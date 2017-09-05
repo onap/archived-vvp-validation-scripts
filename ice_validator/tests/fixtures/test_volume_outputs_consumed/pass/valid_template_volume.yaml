@@ -1,0 +1,81 @@
+# -*- coding: utf8 -*-
+# ============LICENSE_START=======================================================
+# org.onap.vvp/validation-scripts
+# ===================================================================
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# ===================================================================
+#
+# Unless otherwise specified, all software contained herein is licensed
+# under the Apache License, Version 2.0 (the “License”);
+# you may not use this software except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#             http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+#
+# Unless otherwise specified, all documentation contained herein is licensed
+# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# you may not use this documentation except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#             https://creativecommons.org/licenses/by/4.0/
+#
+# Unless required by applicable law or agreed to in writing, documentation
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# ============LICENSE_END============================================
+#
+# ECOMP is a trademark and service mark of AT&T Intellectual Property.
+#
+---
+heat_template_version: 2013-05-23
+
+description: >
+  A template showing how to create a Nova instance, a Cinder volume and attach
+  the volume to the instance. The template uses only Heat OpenStack native
+  resource types.
+
+parameters:
+
+  availability_zone:
+    type: string
+    description: The Availability Zone to launch the instance.
+
+  admin_boot_volume_size_0:
+    type: number
+    description: Size of the volume to be created.
+    constraints:
+      - range: { min: 1, max: 1024 }
+        description: must be between 1 and 1024 Gb.
+
+resources:
+
+  admin_boot_volume_id_0:
+    type: OS::Cinder::Volume
+    properties:
+      size: { get_param: admin_boot_volume_size_0}
+      availability_zone: { get_param: availability_zone }
+
+  admin_boot_volume_id_1:
+    type: OS::Cinder::Volume
+    properties:
+      size: { get_param: admin_boot_volume_size_0}
+      availability_zone: { get_param: availability_zone }
+      
+outputs:
+
+  admin_boot_volume_id_0:
+    value: { get_resource: admin_boot_volume_id_0 } 
+
+  admin_boot_volume_id_1:
+    value: { get_resource: admin_boot_volume_id_1 } 

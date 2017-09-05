@@ -1,0 +1,66 @@
+# -*- coding: utf8 -*-
+# ============LICENSE_START=======================================================
+# org.onap.vvp/validation-scripts
+# ===================================================================
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# ===================================================================
+#
+# Unless otherwise specified, all software contained herein is licensed
+# under the Apache License, Version 2.0 (the “License”);
+# you may not use this software except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#             http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+#
+# Unless otherwise specified, all documentation contained herein is licensed
+# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# you may not use this documentation except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#             https://creativecommons.org/licenses/by/4.0/
+#
+# Unless required by applicable law or agreed to in writing, documentation
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# ============LICENSE_END============================================
+#
+# ECOMP is a trademark and service mark of AT&T Intellectual Property.
+#
+---
+heat_template_version: 2013-05-23
+
+description: Simple template to deploy a single independent volume instance
+
+parameters:
+  vmtype_0_volume_name_0:
+    type: string
+    description: Unique name for this volume instance
+  vmtype_0_volume_type_0:
+    type: string
+    description: Type for this volume instance
+  vmtype_0_cinder_volume_size_0:
+    type: string
+    description: Size in GB for this volume instance
+
+resources:
+  vmtype_0_volume_0:
+    type: OS::Cinder::Volume
+    properties:
+      size: { get_param: vmtype_0_cinder_volume_size_0 }
+      volume_type: { get_param: vmtype_0_volume_type_0 }
+      name: { get_param: vmtype_0_volume_name_0 }
+
+outputs:
+  vmtype_0_volume_id_0:
+    value: { get_resource: vmtype_0_volume_0}

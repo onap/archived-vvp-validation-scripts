@@ -1,0 +1,259 @@
+# -*- coding: utf8 -*-
+# ============LICENSE_START=======================================================
+# org.onap.vvp/validation-scripts
+# ===================================================================
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# ===================================================================
+#
+# Unless otherwise specified, all software contained herein is licensed
+# under the Apache License, Version 2.0 (the “License”);
+# you may not use this software except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#             http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+#
+# Unless otherwise specified, all documentation contained herein is licensed
+# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# you may not use this documentation except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#             https://creativecommons.org/licenses/by/4.0/
+#
+# Unless required by applicable law or agreed to in writing, documentation
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# ============LICENSE_END============================================
+#
+# ECOMP is a trademark and service mark of AT&T Intellectual Property.
+#
+---
+heat_template_version: 2015-04-30
+
+description: Heat template description
+
+parameters:
+
+  vnf_id:
+    type: string
+    description: Unique ID for this VNF instance
+
+  vf_module_id:
+    type: string
+    description: Unique ID for this VF module
+
+  vnf_name:
+    type: string
+    description: Unique name for this VNF instance
+
+  db_names:
+    type: comma_delimited_list
+    description: Names attribute for the VMs
+
+  lb_names:
+    type: comma_delimited_list
+    description: Names attribute for the VMs
+
+  lb_flavor_name:
+    type: string
+    description: flavor to be used to create this vm must be one of the following flavors
+
+  db_flavor_name:
+    type: string
+    description: flavor to be used to create this vm must be one of the following flavors
+
+  availability_zone_0:
+    type: string
+    description: availability zone to be used
+
+  exnet_net_name:
+    type: string
+    description: network name for the external network extnet
+
+  exnet_net_id:
+    type: string
+    description: network id for the external network extnet
+
+  int_intranet_net_id:
+    type: string
+    description: network id for the internal network intranet 
+
+  db_int_intranet_ip_0:
+    type: string
+    description: db_int_intranet_ip_0
+
+  db_int_intranet_v6_ip_0:
+    type: string
+    description: db_int_intranet_v6_ip_0
+
+  db_int_intranet_ips:
+    type: string
+    description: db_int_intranet_ips
+
+  db_int_intranet_v6_ips:
+    type: string
+    description: db_int_intranet_v6_ips
+
+  db_int_intranet_floating_ip:
+    type: string
+    description: db_int_intranet_floating_ip
+
+  db_int_intranet_floating_v6_ip:
+    type: string
+    description: db_int_intranet_floating_v6_ip
+
+  lb_extnet_ip_0:
+    type: string
+    description: lb_extnet_ip_0
+
+  lb_extnet_v6_ip_0:
+    type: string
+    description: lb_extnet_v6_ip_0
+
+  lb_extnet_ips:
+    type: string
+    description: lb_extnet_ips
+
+  lb_extnet_v6_ips:
+    type: string
+    description: lb_extnet_v6_ips
+
+  lb_extnet_floating_ip:
+    type: string
+    description: lb_extnet_floating_ip
+
+  lb_extnet_floating_v6_ip:  
+    type: string
+    description: lb_extnet_floating_v6_ip
+
+resources:
+
+  lb_server_0:
+    type: OS::Nova::Server
+    properties:
+      availability_zone: { get_param: availability_zone_0 }
+      name: { get_param: [lb_names, 0]  }
+      flavor: { get_param: lb_flavor_name}
+      networks:
+        - port: { get_resource: lb_0_extnet_0_port }
+        - port: { get_resource: lb_1_extnet_0_port }
+        - port: { get_resource: lb_2_extnet_0_port }
+        - port: { get_resource: lb_3_extnet_0_port }
+        - port: { get_resource: lb_4_extnet_0_port }
+        - port: { get_resource: lb_5_extnet_0_port }  
+      metadata:
+        vnf_name: { get_param: vnf_name }
+        vnf_id: { get_param: vnf_id }
+        vf_module_id: { get_param: vf_module_id }
+
+  db_server_0:
+    type: OS::Nova::Server
+    properties:
+      availability_zone: { get_param: availability_zone_0 }
+      name: { get_param: [db_names, 1]  }
+      flavor: { get_param: db_flavor_name}
+      networks:
+        - port: { get_resource: db_0_int_intranet_0_port }
+        - port: { get_resource: db_1_int_intranet_0_port }
+        - port: { get_resource: db_2_int_intranet_0_port }
+        - port: { get_resource: db_3_int_intranet_0_port }
+        - port: { get_resource: db_4_int_intranet_0_port }
+        - port: { get_resource: db_5_int_intranet_0_port }
+      metadata:
+        vnf_name: { get_param: vnf_name }
+        vnf_id: { get_param: vnf_id }
+        vf_module_id: { get_param: vf_module_id }
+
+  db_0_int_intranet_0_port:
+        type: OS::Neutron::Port
+        properties:
+          network: { get_param: int_intranet_net_id }
+          allowed_address_pairs:
+            - ip_address: { get_param: db_int_intranet_ip_0 }
+
+  db_1_int_intranet_0_port:
+        type: OS::Neutron::Port
+        properties:
+          network: { get_param: int_intranet_net_id }
+          allowed_address_pairs:
+            - ip_address: { get_param: db_int_intranet_v6_ip_0 }
+
+  db_2_int_intranet_0_port:
+        type: OS::Neutron::Port
+        properties:
+          network: { get_param: int_intranet_net_id }
+          allowed_address_pairs:
+            - ip_address: { get_param: [db_int_intranet_ips, 0] }
+
+  db_3_int_intranet_0_port:
+        type: OS::Neutron::Port
+        properties:
+          network: { get_param: int_intranet_net_id }
+          allowed_address_pairs:
+            - ip_address: { get_param: [db_int_intranet_v6_ips, 0] }
+
+  db_4_int_intranet_0_port:
+        type: OS::Neutron::Port
+        properties:
+          network: { get_param: int_intranet_net_id }
+          allowed_address_pairs:
+            - ip_address: { get_param: db_int_intranet_floating_ip }
+
+  db_5_int_intranet_0_port:
+        type: OS::Neutron::Port
+        properties:
+          network: { get_param: int_intranet_net_id }
+          allowed_address_pairs:
+            - ip_address: { get_param: db_int_intranet1_floating_v6_ip }
+
+  lb_0_extnet_0_port:
+        type: OS::Neutron::Port
+        properties:
+          network: { get_param: extnet_net_name }
+          allowed_address_pairs:
+            - ip_address: { get_param: lb_extnet_ip_0 }
+
+  lb_1_extnet_0_port:
+        type: OS::Neutron::Port
+        properties:
+          network: { get_param: extnet_net_id }
+          allowed_address_pairs:
+            - ip_address: { get_param: lb_extnet_v6_ip_0 }
+
+  lb_2_extnet_0_port:
+        type: OS::Neutron::Port
+        properties:
+          network: { get_param: extnet_net_name }
+          allowed_address_pairs:
+            - ip_address: { get_param: [lb_extnet_ips, 0] }
+
+  lb_3_extnet_0_port:
+        type: OS::Neutron::Port
+        properties:
+          network: { get_param: extnet_net_id }
+          allowed_address_pairs:
+            - ip_address: { get_param: [lb_extnet_v6_ips, 0] }
+
+  lb_4_extnet_0_port:
+        type: OS::Neutron::Port
+        properties:
+          network: { get_param: extnet_net_name }
+          allowed_address_pairs:
+            - ip_address: { get_param: lb_extnet_floating_ip }
+
+  lb_5_extnet_0_port:
+        type: OS::Neutron::Port
+        properties:
+          network: { get_param: extnet_net_id }
+          allowed_address_pairs:
+            - ip_address: { get_param: lb_extnet_floating_v6_ip }
