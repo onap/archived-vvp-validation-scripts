@@ -79,6 +79,12 @@ def find_all_get_param_in_yml(yml):
                 elif isinstance(item, str):
                     params.append(item)
             continue
+        elif k == 'list_join':
+            for item in (v if isinstance(v, list) else [v]):
+                if isinstance(item, list):
+                    for d in item:
+                        params.extend(find_all_get_param_in_yml(d))
+            continue
         if isinstance(v, dict):
             params.extend(find_all_get_param_in_yml(v))
         elif isinstance(v, list):

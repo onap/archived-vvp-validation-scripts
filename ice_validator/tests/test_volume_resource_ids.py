@@ -97,7 +97,10 @@ def test_volume_resource_ids(heat_template):
                         v3.get('get_resource'))
                     if not volume_id:
                         continue
-                    volume_id = volume_id.lower()
+                    if isinstance(volume_id, list):
+                        volume_id = volume_id[0].lower()
+                    else:
+                        volume_id = volume_id.lower()
 
                     if vm_type+"_" not in volume_id:
                         invalid_volumes.append(volume_id)
@@ -137,7 +140,10 @@ def test_volume_resource_ids(heat_template):
                 properties['volume_id'].get('get_resource'))
             if not volume_id:
                 continue
-            volume_id = volume_id.lower()
+            if isinstance(volume_id, list):
+                volume_id = volume_id[0].lower()
+            else:
+                volume_id = volume_id.lower()
 
             # do not test the case when the instance_uuid and
             # volume_id are not defined

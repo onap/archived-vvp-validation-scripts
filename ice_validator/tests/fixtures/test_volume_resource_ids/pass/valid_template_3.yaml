@@ -1,0 +1,59 @@
+heat_template_version: 2015-04-30
+
+description: Heat template description
+
+parameters:
+
+  vnf_id:
+    type: string
+    description: Unique ID for this VNF instance
+
+  vf_module_id:
+    type: string
+    description: Unique ID for this VF module
+
+  vnf_name:
+    type: string
+    description: Unique name for this VNF instance
+
+  admin_names:
+    type: comma_delimited_list
+    description: Names attribute for the VMs
+
+  availability_zone_0:
+    type: string
+    description: availability zone to be used
+
+  admin_flavor_name:
+    type: string
+    description: flavor to be used to create this vm must be one of the following flavors
+
+  admin_volume_ids:
+    type: json
+    description: Unique IDs for volumes
+
+resources:
+
+  admin_server_0:
+    type: OS::Nova::Server
+    properties:
+      availability_zone: { get_param: availability_zone_0 }
+      name: { get_param: [admin_names, 0]  }
+      block_device_mapping: [{ device_name: "vda", volume_id: { get_param : [admin_volume_ids, 0] }, delete_on_termination : "false" }]
+      flavor: { get_param: admin_flavor_name}
+      metadata:
+        vnf_name: { get_param: vnf_name }
+        vnf_id: { get_param: vnf_id }
+        vf_module_id: { get_param: vf_module_id }
+
+  admin_server_1:
+    type: OS::Nova::Server
+    properties:
+      availability_zone: { get_param: availability_zone_0 }
+      name: { get_param: [admin_names, 1]  }
+      block_device_mapping: [{ device_name: "vda", volume_id : { get_param : [admin_volume_ids, 1] }, delete_on_termination : "false" }]
+      flavor: { get_param: admin_flavor_name}
+      metadata:
+        vnf_name: { get_param: vnf_name }
+        vnf_id: { get_param: vnf_id }
+        vf_module_id: { get_param: vf_module_id }
