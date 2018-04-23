@@ -6,7 +6,7 @@
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -39,14 +39,22 @@
 #
 
 import pytest
+from os import path, sep
 import yaml
 from .utils.ports import is_reserved_port
 
 
-def test_fixed_ips_format_use_get_parm(heat_template):
+def test_reserve_port_only_in_base_template(heat_template):
     '''
-    Make sure all fixed_ips properties only use get_param
+    Make sure reserved ports are only specified in the base template
     '''
+    basename = path.splitext(heat_template)[0].rsplit(sep, 1)[1]
+    if (basename.endswith("_base") or
+            basename.startswith("base_") or
+            basename.find("_base_") > 0):
+            pytest.skip("A base template may or may not have reserved ports")
+
+    # parse the yaml
     with open(heat_template) as fh:
         yml = yaml.load(fh)
 
@@ -54,28 +62,17 @@ def test_fixed_ips_format_use_get_parm(heat_template):
     if "resources" not in yml:
         pytest.skip("No resources specified in the heat template")
 
-    invalid_fixed_ips = []
-    for k, v in yml["resources"].items():
-        if not isinstance(v, dict):
+    has_reserved_ports = False
+    for k1, v1 in yml["resources"].items():
+        if not isinstance(v1, dict):
             continue
-        if "properties" not in v:
+        if "properties" not in v1:
             continue
-        if v.get("type") != "OS::Neutron::Port":
+        if v1.get("type") != "OS::Neutron::Port":
             continue
-        if is_reserved_port(k):
+        if not is_reserved_port(k1):
             continue
 
-        valid_fixed_ip = True
-        for k2, v2 in v["properties"].items():
-            if k2 != "fixed_ips":
-                continue
-            for v3 in v2:
-                if "ip_address" not in v3:
-                    continue
-                if "get_param" not in v3["ip_address"]:
-                    valid_fixed_ip = False
+        has_reserved_ports = True
 
-        if not valid_fixed_ip:
-            invalid_fixed_ips.append(k)
-
-    assert not set(invalid_fixed_ips)
+    assert not has_reserved_ports

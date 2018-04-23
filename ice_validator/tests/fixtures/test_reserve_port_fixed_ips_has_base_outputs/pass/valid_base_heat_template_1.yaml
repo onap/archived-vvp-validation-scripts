@@ -6,7 +6,7 @@
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -39,59 +39,56 @@
 #
 ---
 resources:
-  vm_type_1_int_intranet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: int_intranet_net_name }
-          fixed_ips:
-            - subnet_id: { get_param: int_intranet_subnet_id }
-            - subnet_id: { get_param: int_intranet_v6_subnet_id }
 
-  vm_type_1_int_vpnnet_1_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: int_vpnnet_net_id }
-          fixed_ips:
-            - ip_address: { get_param: [db_1_int_vpnnet_ips, 0] }
-            - subnet_id: { get_param: int_vpnnet_subnet_id }
-
-  vm_type_1_int_vpnnet_2_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: int_vpnnet_net_id }
-          fixed_ips:
-            - ip_address: { get_param: [db_1_int_vpnnet_ips, 0] }
-            - subnet_id: { get_resource: int_vpnnet_subnet_id }
-
-  vm_type_1_extnet_net_3_port:
+  reserve_port_lb_1_extnet_floating_ip_1:
         type: OS::Neutron::Port
         properties:
           network: { get_param: extnet_net_name }
           fixed_ips:
-            - ip_address: { get_param: lb_1_extnet_ip_0 }
-            - subnet_id: { get_param: extnet_subnet_id }
+            - ip_address: { get_param: lb_1_extnet_floating_ip }
 
-  vm_type_1_extnet_4_port:
+  reserve_port_lb_2_extnet_floating_v6_ip_1:
         type: OS::Neutron::Port
         properties:
           network: { get_param: extnet_net_id }
           fixed_ips:
-            - subnet_id: { get_param: extnet_subnet_id  }
-            - subnet_id: { get_param: extnet_v6_subnet_id  }
+            - ip_address: { get_param: lb_2_extnet_floating_v6_ip }
 
-  vm_type_1_extnet_5_port:
+  reserve_port_lb_1_extnet_floating_ip_1:
+        type: OS::Neutron::Port
+        properties:
+          network: { get_param: extnet_net_name }
+          fixed_ips:
+            - ip_address: { get_param: lb_1_extnet_floating_ip }
+
+  reserve_port_lb_2_extnet_floating_v6_ip_1:
         type: OS::Neutron::Port
         properties:
           network: { get_param: extnet_net_id }
+          fixed_ips:
+            - ip_address: { get_param: lb_2_extnet_floating_v6_ip }
 
-  int_oam_net:
-        type: OS::Neutron::Net
+  lb_3_extnet_floating_v6_ip_1:
+        type: OS::Neutron::Port
         properties:
-          name: { get_param: int_oam_net_name }
-  vm_type_1_int_vpnnet_3_port:
-       type: OS::Neutron::Port
-       properties:
-         network: { get_resource: int_oam_net }
-         fixed_ips:
-            - ip_address: { get_param: [db_1_int_vpnnet_ips, 1] }
-            - subnet_id: { get_resource: int_vpnnet_subnet_id }
+          network: { get_param: extnet_net_id }
+          fixed_ips:
+            - ip_address: { get_param: lb_3_extnet_floating_v6_ip }
+
+outputs:
+
+  lb_1_int_intranet_vip:
+        description: "vip for lb_1_int_intranet_floating_ip"
+        value: { get_param: lb_1_int_intranet_floating_ip }
+
+  lb_2_int_intranet_v6_vip:
+        description: "vip for lb_2_int_intranet_v6_vip"
+        value: { get_param: lb_2_int_intranet_floating_v6_ip }
+
+  lb_1_extnet_vip:
+        description: "vip for lb_1_extnet_floating_ip"
+        value: { get_param: lb_1_extnet_floating_ip }
+
+  lb_2_extnet_v6_vip:
+        description: "vip for lb_2_extnet_floating_v6_ip"
+        value: { get_param: lb_2_extnet_floating_v6_ip }

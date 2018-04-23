@@ -39,6 +39,7 @@
 #
 
 import yaml
+import collections
 
 
 def test_unique_resources_across_all_yaml_files(yaml_files):
@@ -54,4 +55,8 @@ def test_unique_resources_across_all_yaml_files(yaml_files):
             continue
         resources_ids.extend(yml['resources'].keys())
 
-    assert len(resources_ids) == len(set(resources_ids))
+    dup_ids = [item
+               for item, count in collections.Counter(resources_ids).items()
+               if count > 1]
+
+    assert not dup_ids

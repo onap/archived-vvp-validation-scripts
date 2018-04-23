@@ -177,3 +177,21 @@ def get_invalid_ip_addresses(resources, port_property):
                             invalid_ip_addresses.append(ip_address)
 
     return invalid_ip_addresses
+
+
+def is_reserved_port(port_id):
+    '''
+    Checks to see if the resource id for a port follows
+    the reserve port concept
+    '''
+    formats = [
+            ["port_id",
+             re.compile(r'reserve_port_(.+?)_floating_ip_\d+')],
+            ["port_id",
+             re.compile(r'reserve_port_(.+?)_floating_v6_ip_\d+')],
+            ]
+    for f in formats:
+        m = f[1].match(port_id.lower())
+        if m and m.group(1):
+            return True
+    return False

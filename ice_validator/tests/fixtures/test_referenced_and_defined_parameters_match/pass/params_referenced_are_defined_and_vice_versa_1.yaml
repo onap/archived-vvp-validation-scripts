@@ -82,12 +82,16 @@ parameters:
     type: string
     label: key pair
     description: Name of the key apir the nova server will use
-  ex1_server_index:
+  ex1_server_index_0:
     type: number
     label: server index
     description: Index of server
     constraint:
       - range: { min: 1, max: 100 }
+  ex1_server_info:
+    type: json
+    label: Json containing server index
+    description: Json containing the index of server
 
 resources:
   ex_software_config_0:
@@ -129,7 +133,24 @@ resources:
   ex1_nova_server_1:
     type: OS::Nova::Server
     properties:
-      name: { get_param: [ ex1_vm_names, { get_param: ex1_server_index } ] }
+      name: { get_param: [ ex1_vm_names, { get_param: ex1_server_index_0 } ] }
+      metadata:
+        vnf_id: { get_param: vnf_id }
+        vf_module_id: { get_param: vf_module_id }
+        vnf_name: { get_param: vnf_name }
+      image: { get_param: ex1_image_name}
+      flavor: { get_param: ex1_flavor_name }
+      key_name: { get_param: ex1_key }
+  ex1_nova_server_2:
+    type: OS::Nova::Server
+    properties:
+      name:
+        get_param:
+        - ex1_vm_names
+        - get_param:
+          - ex1_server_info
+          - ex1_server_metadata
+          - ex1_server_index_1
       metadata:
         vnf_id: { get_param: vnf_id }
         vf_module_id: { get_param: vf_module_id }

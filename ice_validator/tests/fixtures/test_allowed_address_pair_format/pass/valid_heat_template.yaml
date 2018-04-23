@@ -123,3 +123,25 @@ resources:
           network: { get_param: extnet_net_id }
           allowed_address_pairs:
             - ip_address: { get_param: [lb_2_extnet_v6_ips, 0] }
+  int_oam_net:
+        type: OS::Neutron::Net
+        properties:
+          name: { get_param: int_oam_net_name }
+  vm_type_1_int_intranet_10_port:
+       type: OS::Neutron::Port
+       properties:
+         network: { get_resource: int_oam_net }
+         allowed_address_pairs:
+           - ip_address: { get_param: [lb_2_int_intranet_v6_ips, 1] }
+  vm_type_1_int_intranet_11_port:
+       type: OS::Neutron::Port
+       properties:
+         network: { get_resource: int_oam_net }
+         allowed_address_pairs:
+           - ip_address: { get_param: [lb_2_int_intranet_ips, 1] }
+  vm_type_1_int_intranet_10_port:
+       type: OS::Neutron::Port
+       properties:
+         network: { get_resource: int_oam_net }
+         allowed_address_pairs:
+           - ip_address: { get_param: lb_2_int_intranet_v6_ip_1 }

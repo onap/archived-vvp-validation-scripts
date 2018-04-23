@@ -60,6 +60,7 @@ def test_base_template_names(template_dir):
 
         if (filename.endswith("_base") or
                 filename.startswith("base_") or
+                filename == "base" or
                 filename.find("_base_") > 0):
             base_template_count += 1
     assert base_template_count == 1

@@ -161,3 +161,20 @@ def is_valid_ipv6_address(ip_address):
     except (OSError, socket.error):
         return False
     return True
+
+
+def property_uses_get_resource(resource, property_name):
+    '''
+    returns true if a port's network property
+    uses the get_resource function
+    '''
+    if not isinstance(resource, dict):
+        return False
+    if 'properties' not in resource:
+        return False
+    for k1, v1 in resource["properties"].items():
+        if k1 != property_name:
+            continue
+        if "get_resource" in v1:
+            return True
+    return False

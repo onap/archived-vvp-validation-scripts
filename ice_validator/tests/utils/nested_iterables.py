@@ -73,11 +73,13 @@ def find_all_get_param_in_yml(yml):
     params = []
     for k, v in yml.items():
         if k == 'get_param' and v not in os_pseudo_parameters:
+            if isinstance(v, list) and not isinstance(v[0], dict):
+                params.append(v[0])
+            elif not isinstance(v, dict) and isinstance(v, str):
+                params.append(v)
             for item in (v if isinstance(v, list) else [v]):
                 if isinstance(item, dict):
                     params.extend(find_all_get_param_in_yml(item))
-                elif isinstance(item, str):
-                    params.append(item)
             continue
         elif k == 'list_join':
             for item in (v if isinstance(v, list) else [v]):

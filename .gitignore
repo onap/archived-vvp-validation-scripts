@@ -87,3 +87,9 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# OS X
+*DS_Store*
+
+# pytest
+*pytest_cache*

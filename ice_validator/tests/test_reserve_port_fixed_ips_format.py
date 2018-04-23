@@ -6,7 +6,7 @@
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -40,13 +40,27 @@
 
 import pytest
 import yaml
+from .utils.network_roles import get_network_role_from_port
 from .utils.ports import is_reserved_port
+import re
 
 
-def test_fixed_ips_format_use_get_parm(heat_template):
+def test_reserve_port_fixed_ips_format(heat_template):
     '''
-    Make sure all fixed_ips properties only use get_param
+    Make sure all fixed_ips properties for a reserved port
+    follow the allowed naming conventions
     '''
+    allowed_formats = [
+                      ["fixed_ips", "string", "internal",
+                       re.compile(r'(.+?)_int_(.+?)_floating_v6_ip')],
+                      ["fixed_ips", "string", "internal",
+                       re.compile(r'(.+?)_int_(.+?)_floating_ip')],
+                      ["fixed_ips", "string", "external",
+                       re.compile(r'(.+?)_floating_v6_ip')],
+                      ["fixed_ips", "string", "external",
+                       re.compile(r'(.+?)_floating_ip')],
+                      ]
+
     with open(heat_template) as fh:
         yml = yaml.load(fh)
 
@@ -54,28 +68,51 @@ def test_fixed_ips_format_use_get_parm(heat_template):
     if "resources" not in yml:
         pytest.skip("No resources specified in the heat template")
 
+    # check both valid and invalid patterns to catch edge cases
     invalid_fixed_ips = []
-    for k, v in yml["resources"].items():
-        if not isinstance(v, dict):
+
+    for k1, v1 in yml["resources"].items():
+        if not isinstance(v1, dict):
             continue
-        if "properties" not in v:
+        if "properties" not in v1:
             continue
-        if v.get("type") != "OS::Neutron::Port":
+        if v1.get("type") != "OS::Neutron::Port":
             continue
-        if is_reserved_port(k):
+        if not is_reserved_port(k1):
             continue
 
-        valid_fixed_ip = True
-        for k2, v2 in v["properties"].items():
+        network_role = get_network_role_from_port(v1)
+
+        for k2, v2 in v1["properties"].items():
             if k2 != "fixed_ips":
                 continue
             for v3 in v2:
                 if "ip_address" not in v3:
                     continue
                 if "get_param" not in v3["ip_address"]:
-                    valid_fixed_ip = False
+                    continue
 
-        if not valid_fixed_ip:
-            invalid_fixed_ips.append(k)
+                valid_fixed_ip = False
+                for v4 in allowed_formats:
+                    param = v3["ip_address"]["get_param"]
+                    if isinstance(param, list):
+                        param = param[0]
+
+                    # check if pattern matches
+                    m = v4[3].match(param)
+                    if m:
+                        if v4[2] == "internal" and\
+                            len(m.groups()) > 1 and\
+                                m.group(2) == network_role:
+                                valid_fixed_ip = True
+                                break
+                        elif v4[2] == "external" and\
+                                len(m.groups()) > 0 and\
+                                m.group(1).endswith("_" + network_role):
+                                    valid_fixed_ip = True
+                                    break
+
+                if not valid_fixed_ip:
+                    invalid_fixed_ips.append(param)
 
     assert not set(invalid_fixed_ips)

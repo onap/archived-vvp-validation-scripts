@@ -43,7 +43,8 @@ import pytest
 import yaml
 from .utils.vm_types import get_vm_type_for_nova_server
 from .utils.network_roles import get_network_role_from_port,\
-                                 get_network_type_from_port
+                                 get_network_type_from_port,\
+                                 property_uses_get_resource
 
 
 def test_port_resource_ids(heat_template):
@@ -111,6 +112,8 @@ def test_port_resource_ids(heat_template):
                 has_vm_type = vm_type+"_" in port_id
 
                 if port_resource:
+                    if property_uses_get_resource(v, "network"):
+                        continue
                     network_role = get_network_role_from_port(port_resource)
                     if not network_role:
                         continue

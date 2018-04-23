@@ -92,3 +92,15 @@ resources:
           fixed_ips:
             - subnet_id: { get_param: extnet_subnet_id }
             - subnet_id: { get_param: extnet_v6_subnet_id }
+  reserve_port_vm_type_1_network_role_a_floating_ip_0:
+        type: OS::Neutron::Port
+        properties:
+          network: { get_param: network_role_a_net_id }
+          fixed_ips:
+            - ip_address : { get_param: vm_type_1_network_role_a_floating_ip }
+  reserve_port_vm_type_1_network_role_a_floating_v6_ip_0:
+        type: OS::Neutron::Port
+        properties:
+          network: { get_param: network_role_a_net_id }
+          fixed_ips:
+            - ip_address : { get_param: vm_type_1_network_role_a_floating_v6_ip }

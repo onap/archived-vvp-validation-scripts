@@ -40,7 +40,8 @@
 
 import pytest
 import yaml
-from .utils.network_roles import get_network_role_from_port
+from .utils.network_roles import get_network_role_from_port,\
+                                 property_uses_get_resource
 import re
 
 
@@ -74,6 +75,8 @@ def test_subnet_format(heat_template):
         if "properties" not in v1:
             continue
         if v1.get("type") != "OS::Neutron::Port":
+            continue
+        if property_uses_get_resource(v1, "network"):
             continue
         network_role = get_network_role_from_port(v1)
 

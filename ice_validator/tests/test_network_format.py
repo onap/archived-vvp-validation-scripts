@@ -40,7 +40,8 @@
 
 import pytest
 import yaml
-from .utils.network_roles import get_network_role_from_port
+from .utils.network_roles import get_network_role_from_port,\
+                                 property_uses_get_resource
 
 
 def test_network_format(heat_template):
@@ -60,6 +61,8 @@ def test_network_format(heat_template):
         if not isinstance(v, dict):
             continue
         if "properties" not in v:
+            continue
+        if property_uses_get_resource(v, "network"):
             continue
         if v.get("type") != "OS::Neutron::Port":
             continue

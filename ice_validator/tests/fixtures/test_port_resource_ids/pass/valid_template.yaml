@@ -95,6 +95,9 @@ parameters:
   int_vpnnet_net_id:
     type: string
     description: network id for the internal network vpnnet 
+  int_oam_net_name:
+    type: string
+    description: name for the OAM network to be created in the resources section
 
 resources:
 
@@ -126,6 +129,18 @@ resources:
         vnf_id: { get_param: vnf_id }
         vf_module_id: { get_param: vf_module_id }
 
+  admin_server_2:
+    type: OS::Nova::Server
+    properties:
+      availability_zone: { get_param: availability_zone_0 }
+      name: { get_param: [admin_names, 2]  }
+      flavor: { get_param: admin_flavor_name}
+      networks:
+        - port: { get_resource: admin_2_int_vpnnet_0_port }
+      metadata:
+        vnf_name: { get_param: vnf_name }
+        vnf_id: { get_param: vnf_id }
+        vf_module_id: { get_param: vf_module_id }
   lb_server_0:
     type: OS::Nova::Server
     properties:
@@ -156,3 +171,14 @@ resources:
       type: OS::Neutron::Port
       properties:
         network: { get_param: extnet_net_id }
+  int_oam_net:
+        type: OS::Neutron::Net
+        properties:
+          name: { get_param: int_oam_net_name }
+  admin_2_int_vpnnet_0_port:
+       type: OS::Neutron::Port
+       properties:
+         network: { get_resource: int_oam_net }
+         fixed_ips:
+            - ip_address: { get_param: [db_1_int_vpnnet_ips, 0] }
+            - ip_address: { get_param: [db_1_int_vpnnet_ips, 1] }

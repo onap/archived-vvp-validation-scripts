@@ -63,7 +63,7 @@ def test_parameter_valid_keys(yaml_file):
             continue
         detected_keys = set(v1) & set(key_values)
         if set(v1) != set(detected_keys):
-            invalid_params.append(v1)
+            invalid_params.append(str(v1))
 
     assert not set(invalid_params)
 
@@ -84,6 +84,6 @@ def test_default_values(yaml_file):
         if not isinstance(v1, dict):
             continue
         if any(k == 'default' for k in v1):
-            invalid_params.append(v1)
+            invalid_params.append(str(v1))
 
     assert not set(invalid_params)

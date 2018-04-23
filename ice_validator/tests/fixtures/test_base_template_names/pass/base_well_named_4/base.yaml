@@ -6,7 +6,7 @@
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -37,45 +37,21 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
+---
+description:
+    base
+parameters:
+    vm_type_volume_name_0:
+        type: string
+    vm_type_volume_size_0:
+        type: number
 
-import pytest
-import yaml
-from .utils.ports import is_reserved_port
+resources:
+    server_0:
+        type: OS::Nova::Server
+        properties:
+            name: {get_param: server_name_0}
 
-
-def test_fixed_ips_format_use_get_parm(heat_template):
-    '''
-    Make sure all fixed_ips properties only use get_param
-    '''
-    with open(heat_template) as fh:
-        yml = yaml.load(fh)
-
-    # skip if resources are not defined
-    if "resources" not in yml:
-        pytest.skip("No resources specified in the heat template")
-
-    invalid_fixed_ips = []
-    for k, v in yml["resources"].items():
-        if not isinstance(v, dict):
-            continue
-        if "properties" not in v:
-            continue
-        if v.get("type") != "OS::Neutron::Port":
-            continue
-        if is_reserved_port(k):
-            continue
-
-        valid_fixed_ip = True
-        for k2, v2 in v["properties"].items():
-            if k2 != "fixed_ips":
-                continue
-            for v3 in v2:
-                if "ip_address" not in v3:
-                    continue
-                if "get_param" not in v3["ip_address"]:
-                    valid_fixed_ip = False
-
-        if not valid_fixed_ip:
-            invalid_fixed_ips.append(k)
-
-    assert not set(invalid_fixed_ips)
+outputs:
+    vm_type_volume_id_0:
+        value: {get_resource: vm_type_volume_0}

@@ -92,3 +92,39 @@ resources:
           fixed_ips:
             - subnet_id: { get_param: extnet_subnet_id }
             - subnet_id: { get_param: extnet_v6_subnet_id }
+  reserve_port_vm_type_1_network_role_a_floating_ip_0:
+        type: OS::Neutron::Port
+        properties:
+          network: { get_param: network_role_a_net_id }
+          fixed_ips:
+            - ip_address : { get_param: vm_type_1_network_role_a_floating_ip }
+  reserve_port_vm_type_1_network_role_a_floating_v6_ip_0:
+        type: OS::Neutron::Port
+        properties:
+          network: { get_param: network_role_a_net_id }
+          fixed_ips:
+            - ip_address : { get_param: vm_type_1_network_role_a_floating_v6_ip }
+  int_oam_net:
+        type: OS::Neutron::Net
+        properties:
+          name: { get_param: int_oam_net_name }
+  vm_type_1_int_vpnnet_8_port:
+       type: OS::Neutron::Port
+       properties:
+         network: { get_resource: int_oam_net }
+         fixed_ips:
+            - ip_address: { get_param: [db_1_int_vpnnet_ips, 0] }
+            - ip_address: { get_param: [db_1_int_vpnnet_ips, 1] }
+  vm_type_1_int_vpnnet_9_port:
+       type: OS::Neutron::Port
+       properties:
+         network: { get_resource: int_oam_net }
+         fixed_ips:
+            - ip_address: { get_param: [db_1_int_vpnnet_ips, 0] }
+            - subnet_id: { get_resource: int_vpnnet_subnet_id }
+  vm_type_1_int_vpnnet_10_port:
+       type: OS::Neutron::Port
+       properties:
+         network: { get_resource: int_oam_net }
+         fixed_ips:
+            - ip_address: { get_param: lb_0_int_intranet_ip_0 }

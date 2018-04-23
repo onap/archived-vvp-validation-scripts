@@ -40,7 +40,9 @@
 
 import pytest
 import yaml
-from .utils.network_roles import get_network_role_from_port
+from .utils.ports import is_reserved_port
+from .utils.network_roles import get_network_role_from_port,\
+                                 property_uses_get_resource
 import re
 
 
@@ -76,12 +78,16 @@ def test_fixed_ips_format(heat_template):
         pytest.skip("No resources specified in the heat template")
 
     invalid_fixed_ips = []
-    for v1 in yml["resources"].values():
+    for k1, v1 in yml["resources"].items():
         if not isinstance(v1, dict):
             continue
         if "properties" not in v1:
             continue
         if v1.get("type") != "OS::Neutron::Port":
+            continue
+        if is_reserved_port(k1):
+            continue
+        if property_uses_get_resource(v1, "network"):
             continue
         network_role = get_network_role_from_port(v1)
 
