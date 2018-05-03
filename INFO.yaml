@@ -1,0 +1,47 @@
+---
+project: 'vvp-validation-scripts'
+project_creation_date: '2017-06-29'
+lifecycle_state: 'Incubation'
+project_lead: &onap_releng_ptl
+    name: 'Steven Wright'
+    email: 'sw3588@att.com'
+    id: 'wombat123'
+    company: 'ATT'
+    timezone: 'America/Atlanta'
+primary_contact: *onap_releng_ptl
+issue_tracking:
+    type: 'jira'
+    url: 'https://jira.onap.org/projects/VVP'
+    key: 'VVP'
+meetings:
+    - type: 'zoom'
+      agenda: 'https://wiki.onap.org/display/DW/2018+VVP+Project+Team+Meetings'
+      url: 'https://wiki.onap.org/pages/viewpage.action?pageId=25439844'
+      server: 'n/a'
+      channel: 'n/a'
+      repeats: 'weekly'
+      time: '15:00 UTC'
+committers:
+    - <<: *onap_releng_ptl
+    - name: 'Chris Donley'
+      email: 'christopher.donley@huawei.com'
+      company: 'Huawei'
+      id: 'chrisd5110'
+      timezone: 'America/Vancouver'
+    - name: 'Edan Binshtok'
+      email: 'eb578m@intl.att.com'
+      company: 'ATT'
+      id: 'edan.binshtok'
+      timezone: 'Asia/Tel_Aviv'
+    - name: 'Erik Sundelof'
+      email: 'es4410@att.com'
+      company: 'ATT'
+      id: 'eriks'
+      timezone: 'America/Los Angeles'
+    - name: 'Sandeep Shah'
+      email: 'sandeepatsprint@gmail.com'
+      company: 'Tech Mahindra'
+      id: 'SandeepLinux'
+      timezone: 'America/Houston'
+tsc:
+    approval: 'https://lists.onap.org/pipermail/onap-tsc'
