@@ -43,5 +43,14 @@ committers:
       company: 'Tech Mahindra'
       id: 'SandeepLinux'
       timezone: 'America/Houston'
+    - name: 'Sandeep Shah'
+      email: 'sandeepatsprint@gmail.com'
+      company: 'Tech Mahindra'
+      id: 'SandeepLinux'
+      timezone: 'America/Houston'
 tsc:
     approval: 'https://lists.onap.org/pipermail/onap-tsc'
+    changes:
+        - type: 'Addition'
+          name: 'Steven Stark'
+          link: 'https://lists.onap.org/pipermail/onap-tsc/2018-June/004978.html'
