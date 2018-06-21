@@ -62,8 +62,8 @@ def test_port_resource_ids(heat_template):
         pytest.skip("No resources specified in the heat template")
 
     port_patterns = {
-                    'internal': re.compile(r'(.+?)_\d+_int_(.+?)_\d+_port'),
-                    'external': re.compile(r'(.+?)_\d+_(.+?)_\d+_port'),
+                    'internal': re.compile(r'(.+?)_\d+_int_(.+?)_port_\d+'),
+                    'external': re.compile(r'(.+?)_\d+_(.+?)_port_\d+'),
                     }
     resources = yml['resources']
 
@@ -110,6 +110,7 @@ def test_port_resource_ids(heat_template):
                     continue
 
                 has_vm_type = vm_type+"_" in port_id
+                has_network_role = False
 
                 if port_resource:
                     if property_uses_get_resource(v, "network"):
@@ -123,10 +124,8 @@ def test_port_resource_ids(heat_template):
                     if not network_type:
                         continue
 
-                    prepend = ""
-                    if network_type == 'internal':
-                        prepend = "int_"
-                    has_network_role = prepend+network_role+"_" in port_id
+                    if port_patterns[network_type].match(port_id):
+                        has_network_role = True
                 else:
                     # match the assumed naming convention for ports
                     # if the specified port is provided via get_param

@@ -108,8 +108,8 @@ resources:
       name: { get_param: [admin_names, 0]  }
       flavor: { get_param: admin_flavor_name}
       networks:
-        - port: { get_resource: admin_0_exnet_0_port }
-        - port: { get_resource: admin_0_int_vpnnet_0_port }
+        - port: { get_resource: admin_0_exnet_port_0 }
+        - port: { get_resource: admin_0_int_vpnnet_port_0 }
       metadata:
         vnf_name: { get_param: vnf_name }
         vnf_id: { get_param: vnf_id }
@@ -122,8 +122,8 @@ resources:
       name: { get_param: [admin_names, 1]  }
       flavor: { get_param: admin_flavor_name}
       networks:
-        - port: { get_resource: ADMIN_1_EXTNET_0_PORT }
-        - port: { get_resource: admin_1_extnet_1_port }
+        - port: { get_resource: ADMIN_1_EXTNET_PORT_0 }
+        - port: { get_resource: admin_1_extnet_port_1 }
       metadata:
         vnf_name: { get_param: vnf_name }
         vnf_id: { get_param: vnf_id }
@@ -136,7 +136,7 @@ resources:
       name: { get_param: [admin_names, 2]  }
       flavor: { get_param: admin_flavor_name}
       networks:
-        - port: { get_resource: admin_2_int_vpnnet_0_port }
+        - port: { get_resource: admin_2_int_vpnnet_port_0 }
       metadata:
         vnf_name: { get_param: vnf_name }
         vnf_id: { get_param: vnf_id }
@@ -152,30 +152,32 @@ resources:
         vnf_id: { get_param: vnf_id }
         vf_module_id: { get_param: vf_module_id }
 
-  admin_0_exnet_0_port:
+  admin_0_exnet_port_0:
       type: OS::Neutron::Port
       properties:
         network: { get_param: exnet_net_name }
 
-  admin_0_int_vpnnet_0_port:
+  admin_0_int_vpnnet_port_0:
       type: OS::Neutron::Port
       properties:
           network: { get_param: int_vpnnet_net_id }
 
-  ADMIN_1_EXTNET_0_PORT:
+  ADMIN_1_EXTNET_PORT_0:
       type: OS::Neutron::Port
       properties:
         network: { get_param: extnet_net_name }
 
-  admin_1_extnet_1_port:
+  admin_1_extnet_port_1:
       type: OS::Neutron::Port
       properties:
         network: { get_param: extnet_net_id }
+
   int_oam_net:
         type: OS::Neutron::Net
         properties:
           name: { get_param: int_oam_net_name }
-  admin_2_int_vpnnet_0_port:
+
+  admin_2_int_vpnnet_port_0:
        type: OS::Neutron::Port
        properties:
          network: { get_resource: int_oam_net }
