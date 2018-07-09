@@ -39,6 +39,7 @@
 #
 
 import yaml
+from boltons import funcutils
 
 
 def check_basename_ending(template_type, basename):
@@ -76,3 +77,27 @@ def get_parsed_yml_for_yaml_files(yaml_files, sections=[]):
             parsed_yml_list.append(yml)
 
     return parsed_yml_list
+
+
+def validates(*requirement_ids):
+    """Decorator that tags the test function with one or more requirement IDs.
+
+    Example:
+        >>> @validates('R-12345', 'R-12346')
+        ... def test_something():
+        ...     pass
+        >>> assert test_something.requirement_ids == ['R-12345', 'R-12346']
+    """
+    def decorator(func):
+        # NOTE: We use a utility here to ensure that function signatures are
+        # maintained because pytest inspects function signatures to inject
+        # fixtures.  I experimented with a few options, but this is the only
+        # library that worked. Other libraries dynamically generated a
+        # function at run-time, and then lost the requirement_ids attribute
+        @funcutils.wraps(func)
+        def wrapper(*args, **kw):
+            return func(*args, **kw)
+        wrapper.requirement_ids = requirement_ids
+        return wrapper
+    decorator.requirement_ids = requirement_ids
+    return decorator

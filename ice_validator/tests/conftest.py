@@ -147,3 +147,14 @@ def pytest_generate_tests(metafunc):
     if 'templates' in metafunc.fixturenames:
         from .parametrizers import parametrize_templates
         parametrize_templates(metafunc)
+
+
+def pytest_report_collectionfinish(config, startdir, items):
+    """Generates a simple traceability report to sysout"""
+    print("Traceability Report")
+    print("==================================================================")
+    for item in items:
+        if hasattr(item.function, "requirement_ids"):
+            for req_id in item.function.requirement_ids:
+                print(req_id + "," + item.function.__module__ + ","
+                      + item.function.__name__)

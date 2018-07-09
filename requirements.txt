@@ -41,3 +41,4 @@
 pytest
 PyYAML
 pytest-tap
+boltons
