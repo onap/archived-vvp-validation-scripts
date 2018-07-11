@@ -41,8 +41,10 @@
 from os import listdir
 from os import path
 from .helpers import check_basename_ending
+from .helpers import validates
 
 
+@validates('R-37028', 'R-87485', 'R-81339', 'R-87247', 'R-76057')
 def test_base_template_names(template_dir):
     '''
     Check all base templates have a filename that includes "_base_".

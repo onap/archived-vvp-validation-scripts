@@ -37,8 +37,10 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
+from .helpers import validates
 
 
+@validates('R-11200', 'R-89913', 'R-07443')
 def test_volume_outputs_consumed(heat_volume_pair):
     '''
     Check that all outputs in a volume template is consumed

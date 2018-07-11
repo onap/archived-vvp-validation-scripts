@@ -37,11 +37,12 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-
+from .helpers import validates
 import pytest
 import yaml
 
 
+@validates('R-88863')
 def test_numeric_parameter(yaml_file):
     '''
     Make sure all numeric parameters has either `range` or `allowed_values`

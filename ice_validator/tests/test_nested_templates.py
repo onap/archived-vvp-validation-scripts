@@ -38,11 +38,13 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
+from .helpers import validates
 import yaml
 from os import path
 from .utils.nested_files import get_list_of_nested_files
 
 
+@validates('R-70276')
 def test_all_nested_templates_provided(yaml_files):
     '''
     Check that all templates marked as volume templates are

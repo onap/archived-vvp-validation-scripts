@@ -37,11 +37,12 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-
+from .helpers import validates
 import yaml
 import collections
 
 
+@validates('R-16447')
 def test_unique_resources_across_all_yaml_files(yaml_files):
     '''
     Check that all instance names are unique

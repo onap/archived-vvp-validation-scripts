@@ -37,10 +37,11 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-
+from .helpers import validates
 from os import path
 
 
+@validates('R-86285', 'R-38474', 'R-81725', 'R-53433', 'R-56438', 'R-74304', 'R-91342', 'R-94509', 'R-31141')
 def test_heat_pairs_provided(heat_templates, env_files, volume_templates):
     '''
     Check that every yaml file is submitted with
