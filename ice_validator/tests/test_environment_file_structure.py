@@ -37,7 +37,7 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-
+from .helpers import validates
 import yaml
 import pytest
 
@@ -54,6 +54,7 @@ def test_environment_structure(env_file):
     assert any(map(lambda v: v in yml, key_values))
 
 
+@validates('R-03324')
 def test_environment_file_contains_required_sections(env_file):
     '''
     Check that all environments files only have the allowed sections

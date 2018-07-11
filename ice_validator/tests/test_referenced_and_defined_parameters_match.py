@@ -37,11 +37,12 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-
 import yaml
+from .helpers import validates
 from .utils.nested_iterables import find_all_get_param_in_yml
 
 
+@validates('R-23664')
 def test_referenced_and_defined_parameters_match(yaml_file):
     '''
     Check that all referenced parameters are actually defined

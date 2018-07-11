@@ -37,8 +37,10 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
+from .helpers import validates
 
 
+@validates('R-90279')
 def test_no_unused_parameters_between_env_and_templates(environment_pair):
     '''
     Check all defined parameters are used in the appropiate Heat template.

@@ -37,7 +37,7 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-
+from .helpers import validates
 import yaml
 
 
@@ -54,6 +54,7 @@ def test_heat_template_structure(yaml_file):
     assert any(map(lambda v: v in yml, key_values))
 
 
+@validates('27078', 'R-39402', 'R-35414')
 def test_heat_template_structure_contains_required_sections(yaml_file):
     '''
     Check that all heat templates have the required sections

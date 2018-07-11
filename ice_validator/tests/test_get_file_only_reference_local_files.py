@@ -43,8 +43,10 @@ import pytest
 import re
 import yaml
 from .utils.nested_iterables import find_all_get_file_in_yml
+from .helpers import validates
 
 
+@validates('R-99646')
 def test_get_file_only_reference_local_files(yaml_file):
     '''
     Make sure that all references to get_file only try to access local files

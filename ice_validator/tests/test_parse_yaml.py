@@ -39,10 +39,12 @@
 #
 
 from os import path
+from .helpers import validates
 import pytest
 import yaml
 
 
+@validates('R-95303')
 def test_parse_yaml(filename):
     '''
     Read in each .yaml or .env file. If it is successfully parsed as yaml, save
