@@ -39,7 +39,11 @@
 #
 from .helpers import validates
 import pytest
+import re
 import yaml
+
+# one or more (alphanumeric or underscore)
+RE_VALID_PARAMETER_NAME = re.compile(r'[\w_]+$')
 
 
 def test_parameter_valid_keys(yaml_file):
@@ -88,3 +92,24 @@ def test_default_values(yaml_file):
             invalid_params.append(str(v1))
 
     assert not set(invalid_params)
+
+
+@validates('R-25877')
+def test_parameter_names(yaml_file):
+    '''
+    A VNF's Heat Orchestration Template's parameter name
+    (i.e., <param name>) **MUST** contain only alphanumeric
+    characters and underscores ('_').
+    '''
+    with open(yaml_file) as fh:
+        yml = yaml.load(fh)
+
+    # skip if parameters are not defined
+    if "parameters" not in yml:
+        pytest.skip("No parameters specified in the heat template")
+
+    for key in yml['parameters']:
+        assert RE_VALID_PARAMETER_NAME.match(key), (
+                '%s parameter "%s" not alphanumeric or underscore' % (
+                        yaml_file,
+                        key))

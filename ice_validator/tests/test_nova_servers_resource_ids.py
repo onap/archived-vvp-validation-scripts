@@ -40,9 +40,11 @@
 
 import pytest
 import yaml
+from .helpers import validates
 from .utils.vm_types import get_vm_type_for_nova_server
 
 
+@validates('R-01455', 'R-48067', 'R-00977')
 def test_nova_servers_valid_resource_ids(heat_template):
     '''
     Make sure all nova servers have valid resource ids
