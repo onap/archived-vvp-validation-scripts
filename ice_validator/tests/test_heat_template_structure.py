@@ -51,10 +51,10 @@ def test_heat_template_structure(yaml_file):
 
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
-    assert any(map(lambda v: v in yml, key_values))
+    assert all([k in key_values for k in yml])
 
 
-@validates('27078', 'R-39402', 'R-35414')
+@validates('R-27078', 'R-39402', 'R-35414')
 def test_heat_template_structure_contains_required_sections(yaml_file):
     '''
     Check that all heat templates have the required sections
@@ -64,7 +64,7 @@ def test_heat_template_structure_contains_required_sections(yaml_file):
 
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
-    assert any(map(lambda v: v in yml, required_key_values))
+    assert all([k in yml for k in required_key_values])
 
 
 def test_heat_template_structure_sections_have_the_right_format(yaml_file):
@@ -96,3 +96,28 @@ def test_heat_template_structure_sections_have_the_right_format(yaml_file):
                     should_not_be_dict += 1
     assert (is_dict == should_be_dict and
             is_not_dict == should_not_be_dict)
+
+
+@validates('R-11441')
+def test_parameter_type(yaml_file):
+    types = [
+            'string',
+            'number',
+            'json',
+            'comma_delimited_list',
+            'boolean',
+            ]
+    with open(yaml_file) as fh:
+        yml = yaml.load(fh)
+    for key, param in yml.get('parameters', {}).items():
+        assert isinstance(param, dict), '%s parameter %s is not dict' % (
+                yaml_file,
+                key)
+        assert 'type' in param, '%s parameter %s has no "type"' % (
+                yaml_file,
+                key)
+        typ = param['type']
+        assert typ in types, '%s parameter %s has invalid type "%s"' % (
+                yaml_file,
+                key,
+                typ)

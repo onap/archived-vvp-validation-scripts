@@ -43,7 +43,7 @@ import pytest
 import re
 
 
-@validates('R-75141')
+@validates('R-75141', 'R-98407', 'R-90152')
 def test_alphanumeric_resource_ids_only(yaml_file):
     '''
     Check that all instance names are only using alphanumerics

@@ -1,12 +1,12 @@
 # -*- coding: utf8 -*-
-# ============LICENSE_START=======================================================
+# ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright Â© 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the â€œLicenseâ€);
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the License);
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -38,9 +38,14 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-import yaml
-import re
+"""nested files
+"""
+
 from os import path
+import re
+import yaml
+
+VERSION = '1.0.2'
 
 
 def get_list_of_nested_files(yml, dirpath):
@@ -53,7 +58,7 @@ def get_list_of_nested_files(yml, dirpath):
 
     nested_files = []
 
-    for k, v in yml.items():
+    for v in yml.values():
         if isinstance(v, dict) and "type" in v:
             t = v["type"]
             if t.endswith(".yml") or t.endswith(".yaml"):
@@ -63,8 +68,10 @@ def get_list_of_nested_files(yml, dirpath):
                 nested_files.append(filepath)
                 nested_files.extend(get_list_of_nested_files(t_yml, dirpath))
             elif t == "OS::Heat::ResourceGroup":
-                rdt = v["properties"]["resource_def"]["type"]
-                if rdt.endswith(".yml") or rdt.endswith(".yaml"):
+                rdt = (v.get("properties", {})
+                        .get("resource_def", {})
+                        .get("type", None))
+                if rdt and (rdt.endswith(".yml") or rdt.endswith(".yaml")):
                     filepath = path.join(dirpath, rdt)
                     with open(filepath) as fh:
                         rdt_yml = yaml.load(fh)
@@ -85,58 +92,48 @@ def check_for_invalid_nesting(yml, yaml_file, dirpath):
     '''
     return a list of all nested files
     '''
-
     if not hasattr(yml, 'items'):
         return []
-
     invalid_nesting = []
     p = re.compile('^[A-z]*::[A-z]*::[A-z]*$')
 
-    for k, v in yml.items():
+    for v in yml.values():
         if isinstance(v, dict) and "type" in v:
             t = v["type"]
-
             if t.endswith(".yml") or t.endswith(".yaml"):
                 filepath = path.join(dirpath, t)
-                try:
-                    with open(filepath) as fh:
-                        t_yml = yaml.load(fh)
-                except Exception as e:
-                    invalid_nesting.append(filepath)
-                    print(e)
-                invalid_nesting.extend(
-                    check_for_invalid_nesting(t_yml,
-                                              filepath,
-                                              dirpath))
             elif t == "OS::Heat::ResourceGroup":
                 rd = v["properties"]["resource_def"]
-                if not isinstance(rd, dict):
+                if not isinstance(rd, dict) or "type" not in rd:
                     invalid_nesting.append(yaml_file)
-                elif "type" not in rd:
-                    invalid_nesting.append(yaml_file)
-                elif not p.match(rd["type"]) and not \
-                    (rd["type"].endswith(".yml")
-                     or rd["type"].endswith(".yaml")):
+                    continue
+                elif not p.match(rd["type"]) and not (
+                        rd["type"].endswith(".yml")
+                        or rd["type"].endswith(".yaml")):
                     filepath = path.join(dirpath, rd["type"])
-                    try:
-                        with open(filepath) as fh:
-                            rdt_yml = yaml.load(fh)
-                    except Exception as e:
-                        invalid_nesting.append(filepath)
-                        print(e)
-                    invalid_nesting.extend(
-                        check_for_invalid_nesting(rdt_yml,
-                                                  filepath,
-                                                  dirpath))
+                else:
+                    continue
+            else:
+                continue
+            try:
+                with open(filepath) as fh:
+                    yml = yaml.load(fh)
+            except yaml.YAMLError as e:
+                invalid_nesting.append(filepath)
+                print(e)    # pylint: disable=superfluous-parens
+            invalid_nesting.extend(check_for_invalid_nesting(
+                    yml,
+                    filepath,
+                    dirpath))
         if isinstance(v, dict):
-            invalid_nesting.extend(
-                check_for_invalid_nesting(v,
-                                          yaml_file,
-                                          dirpath))
+            invalid_nesting.extend(check_for_invalid_nesting(
+                    v,
+                    yaml_file,
+                    dirpath))
         elif isinstance(v, list):
             for d in v:
-                invalid_nesting.extend(
-                    check_for_invalid_nesting(d,
-                                              yaml_file,
-                                              dirpath))
+                invalid_nesting.extend(check_for_invalid_nesting(
+                        d,
+                        yaml_file,
+                        dirpath))
     return invalid_nesting
