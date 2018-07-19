@@ -37,17 +37,22 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
----
-parameters:
-  a!:
-    type: string
-    label: human-readable name of the parameter
-    description: description of the parameter
-    default: default value for parameter
-    hidden: true
-    constraints:
-      - length: { min: 6, max: 8 }
-        description: User name must be between 6 and 8 characters
-      - allowed_pattern: "[A-Z]+[a-zA-Z0-9]*"
-        description: User name must start with an uppercase character
-    immutable: true
+
+import yaml
+
+from .helpers import validates
+
+VERSION = '1.0.0'
+
+
+@validates('R-70112', 'R-67231')
+def test_env_no_resource_registry(env_files):
+    '''
+    A VNF's Heat Orchestration template's Environment File's
+    **MUST NOT** contain the "resource_registry:" section.
+    '''
+    for filename in env_files:
+        with open(filename) as fi:
+            yml = yaml.load(fi)
+        assert 'resource_registry' not in yml, (
+                '%s contains "resource_registry"' % filename)

@@ -41,12 +41,24 @@
 import re
 import pytest
 import yaml
+from .helpers import validates
 from .utils.vm_types import get_vm_type_for_nova_server
 from .utils.network_roles import get_network_role_from_port,\
                                  get_network_type_from_port,\
                                  property_uses_get_resource
 
 
+@validates('R-29865',
+           'R-69014',
+           'R-05201',
+           'R-68936',
+           'R-32025',
+           'R-11168',
+           'R-84322',
+           'R-96983',
+           'R-26506',
+           'R-20453',
+           'R-26351')
 def test_port_resource_ids(heat_template):
     '''
     Check that all resource ids for ports follow the right

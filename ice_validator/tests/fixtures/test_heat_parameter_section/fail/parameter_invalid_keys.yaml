@@ -39,7 +39,7 @@
 #
 ---
 parameters:
-  a:
+  a!:
     type: string
     label: human-readable name of the parameter
     description: description of the parameter

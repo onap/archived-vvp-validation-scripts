@@ -40,8 +40,12 @@
 
 from os import listdir
 from os import path
+import re
 from .helpers import check_basename_ending
 from .helpers import validates
+
+# is 'base', starts with 'base_', contains '_base_', ends with '_base'
+RE_BASE = re.compile(r'(^base$)|(^base_)|(_base_)|(_base$)')
 
 
 @validates('R-37028', 'R-87485', 'R-81339', 'R-87247', 'R-76057')
@@ -60,9 +64,6 @@ def test_base_template_names(template_dir):
         if check_basename_ending('volume', filename):
             continue
 
-        if (filename.endswith("_base") or
-                filename.startswith("base_") or
-                filename == "base" or
-                filename.find("_base_") > 0):
+        if RE_BASE.search(filename):
             base_template_count += 1
     assert base_template_count == 1
