@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da7095c5_2d7c4572",
+        "filename": "ice_validator/tests/test_env_no_resource_registry.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2018-07-19T21:46:18Z",
+      "side": 1,
+      "message": "I can\u0027t find a requirement R-70112.  What is that?",
+      "revId": "a2439c5936ad685129a5caf01b83264c78acea1c",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da7095c5_2da52504",
+        "filename": "ice_validator/tests/test_port_resource_ids.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2018-07-19T21:46:18Z",
+      "side": 1,
+      "message": "If this requirement is going to validate this many requirements, then it needs to output a more meaningful error message at the end.   Can we either split this or provide some assertion message to pinpoint what\u0027s wrong?",
+      "revId": "a2439c5936ad685129a5caf01b83264c78acea1c",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da7095c5_cdb58932",
+        "filename": "ice_validator/tests/test_resource_ids_alphanumeric_only.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2018-07-19T21:46:18Z",
+      "side": 1,
+      "message": "R-98407 states that teh requirement should not include _int, int_, _int_.   I don\u0027t see this being validated in this test case.  Should the requirement ID be removed or should the test case be updated?\n\nR-90152 stats that a resources section must have at least 1 resource.  I don\u0027t see that being validated either.  I guess an exception might be raised on the call to keys(), but that\u0027s not going to yield a helpful message.",
+      "revId": "a2439c5936ad685129a5caf01b83264c78acea1c",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
