@@ -38,11 +38,14 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
+from .helpers import validates
+
 import pytest
 import yaml
 import re
 
 
+@validates('R-71152', 'R-50436')
 def test_nova_servers_correct_parameter_types(heat_template):
     '''
     Make sure all nova servers have properly assigned types for the parameters

@@ -37,12 +37,14 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
+from .helpers import validates
 
 import pytest
 import yaml
 import re
 
 
+@validates('R-98450')
 def test_availability_zone_naming(heat_template):
     '''
     Make sure all availability zones are properly formatted

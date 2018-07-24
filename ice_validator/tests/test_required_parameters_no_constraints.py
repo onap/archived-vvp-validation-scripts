@@ -37,11 +37,13 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
+from .helpers import validates
 
 import pytest
 import yaml
 
 
+@validates('R-55218', 'R-98374', 'R-44318')
 def test_required_parameters_no_constraints(yaml_file):
     '''
     Make sure all required parameters are specified without any
