@@ -37,12 +37,15 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
+from .helpers import validates
 
 import pytest
 import yaml
 from .utils.ports import get_invalid_ip_addresses
 
 
+@validates('R-41492',
+           'R-35735')
 def test_allowed_address_pairs_include_vm_type_network_role(heat_template):
     '''
     Check that all allowed_address_pairs include the {vm_type} of the
