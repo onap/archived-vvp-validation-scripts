@@ -37,11 +37,13 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
+from .helpers import validates
 
 from os import listdir
 from os import path
 
 
+@validates('R-67205', 'R-35727', 'R-22656')
 def test_env_and_yaml_same_name(template_dir):
     '''
     Check that all environment template filenames are identical to an

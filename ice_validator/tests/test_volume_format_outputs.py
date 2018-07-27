@@ -37,11 +37,13 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
+from .helpers import validates
 
 import yaml
 import pytest
 
 
+@validates('R-79531')
 def test_volume_format_outputs(volume_template):
     '''
     Check that the values are properly provided to the outputs section
