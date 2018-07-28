@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da7095c5_7fe88c7c",
+        "filename": "ice_validator/tests/test_env_and_yaml_same_name.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2018-07-28T15:10:28Z",
+      "side": 1,
+      "message": "re: R-3572 - \"The VNF Heat Orchestration Template MUST have a corresponding environment file for an Incremental module.\"  This test case validates that every env file matches a template file, but there is no assertion going the other way.  I suggest we remove that from validation.\n\nSimilarly for R-22656, I don\u0027t think this applies.  I don\u0027t think every env file has a matching template is equivalent to the other direction.",
+      "revId": "20b8e673c02ed57cc2393b81bbdda3904ed91da5",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da7095c5_9fed608e",
+        "filename": "ice_validator/tests/test_volume_format_outputs.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2018-07-28T15:10:28Z",
+      "side": 1,
+      "message": "This test doesn\u0027t validate this requirement.  \"R-79531 - The VNF Heat Orchestration Template MUST define “outputs” in the volume template for each Cinder volume resource universally unique identifier (UUID) (i.e. ONAP Volume Template Output Parameters)\"\n\nThe test is skipped if outputs aren\u0027t present in the template, but the requirement states that outputs must be present if a Cinder volume is defined.  \n\nThis test simply validates that every output gets it\u0027s value via either get_resource or get_attr.  I scanned the various requirements, but couldn\u0027t find a requirement that explicitly states that.  Should we add a requirement and map this to a new requirement?",
+      "revId": "20b8e673c02ed57cc2393b81bbdda3904ed91da5",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
