@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da7095c5_5fffc834",
+        "filename": "ice_validator/tests/test_allowed_address_pairs_include_vm_type_network_role.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2018-07-28T15:47:05Z",
+      "side": 1,
+      "message": "Is there another test already implemented that validates the vm-type (I see we have a test for network-role)?   The only concern I have on this one is that the test simply skips the port if it\u0027s unable to parse out the vm-type  (see utils.ports.get_invalid_ip_addresses).  I think that\u0027s OK, if there\u0027s something else to flag an error, but if not it would appear to silently ignore it.",
+      "revId": "6985dd5e75118aed4ff07c88de11c8c9cd5c72cb",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da7095c5_fffb3c45",
+        "filename": "ice_validator/tests/test_fixed_ips_include_vm_type_network_role.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2018-07-28T15:47:05Z",
+      "side": 1,
+      "message": "If i\u0027m reading the code correctly, the only way it can validate the parameter is if the vm-type and network-role can be parsed from the resource.  If not, then the parameter check is just skipped.  Should we change this to flag an error rather than silently ignore it?",
+      "revId": "6985dd5e75118aed4ff07c88de11c8c9cd5c72cb",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
