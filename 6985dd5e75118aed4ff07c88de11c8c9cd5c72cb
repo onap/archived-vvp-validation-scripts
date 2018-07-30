@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "9a6a9dd7_2009b02c",
+        "filename": "ice_validator/tests/test_allowed_address_pairs_include_vm_type_network_role.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2018-07-30T18:11:25Z",
+      "side": 1,
+      "message": "That works.  I agree - just didn\u0027t see the test for vm_type.",
+      "parentUuid": "9a6a9dd7_1d41730b",
+      "revId": "6985dd5e75118aed4ff07c88de11c8c9cd5c72cb",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da7095c5_fffb3c45",
         "filename": "ice_validator/tests/test_fixed_ips_include_vm_type_network_role.py",
         "patchSetId": 3
