@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a6a9dd7_1d41730b",
+        "filename": "ice_validator/tests/test_allowed_address_pairs_include_vm_type_network_role.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 3013
+      },
+      "writtenOn": "2018-07-30T14:56:44Z",
+      "side": 1,
+      "message": "the test_port_resource_ids.py should be validating that the port resource has vm_type and network_role. You are correct that this test will fall through if unable to parse the vm_type or network_role, however the other test will fail until the port resource id has been corrected.",
+      "parentUuid": "da7095c5_5fffc834",
+      "revId": "6985dd5e75118aed4ff07c88de11c8c9cd5c72cb",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da7095c5_fffb3c45",
         "filename": "ice_validator/tests/test_fixed_ips_include_vm_type_network_role.py",
         "patchSetId": 3
