@@ -37,13 +37,16 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-
 from os import path, listdir
 import re
 import yaml
 import pytest
 from .helpers import get_parsed_yml_for_yaml_files, check_basename_ending
 from .utils.nested_files import get_list_of_nested_files
+
+VERSION = '1.0.0'
+
+# pylint: disable=invalid-name
 
 
 def get_template_dir(metafunc):
@@ -73,74 +76,86 @@ def get_nested_files(filenames):
             if "resources" not in yml:
                 continue
             nested_files.extend(get_list_of_nested_files(
-                    yml["resources"], path.dirname(filename)))
-        except Exception as e:
-            print(e)
+                    yml["resources"],
+                    path.dirname(filename)))
+        except yaml.YAMLError as e:
+            print(e)  # pylint: disable=superfluous-parens
             continue
     return nested_files
 
 
-def list_filenames_in_template_dir(metafunc, extensions, template_type='',
-                                   sub_dirs=[]):
+def list_filenames_in_template_dir(
+            metafunc,
+            extensions,
+            template_type='',
+            sub_dirs=None):
     '''
     returns the filenames in a template_dir, either as its passed in
     on CLI or, during --self-test, the directory whos name matches
     the current tests module name
     '''
+    sub_dirs = [] if sub_dirs is None else sub_dirs
     template_dir = get_template_dir(metafunc)
     filenames = []
-
-    try:
-        if metafunc.config.getoption('self_test'):
-            filenames = [path.join(template_dir, s, f)
-                         for s in sub_dirs
-                         for f in listdir(path.join(template_dir, s))
-                         if path.isfile(path.join(template_dir, s, f)) and
-                         path.splitext(f)[-1] in extensions and
-                         check_basename_ending(template_type,
-                                               path.splitext(f)[0])]
-        else:
-            filenames = [path.join(template_dir, f)
-                         for f in listdir(template_dir)
-                         if path.isfile(path.join(template_dir, f)) and
-                         path.splitext(f)[-1] in extensions and
-                         check_basename_ending(template_type,
-                                               path.splitext(f)[0])]
-
-    except Exception as e:
-        print(e)
-
+    if metafunc.config.getoption('self_test'):
+        filenames = [path.join(template_dir, s, f)
+                     for s in sub_dirs
+                     for f in listdir(path.join(template_dir, s))
+                     if path.isfile(path.join(template_dir, s, f))
+                     and path.splitext(f)[-1] in extensions
+                     and check_basename_ending(
+                            template_type,
+                            path.splitext(f)[0])]
+    else:
+        filenames = [path.join(template_dir, f)
+                     for f in listdir(template_dir)
+                     if path.isfile(path.join(template_dir, f))
+                     and path.splitext(f)[-1] in extensions
+                     and check_basename_ending(
+                                template_type,
+                                path.splitext(f)[0])]
     return filenames
 
 
-def list_template_dir(metafunc, extensions, exclude_nested=True,
-                      template_type='', sub_dirs=[]):
+def list_template_dir(
+            metafunc,
+            extensions,
+            exclude_nested=True,
+            template_type='',
+            sub_dirs=None):
     '''
     returns the filenames excluding the nested files for a template_dir,
     either as its passed in on CLI or, during --self-test, the
     directory whos name matches the current tests module name
     '''
+    sub_dirs = [] if sub_dirs is None else sub_dirs
     filenames = []
     nested_files = []
-
-    try:
-        filenames = list_filenames_in_template_dir(metafunc, extensions,
-                                                   template_type, sub_dirs)
-        if exclude_nested:
-            nested_files = get_nested_files(filenames)
-    except Exception as e:
-        print(e)
-
+    filenames = list_filenames_in_template_dir(
+            metafunc,
+            extensions,
+            template_type,
+            sub_dirs)
+    if exclude_nested:
+        nested_files = get_nested_files(filenames)
     return list(set(filenames) - set(nested_files))
 
 
-def get_filenames_list(metafunc, extensions=[".yaml", ".yml", ".env"],
-                       exclude_nested=False, template_type=''):
+def get_filenames_list(
+            metafunc,
+            extensions=None,
+            exclude_nested=False,
+            template_type=''):
     '''
     returns the filename fixtures for the template dir, either as by how its
     passed in on CLI or, during --self-test, the directory whos name
     matches the current tests module name
     '''
+    extensions = [
+            ".yaml",
+            ".yml",
+            ".env"
+            ] if extensions is None else extensions
     if metafunc.config.getoption('self_test'):
         filenames_list = list_template_dir(metafunc,
                                            extensions,
@@ -162,13 +177,21 @@ def get_filenames_list(metafunc, extensions=[".yaml", ".yml", ".env"],
     return filenames_list
 
 
-def get_filenames_lists(metafunc, extensions=[".yaml", ".yml", ".env"],
-                        exclude_nested=False, template_type=''):
+def get_filenames_lists(
+            metafunc,
+            extensions=None,
+            exclude_nested=False,
+            template_type=''):
     '''
     returns the list of files in the template dir, either as by how its
     passed in on CLI or, during --self-test, the directory whos name
     matches the current tests module name
     '''
+    extensions = [
+            ".yaml",
+            ".yml",
+            ".env"
+            ] if extensions is None else extensions
     filenames_lists = []
     if metafunc.config.getoption('self_test'):
         filenames_lists.append(list_template_dir(metafunc,
@@ -188,17 +211,21 @@ def get_filenames_lists(metafunc, extensions=[".yaml", ".yml", ".env"],
                                                  extensions,
                                                  exclude_nested,
                                                  template_type))
-
     return filenames_lists
 
 
-def get_parsed_yaml_files(metafunc, extensions, exclude_nested=True,
-                          template_type='', sections=[]):
+def get_parsed_yaml_files(
+            metafunc,
+            extensions,
+            exclude_nested=True,
+            template_type='',
+            sections=None):
     '''
     returns the list of parsed yaml files in the specified template dir,
     either as by how its passed in on CLI or, during --self-test, the
     directory whos name matches the current tests module name
     '''
+    sections = [] if sections is None else sections
     extensions = [".yaml", ".yml"]
 
     if metafunc.config.getoption('self_test'):
@@ -217,7 +244,6 @@ def get_parsed_yaml_files(metafunc, extensions, exclude_nested=True,
         yaml_files = list_template_dir(metafunc, extensions)
         parsed_yml_list = get_parsed_yml_for_yaml_files(yaml_files,
                                                         sections)
-
     return parsed_yml_list
 
 
@@ -405,8 +431,8 @@ def parametrize_environment_pair(metafunc, template_type=''):
             else:
                 pairs.append({"name": basename, "yyml": yyml, "eyml": eyml})
 
-        except Exception as e:
-            print(e)
+        except yaml.YAMLError as e:
+            print(e)  # pylint: disable=superfluous-parens
 
     metafunc.parametrize('environment_pair', pairs)
 
@@ -450,7 +476,7 @@ def parametrize_heat_volume_pair(metafunc):
             else:
                 pairs.append({"name": basename, "yyml": yyml, "vyml": vyml})
 
-        except Exception as e:
-            print(e)
+        except yaml.YAMLError as e:
+            print(e)  # pylint: disable=superfluous-parens
 
     metafunc.parametrize('heat_volume_pair', pairs)

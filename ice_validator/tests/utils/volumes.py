@@ -38,8 +38,10 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-import yaml
 from os import path
+import yaml
+
+VERSION = '1.0.0'
 
 
 def get_volume_resources(heat_template):
@@ -60,8 +62,8 @@ def get_volume_resources(heat_template):
     try:
         with open(volume_template) as fh:
             yml = yaml.load(fh)
-    except Exception as e:
-        print(e)
+    except yaml.YAMLError as e:
+        print(e)    # pylint: disable=superfluous-parens
         return {}
 
     if 'outputs' not in yml:
