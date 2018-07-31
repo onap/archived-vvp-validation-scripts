@@ -55,10 +55,11 @@ def check_basename_ending(template_type, basename):
         return not basename.endswith('_volume')
 
 
-def get_parsed_yml_for_yaml_files(yaml_files, sections=[]):
+def get_parsed_yml_for_yaml_files(yaml_files, sections=None):
     '''
     get the parsed yaml for a list of yaml files
     '''
+    sections = [] if sections is None else sections
     parsed_yml_list = []
     for yaml_file in yaml_files:
         yml = ''
@@ -67,8 +68,8 @@ def get_parsed_yml_for_yaml_files(yaml_files, sections=[]):
             with open(yaml_file) as fh:
                 yml = yaml.load(fh)
         except Exception as e:
-            print(e)
-
+            print('Error in %s: %s' % (yaml_file, e))
+            continue
         if yml:
             if sections:
                 for k in yml.keys():
