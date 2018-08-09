@@ -1,12 +1,12 @@
 # -*- coding: utf8 -*-
-# ============LICENSE_START=======================================================
+# ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
 # Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -38,8 +38,13 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-import yaml
+"""Helpers
+"""
+
 from boltons import funcutils
+import yaml
+
+VERSION = '1.1.0'
 
 
 def check_basename_ending(template_type, basename):
@@ -62,12 +67,11 @@ def get_parsed_yml_for_yaml_files(yaml_files, sections=None):
     sections = [] if sections is None else sections
     parsed_yml_list = []
     for yaml_file in yaml_files:
-        yml = ''
-
         try:
             with open(yaml_file) as fh:
                 yml = yaml.load(fh)
-        except Exception as e:
+        except yaml.YAMLError as e:
+            # pylint: disable=superfluous-parens
             print('Error in %s: %s' % (yaml_file, e))
             continue
         if yml:
@@ -76,7 +80,6 @@ def get_parsed_yml_for_yaml_files(yaml_files, sections=None):
                     if k not in sections:
                         del yml[k]
             parsed_yml_list.append(yml)
-
     return parsed_yml_list
 
 
@@ -89,6 +92,7 @@ def validates(*requirement_ids):
         ...     pass
         >>> assert test_something.requirement_ids == ['R-12345', 'R-12346']
     """
+    # pylint: disable=missing-docstring
     def decorator(func):
         # NOTE: We use a utility here to ensure that function signatures are
         # maintained because pytest inspects function signatures to inject

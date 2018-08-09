@@ -1,12 +1,12 @@
 # -*- coding: utf8 -*-
-# ============LICENSE_START=======================================================
+# ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
 # Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -39,8 +39,12 @@
 #
 from .helpers import validates
 
+'''test_env_and_yaml_same_name
+'''
 from os import listdir
 from os import path
+
+VERSION = '1.0.0'
 
 
 @validates('R-67205', 'R-35727', 'R-22656')
@@ -55,7 +59,11 @@ def test_env_and_yaml_same_name(template_dir):
                  if path.splitext(f)[-1] == ".env"]
     yaml_files = [f for f in files
                   if path.splitext(f)[-1] in ['.yml', '.yaml']]
+    unmatched = []
     for filename in env_files:
         basename = path.splitext(filename)[0]
-        assert basename + '.yaml' in yaml_files or \
-            basename + '.yml' in yaml_files
+        if (basename + '.yaml' not in yaml_files
+                and basename + '.yml' not in yaml_files):
+            unmatched.append(filename)
+    assert not unmatched, (
+            'files with no corresponding .y[a]ml %s' % unmatched)

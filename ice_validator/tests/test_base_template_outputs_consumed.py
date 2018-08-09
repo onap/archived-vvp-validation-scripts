@@ -1,12 +1,12 @@
 # -*- coding: utf8 -*-
-# ============LICENSE_START=======================================================
+# ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
 # Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -37,10 +37,21 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-from .helpers import validates
+
+'''
+test_base_template_outputs_consumed
+'''
+
 from os import path, sep
-import yaml
+
 import pytest
+import yaml
+
+from .helpers import validates
+
+VERSION = '1.0.0'
+
+# pylint: disable=invalid-name
 
 
 @validates('R-52753')
@@ -56,11 +67,11 @@ def test_base_template_outputs_consumed(heat_templates):
         with open(heat_template) as fh:
             yml = yaml.load(fh)
         basename = path.splitext(heat_template)[0].rsplit(sep, 1)[1]
-        if (basename.endswith("_base") or
-                basename.startswith("base_") or
-                basename.find("_base_") > 0):
-                base_template = heat_template
-                base_template_yml = yml
+        if (basename.endswith("_base")
+                or basename.startswith("base_")
+                or basename.find("_base_") > 0):
+            base_template = heat_template
+            base_template_yml = yml
 
     # get the base template outputs
     if "outputs" not in base_template_yml:
@@ -83,4 +94,6 @@ def test_base_template_outputs_consumed(heat_templates):
         parameters = yml["parameters"].keys()
         non_base_parameters.extend(parameters)
 
-    assert base_outputs <= set(non_base_parameters)
+    assert base_outputs <= set(non_base_parameters), (
+            'unconsumed outputs %s' % list(
+                    base_outputs - set(non_base_parameters)))

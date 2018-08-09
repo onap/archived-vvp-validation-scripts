@@ -38,39 +38,50 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-'''test_all_referenced_resources_exists
+'''
+A VNF's Heat Orchestration Template's Resource ``OS::Heat::CloudConfig``
+Resource ID **MUST** contain the ``{vm-type}``.
 '''
 
 import pytest
-import yaml
 
-from .utils.nested_iterables import find_all_get_resource_in_yml
+from .structures import Heat
+from .helpers import validates
+from .utils import vm_types
 
 VERSION = '1.0.0'
 
-# pylint: disable=invalid-name
 
-
-def test_all_referenced_resources_exists(yaml_file):
+@validates('R-04747')
+def test_cloud_config(heat_template):
+    '''validate resource ids
     '''
-    Check that all resources referenced by get_resource
-    actually exists in all yaml files
-    '''
-    with open(yaml_file) as fh:
-        yml = yaml.load(fh)
+    h = Heat(filepath=heat_template)
+    if not h.resources:
+        pytest.skip('No resources in this template')
 
-    # skip if resources are not defined
-    if "resources" not in yml:
-        pytest.skip("No resources specified in the yaml file")
+    cloud_configs = get_cloud_configs(h)
+    if not cloud_configs:
+        pytest.skip('No CloudConfig resources in this template')
 
-    resource_ids = yml['resources'].keys()
-    referenced_resource_ids = find_all_get_resource_in_yml(yml)
+    resource_vm_types = vm_types.get_vm_types(h.resources)
+    if not resource_vm_types:
+        pytest.skip('No resources with {vm-type} in this template')
 
-    missing_referenced_resources = set()
-    for referenced_resource_id in referenced_resource_ids:
-        if referenced_resource_id not in resource_ids:
-            missing_referenced_resources.add(referenced_resource_id)
+    bad = set()
+    for rid in cloud_configs:
+        for vm_type in resource_vm_types:
+            if vm_type in rid:
+                break
+        else:
+            bad.add(rid)
+    assert not bad, 'CloudConfigs %s have {vm-type} not in %s' % (
+            list(bad),
+            list(resource_vm_types))
 
-    assert not missing_referenced_resources, (
-            'missing referenced resources %s' % list(
-                    missing_referenced_resources))
+
+def get_cloud_configs(heat):
+    """Return list of resource_id whose type is OS::Heat::CloudConfig.
+    """
+    return [rid for rid, resource in heat.resources.items()
+            if heat.nested_get(resource, 'type') == 'OS::Heat::CloudConfig']

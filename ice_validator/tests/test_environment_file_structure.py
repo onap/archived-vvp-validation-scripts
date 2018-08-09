@@ -1,12 +1,12 @@
 # -*- coding: utf8 -*-
-# ============LICENSE_START=======================================================
+# ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
 # Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -37,9 +37,18 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-from .helpers import validates
+
+""" environment file structure
+"""
+
 import yaml
 import pytest
+
+from .helpers import validates
+
+VERSION = '1.0.0'
+
+# pylint: disable=invalid-name
 
 
 def test_environment_structure(env_file):
@@ -51,7 +60,10 @@ def test_environment_structure(env_file):
 
     with open(env_file) as fh:
         yml = yaml.load(fh)
-    assert any(map(lambda v: v in yml, key_values))
+    assert [k for k in key_values if k in yml], (
+            '%s missing any of %s' % (
+                    env_file,
+                    key_values))
 
 
 @validates('R-03324')
@@ -59,11 +71,12 @@ def test_environment_file_contains_required_sections(env_file):
     '''
     Check that all environments files only have the allowed sections
     '''
-    required_key_values = ["parameters"]
+    required_keys = ["parameters"]
 
     with open(env_file) as fh:
         yml = yaml.load(fh)
-    assert any(map(lambda v: v in yml, required_key_values))
+    missing_keys = [v for v in required_keys if v not in yml]
+    assert not missing_keys, '%s missing %s' % (env_file, missing_keys)
 
 
 def test_environment_file_sections_have_the_right_format(env_file):
@@ -71,29 +84,30 @@ def test_environment_file_sections_have_the_right_format(env_file):
     Check that all environment files have sections of the right format.
     Do note that it only tests for dicts or not dicts currently.
     '''
-    key_values = ["parameters", "event_sinks", "encrypted_parameters",
-                  "parameter_merge_strategies"]
-    key_values_not_dicts = ["event_sinks"]
+    dict_keys = [
+            "parameters",
+            "encrypted_parameters",
+            "parameter_merge_strategies"]
+    not_dict_keys = [
+            "event_sinks"]
 
     with open(env_file) as fh:
         yml = yaml.load(fh)
 
-    if not any(map(lambda v: v in yml, key_values)):
+    if not [k for k in dict_keys + not_dict_keys if k in yml]:
         pytest.skip('The fixture is not applicable for this test')
 
-    is_dict = 0
-    should_be_dict = 0
-    is_not_dict = 0
-    should_not_be_dict = 0
-    for key_value in key_values:
-        if key_value in yml:
-            if isinstance(yml[key_value], dict):
-                is_dict += 1
-                if key_value not in key_values_not_dicts:
-                    should_be_dict += 1
-            elif not isinstance(yml[key_value], list):
-                is_not_dict += 1
-                if key_value in key_values_not_dicts:
-                    should_not_be_dict += 1
-    assert (is_dict == should_be_dict and
-            is_not_dict == should_not_be_dict)
+    bad_dict_keys = [k for k in dict_keys
+                     if k in yml
+                     and not isinstance(yml[k], dict)]
+    bad_not_dict_keys = [k for k in not_dict_keys
+                         if k in yml
+                         and isinstance(yml[k], dict)]
+    errors = []
+    if bad_dict_keys:
+        errors.append('must be dict %s' % bad_dict_keys)
+    if bad_not_dict_keys:
+        errors.append('must not be dict %s' % bad_not_dict_keys)
+    assert not errors, '%s errors:\n    %s' % (
+            env_file,
+            '\n    '.join(errors))

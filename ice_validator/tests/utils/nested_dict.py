@@ -38,39 +38,27 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-'''test_all_referenced_resources_exists
+'''nested_dict.get
 '''
-
-import pytest
-import yaml
-
-from .utils.nested_iterables import find_all_get_resource_in_yml
 
 VERSION = '1.0.0'
 
-# pylint: disable=invalid-name
 
-
-def test_all_referenced_resources_exists(yaml_file):
+def get(dic, *keys):
+    '''Return the value of the last key given a (nested) dict
+    and list of keys.  If any key is missing, or if the value
+    of any key except the last is not a dict, then None is returned.
     '''
-    Check that all resources referenced by get_resource
-    actually exists in all yaml files
+    d = dic
+    for key in keys:
+        if hasattr(d, 'get'):
+            d = d.get(key)
+        else:
+            return None
+    return d
+
+
+def is_dict_has_key(obj, key):
+    '''return True/False `obj` is a dict and has `key`
     '''
-    with open(yaml_file) as fh:
-        yml = yaml.load(fh)
-
-    # skip if resources are not defined
-    if "resources" not in yml:
-        pytest.skip("No resources specified in the yaml file")
-
-    resource_ids = yml['resources'].keys()
-    referenced_resource_ids = find_all_get_resource_in_yml(yml)
-
-    missing_referenced_resources = set()
-    for referenced_resource_id in referenced_resource_ids:
-        if referenced_resource_id not in resource_ids:
-            missing_referenced_resources.add(referenced_resource_id)
-
-    assert not missing_referenced_resources, (
-            'missing referenced resources %s' % list(
-                    missing_referenced_resources))
+    return isinstance(obj, dict) and key in obj

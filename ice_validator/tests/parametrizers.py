@@ -1,12 +1,12 @@
 # -*- coding: utf8 -*-
-# ============LICENSE_START=======================================================
+# ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
 # Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -37,6 +37,10 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
+
+"""parametrizers
+"""
+
 from os import path, listdir
 import re
 import yaml
@@ -104,16 +108,16 @@ def list_filenames_in_template_dir(
                      if path.isfile(path.join(template_dir, s, f))
                      and path.splitext(f)[-1] in extensions
                      and check_basename_ending(
-                            template_type,
-                            path.splitext(f)[0])]
+                        template_type,
+                        path.splitext(f)[0])]
     else:
         filenames = [path.join(template_dir, f)
                      for f in listdir(template_dir)
                      if path.isfile(path.join(template_dir, f))
                      and path.splitext(f)[-1] in extensions
                      and check_basename_ending(
-                                template_type,
-                                path.splitext(f)[0])]
+                        template_type,
+                        path.splitext(f)[0])]
     return filenames
 
 

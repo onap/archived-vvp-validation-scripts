@@ -1,12 +1,12 @@
 # -*- coding: utf8 -*-
-# ============LICENSE_START=======================================================
+# ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
 # Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -37,11 +37,17 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-from .helpers import validates
+"""test
+"""
+
+import re
 
 import pytest
 import yaml
-import re
+
+from .helpers import validates
+
+VERSION = '1.1.0'
 
 
 @validates('R-98450')
@@ -57,9 +63,9 @@ def test_availability_zone_naming(heat_template):
     if "resources" not in yml:
         pytest.skip("No resources specified in the heat template")
 
-    invalid_availability_zones = []
+    invalid_availability_zones = set()
 
-    for k1, v1 in yml["resources"].items():
+    for v1 in yml["resources"].values():
         if not isinstance(v1, dict):
             continue
         if "properties" not in v1:
@@ -71,8 +77,11 @@ def test_availability_zone_naming(heat_template):
             for k2, v2 in v1["properties"].items():
                 if k2 != 'availability_zone':
                     continue
-
+                if 'str_replace' in v2:
+                    continue
                 if not re.match(r'availability_zone_\d+', v2["get_param"]):
-                    invalid_availability_zones.append(v2["get_param"])
+                    invalid_availability_zones.add(v2["get_param"])
 
-    assert not set(invalid_availability_zones)
+    assert not invalid_availability_zones, (
+            'invalid availability zones %s' % list(
+                    invalid_availability_zones))

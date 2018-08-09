@@ -1,12 +1,12 @@
 # -*- coding: utf8 -*-
-# ============LICENSE_START=======================================================
+# ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
 # Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -38,11 +38,21 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
+'''
+test_allowed_address_pairs_format
+'''
+
+import re
+
 import pytest
 import yaml
-from .utils.network_roles import get_network_role_from_port,\
-                                 property_uses_get_resource
-import re
+
+from .utils.network_roles import get_network_role_from_port, \
+    property_uses_get_resource
+
+VERSION = '1.0.0'
+
+# pylint: disable=invalid-name
 
 
 def test_allowed_address_pairs_format(heat_template):
@@ -88,46 +98,38 @@ def test_allowed_address_pairs_format(heat_template):
     invalid_allowed_address_pairs = []
 
     for v1 in yml["resources"].values():
-        if not isinstance(v1, dict):
-            continue
-        if "properties" not in v1:
-            continue
-        if v1.get("type") != "OS::Neutron::Port":
-            continue
-        if property_uses_get_resource(v1, "network"):
+        if (not isinstance(v1, dict)
+                or "properties" not in v1
+                or v1.get("type") != "OS::Neutron::Port"
+                or property_uses_get_resource(v1, "network")):
             continue
         network_role = get_network_role_from_port(v1)
 
-        for k2, v2 in v1["properties"].items():
-            if k2 != "allowed_address_pairs":
+        v2 = v1["properties"].get("allowed_address_pairs", {})
+        for v3 in v2:
+            if ("ip_address" not in v3
+                    or "get_param" not in v3["ip_address"]):
                 continue
-            for v3 in v2:
-                if "ip_address" not in v3:
-                    continue
-                if "get_param" not in v3["ip_address"]:
-                    continue
 
-                valid_allowed_address_pair = False
-                for v4 in allowed_formats:
-                    param = v3["ip_address"]["get_param"]
-                    if isinstance(param, list):
-                        param = param[0]
+            param = v3["ip_address"]["get_param"]
+            if isinstance(param, list):
+                param = param[0]
 
-                    # check if pattern matches
-                    m = v4[3].match(param)
-                    if m:
-                        if v4[2] == "internal" and\
-                            len(m.groups()) > 1 and\
-                                m.group(2) == network_role:
-                                valid_allowed_address_pair = True
-                                break
-                        elif v4[2] == "external" and\
-                                len(m.groups()) > 0 and\
-                                m.group(1).endswith("_" + network_role):
-                                    valid_allowed_address_pair = True
-                                    break
+            for v4 in allowed_formats:
+                # check if pattern matches
+                m = v4[3].match(param)
+                if m:
+                    if (v4[2] == "internal"
+                            and len(m.groups()) > 1
+                            and m.group(2) == network_role):
+                        break
+                    elif (v4[2] == "external"
+                            and len(m.groups()) > 0
+                            and m.group(1).endswith("_" + network_role)):
+                        break
+            else:
+                invalid_allowed_address_pairs.append(param)
 
-                if not valid_allowed_address_pair:
-                    invalid_allowed_address_pairs.append(param)
-
-    assert not set(invalid_allowed_address_pairs)
+    assert not set(invalid_allowed_address_pairs), (
+            'invalid_allowed_address_pairs %s' % list(
+                    set(invalid_allowed_address_pairs)))

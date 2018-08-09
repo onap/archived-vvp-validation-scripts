@@ -1,12 +1,12 @@
 # -*- coding: utf8 -*-
-# ============LICENSE_START=======================================================
+# ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
 # Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -38,11 +38,17 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
+"""base template names
+"""
+
 from os import listdir
 from os import path
 import re
+
 from .helpers import check_basename_ending
 from .helpers import validates
+
+VERSION = '1.2.0'
 
 # is 'base', starts with 'base_', contains '_base_', ends with '_base'
 RE_BASE = re.compile(r'(^base$)|(^base_)|(_base_)|(_base$)')
@@ -66,4 +72,7 @@ def test_base_template_names(template_dir):
 
         if RE_BASE.search(filename):
             base_template_count += 1
-    assert base_template_count == 1
+    assert base_template_count == 1, (
+            'must be 1 "*_base_*" in %s not %d' % (
+                    filenames,
+                    base_template_count))

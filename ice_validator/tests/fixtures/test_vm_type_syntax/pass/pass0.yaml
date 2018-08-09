@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-# ============LICENSE_START====================================================
+# ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
 # Copyright © 2017 AT&T Intellectual Property. All rights reserved.
@@ -37,40 +37,32 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
+---
+resources:
+  vm_type_a_server_0:
+        type: OS::Nova::Server
+        properties:
+          name: { get_param: [vm_type_a_names, 0]  }
+          flavor: { get_param: vm_type_a_flavor_name}
+          image: { get_param: vm_type_a_image_name}
 
-'''test_all_referenced_resources_exists
-'''
+  vm_type_a_server_1:
+        type: OS::Nova::Server
+        properties:
+          name: { get_param: [vm_type_a_names, 1]  }
+          flavor: { get_param: vm_type_a_flavor_name}
+          image: { get_param: vm_type_a_image_name}
 
-import pytest
-import yaml
+  vm_type_b_server_0:
+      type: OS::Nova::Server
+      properties:
+        name: { get_param: vm_type_b_name_0  }
+        flavor: { get_param: vm_type_b_flavor_name}
+        image: { get_param: vm_type_b_image_name}
 
-from .utils.nested_iterables import find_all_get_resource_in_yml
-
-VERSION = '1.0.0'
-
-# pylint: disable=invalid-name
-
-
-def test_all_referenced_resources_exists(yaml_file):
-    '''
-    Check that all resources referenced by get_resource
-    actually exists in all yaml files
-    '''
-    with open(yaml_file) as fh:
-        yml = yaml.load(fh)
-
-    # skip if resources are not defined
-    if "resources" not in yml:
-        pytest.skip("No resources specified in the yaml file")
-
-    resource_ids = yml['resources'].keys()
-    referenced_resource_ids = find_all_get_resource_in_yml(yml)
-
-    missing_referenced_resources = set()
-    for referenced_resource_id in referenced_resource_ids:
-        if referenced_resource_id not in resource_ids:
-            missing_referenced_resources.add(referenced_resource_id)
-
-    assert not missing_referenced_resources, (
-            'missing referenced resources %s' % list(
-                    missing_referenced_resources))
+  vm_type_b_server_1:
+        type: OS::Nova::Server
+        properties:
+          name: { get_param: vm_type_b_name_1  }
+          flavor: { get_param: vm_type_b_flavor_name}
+          image: { get_param: vm_type_b_image_name}

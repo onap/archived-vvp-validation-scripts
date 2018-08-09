@@ -38,39 +38,37 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-'''test_all_referenced_resources_exists
+'''vm-type resource_id
 '''
 
 import pytest
-import yaml
 
-from .utils.nested_iterables import find_all_get_resource_in_yml
+from .structures import Heat
+from .helpers import validates
+from .utils import vm_types as utils_vm_types
 
-VERSION = '1.0.0'
-
-# pylint: disable=invalid-name
+VERSION = '1.1.0'
 
 
-def test_all_referenced_resources_exists(yaml_file):
+@validates('R-46839')
+def test_vm_type_resource_id(heat_template):
     '''
-    Check that all resources referenced by get_resource
-    actually exists in all yaml files
+    A VNF's Heat Orchestration Template's use of ``{vm-type}``
+    in all Resource IDs **MUST** be the same case.
     '''
-    with open(yaml_file) as fh:
-        yml = yaml.load(fh)
+    bad = {}
+    h = Heat(filepath=heat_template)
+    if not h.resources:
+        pytest.skip("No resources specified in the heat template")
+    vm_types = {v + '_': v.lower() + '_'
+                for v in utils_vm_types.get_vm_types(h.resources)}
+    if not vm_types:
+        pytest.skip("No {vm-type} specified in the heat template")
 
-    # skip if resources are not defined
-    if "resources" not in yml:
-        pytest.skip("No resources specified in the yaml file")
-
-    resource_ids = yml['resources'].keys()
-    referenced_resource_ids = find_all_get_resource_in_yml(yml)
-
-    missing_referenced_resources = set()
-    for referenced_resource_id in referenced_resource_ids:
-        if referenced_resource_id not in resource_ids:
-            missing_referenced_resources.add(referenced_resource_id)
-
-    assert not missing_referenced_resources, (
-            'missing referenced resources %s' % list(
-                    missing_referenced_resources))
+    for rid in h.resources:
+        lower_rid = rid.lower()
+        for vm_type, lower_vm_type in vm_types.items():
+            if (lower_rid.startswith(lower_vm_type)
+               and not rid.startswith(vm_type)):
+                    bad[rid] = vm_type
+    assert not bad, 'resource_id which do not match their vm-type %s' % bad
