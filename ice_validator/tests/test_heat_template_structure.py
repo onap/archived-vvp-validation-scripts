@@ -2,11 +2,11 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -101,23 +101,23 @@ def test_heat_template_structure_sections_have_the_right_format(yaml_file):
 @validates('R-11441')
 def test_parameter_type(yaml_file):
     types = [
-            'string',
-            'number',
-            'json',
-            'comma_delimited_list',
-            'boolean',
-            ]
+        'string',
+        'number',
+        'json',
+        'comma_delimited_list',
+        'boolean',
+    ]
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
     for key, param in yml.get('parameters', {}).items():
         assert isinstance(param, dict), '%s parameter %s is not dict' % (
-                yaml_file,
-                key)
+            yaml_file,
+            key)
         assert 'type' in param, '%s parameter %s has no "type"' % (
-                yaml_file,
-                key)
+            yaml_file,
+            key)
         typ = param['type']
         assert typ in types, '%s parameter %s has invalid type "%s"' % (
-                yaml_file,
-                key,
-                typ)
+            yaml_file,
+            key,
+            typ)

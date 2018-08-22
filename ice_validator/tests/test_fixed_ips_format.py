@@ -2,11 +2,11 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -41,8 +41,7 @@
 import pytest
 import yaml
 from .utils.ports import is_reserved_port
-from .utils.network_roles import get_network_role_from_port,\
-                                 property_uses_get_resource
+from .utils.network_roles import get_network_role_from_port, property_uses_get_resource
 import re
 
 
@@ -52,23 +51,23 @@ def test_fixed_ips_format(heat_template):
     naming conventions
     '''
     formats = [
-              ["fixed_ips", "string", "internal",
-               re.compile(r'(.+?)_int_(.+?)_ip_\d+')],
-              ["fixed_ips", "string", "internal",
-               re.compile(r'(.+?)_int_(.+?)_v6_ip_\d+')],
-              ["fixed_ips", "string", "external",
-               re.compile(r'(.+?)_ip_\d+')],
-              ["fixed_ips", "string", "external",
-               re.compile(r'(.+?)_v6_ip_\d+')],
-              ["fixed_ips", "comma_delimited_list", "internal",
-               re.compile(r'(.+?)_int_(.+?)_ips')],
-              ["fixed_ips", "comma_delimited_list", "internal",
-               re.compile(r'(.+?)_int_(.+?)_v6_ips')],
-              ["fixed_ips", "comma_delimited_list", "external",
-               re.compile(r'(.+?)_ips')],
-              ["fixed_ips", "comma_delimited_list", "external",
-               re.compile(r'(.+?)_v6_ips')],
-              ]
+        ["fixed_ips", "string", "internal",
+         re.compile(r'(.+?)_int_(.+?)_ip_\d+')],
+        ["fixed_ips", "string", "internal",
+         re.compile(r'(.+?)_int_(.+?)_v6_ip_\d+')],
+        ["fixed_ips", "string", "external",
+         re.compile(r'(.+?)_ip_\d+')],
+        ["fixed_ips", "string", "external",
+         re.compile(r'(.+?)_v6_ip_\d+')],
+        ["fixed_ips", "comma_delimited_list", "internal",
+         re.compile(r'(.+?)_int_(.+?)_ips')],
+        ["fixed_ips", "comma_delimited_list", "internal",
+         re.compile(r'(.+?)_int_(.+?)_v6_ips')],
+        ["fixed_ips", "comma_delimited_list", "external",
+         re.compile(r'(.+?)_ips')],
+        ["fixed_ips", "comma_delimited_list", "external",
+         re.compile(r'(.+?)_v6_ips')],
+    ]
 
     with open(heat_template) as fh:
         yml = yaml.load(fh)

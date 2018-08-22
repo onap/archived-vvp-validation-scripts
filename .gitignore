@@ -93,3 +93,6 @@ ENV/
 
 # pytest
 *pytest_cache*
+
+.idea/
+ice_validator/output/

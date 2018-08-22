@@ -72,7 +72,5 @@ def test_base_template_names(template_dir):
 
         if RE_BASE.search(filename):
             base_template_count += 1
-    assert base_template_count == 1, (
-            'must be 1 "*_base_*" in %s not %d' % (
-                    filenames,
-                    base_template_count))
+    msg = 'must be 1 "*_base_*" in %s not %d' % (filenames, base_template_count)
+    assert base_template_count == 1, msg

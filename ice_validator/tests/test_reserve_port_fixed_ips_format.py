@@ -51,15 +51,15 @@ def test_reserve_port_fixed_ips_format(heat_template):
     follow the allowed naming conventions
     '''
     allowed_formats = [
-                      ["fixed_ips", "string", "internal",
-                       re.compile(r'(.+?)_int_(.+?)_floating_v6_ip')],
-                      ["fixed_ips", "string", "internal",
-                       re.compile(r'(.+?)_int_(.+?)_floating_ip')],
-                      ["fixed_ips", "string", "external",
-                       re.compile(r'(.+?)_floating_v6_ip')],
-                      ["fixed_ips", "string", "external",
-                       re.compile(r'(.+?)_floating_ip')],
-                      ]
+        ["fixed_ips", "string", "internal",
+         re.compile(r'(.+?)_int_(.+?)_floating_v6_ip')],
+        ["fixed_ips", "string", "internal",
+         re.compile(r'(.+?)_int_(.+?)_floating_ip')],
+        ["fixed_ips", "string", "external",
+         re.compile(r'(.+?)_floating_v6_ip')],
+        ["fixed_ips", "string", "external",
+         re.compile(r'(.+?)_floating_ip')],
+    ]
 
     with open(heat_template) as fh:
         yml = yaml.load(fh)

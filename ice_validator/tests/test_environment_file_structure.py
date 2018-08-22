@@ -46,68 +46,64 @@ import pytest
 
 from .helpers import validates
 
-VERSION = '1.0.0'
+VERSION = "1.0.0"
 
 # pylint: disable=invalid-name
 
 
 def test_environment_structure(env_file):
-    '''
+    """
     Check that all environments files only have the allowed sections
-    '''
-    key_values = ["parameters", "event_sinks", "encrypted_parameters",
-                  "parameter_merge_strategies"]
+    """
+    key_values = [
+        "parameters",
+        "event_sinks",
+        "encrypted_parameters",
+        "parameter_merge_strategies",
+    ]
 
     with open(env_file) as fh:
         yml = yaml.load(fh)
-    assert [k for k in key_values if k in yml], (
-            '%s missing any of %s' % (
-                    env_file,
-                    key_values))
+    assert [k for k in key_values if k in yml], "%s missing any of %s" % (
+        env_file,
+        key_values,
+    )
 
 
-@validates('R-03324')
+@validates("R-03324")
 def test_environment_file_contains_required_sections(env_file):
-    '''
+    """
     Check that all environments files only have the allowed sections
-    '''
+    """
     required_keys = ["parameters"]
 
     with open(env_file) as fh:
         yml = yaml.load(fh)
     missing_keys = [v for v in required_keys if v not in yml]
-    assert not missing_keys, '%s missing %s' % (env_file, missing_keys)
+    assert not missing_keys, "%s missing %s" % (env_file, missing_keys)
 
 
 def test_environment_file_sections_have_the_right_format(env_file):
-    '''
+    """
     Check that all environment files have sections of the right format.
     Do note that it only tests for dicts or not dicts currently.
-    '''
-    dict_keys = [
-            "parameters",
-            "encrypted_parameters",
-            "parameter_merge_strategies"]
-    not_dict_keys = [
-            "event_sinks"]
+    """
+    dict_keys = ["parameters", "encrypted_parameters", "parameter_merge_strategies"]
+    not_dict_keys = ["event_sinks"]
 
     with open(env_file) as fh:
         yml = yaml.load(fh)
 
     if not [k for k in dict_keys + not_dict_keys if k in yml]:
-        pytest.skip('The fixture is not applicable for this test')
+        pytest.skip("The fixture is not applicable for this test")
 
-    bad_dict_keys = [k for k in dict_keys
-                     if k in yml
-                     and not isinstance(yml[k], dict)]
-    bad_not_dict_keys = [k for k in not_dict_keys
-                         if k in yml
-                         and isinstance(yml[k], dict)]
+    bad_dict_keys = [k for k in dict_keys if k in yml and not isinstance(yml[k], dict)]
+    bad_not_dict_keys = [
+        k for k in not_dict_keys if k in yml and isinstance(yml[k], dict)
+    ]
     errors = []
     if bad_dict_keys:
-        errors.append('must be dict %s' % bad_dict_keys)
+        errors.append("must be dict %s" % bad_dict_keys)
     if bad_not_dict_keys:
-        errors.append('must not be dict %s' % bad_not_dict_keys)
-    assert not errors, '%s errors:\n    %s' % (
-            env_file,
-            '\n    '.join(errors))
+        errors.append("must not be dict %s" % bad_not_dict_keys)
+    assert not errors, "%s errors:\n    %s" % (env_file, "\n    ".join(errors))

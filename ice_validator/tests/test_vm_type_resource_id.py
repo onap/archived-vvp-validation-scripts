@@ -68,7 +68,6 @@ def test_vm_type_resource_id(heat_template):
     for rid in h.resources:
         lower_rid = rid.lower()
         for vm_type, lower_vm_type in vm_types.items():
-            if (lower_rid.startswith(lower_vm_type)
-               and not rid.startswith(vm_type)):
-                    bad[rid] = vm_type
+            if lower_rid.startswith(lower_vm_type) and not rid.startswith(vm_type):
+                bad[rid] = vm_type
     assert not bad, 'resource_id which do not match their vm-type %s' % bad

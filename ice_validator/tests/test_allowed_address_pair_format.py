@@ -38,54 +38,91 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-'''
+"""
 test_allowed_address_pairs_format
-'''
+"""
 
 import re
 
 import pytest
 import yaml
 
-from .utils.network_roles import get_network_role_from_port, \
-    property_uses_get_resource
+from .utils.network_roles import get_network_role_from_port, property_uses_get_resource
 
-VERSION = '1.0.0'
+VERSION = "1.0.0"
 
 # pylint: disable=invalid-name
 
 
 def test_allowed_address_pairs_format(heat_template):
-    '''
+    """
     Make sure all allowed_address_pairs properties follow the allowed
     naming conventions
-    '''
+    """
     allowed_formats = [
-                      ["allowed_address_pairs", "string", "internal",
-                       re.compile(r'(.+?)_int_(.+?)_floating_v6_ip')],
-                      ["allowed_address_pairs", "string", "internal",
-                       re.compile(r'(.+?)_int_(.+?)_floating_ip')],
-                      ["allowed_address_pairs", "string", "external",
-                       re.compile(r'(.+?)_floating_v6_ip')],
-                      ["allowed_address_pairs", "string", "external",
-                       re.compile(r'(.+?)_floating_ip')],
-                      ["allowed_address_pairs", "string", "internal",
-                       re.compile(r'(.+?)_int_(.+?)_v6_ip_\d+')],
-                      ["allowed_address_pairs", "string", "internal",
-                       re.compile(r'(.+?)_int_(.+?)_ip_\d+')],
-                      ["allowed_address_pairs", "string", "external",
-                       re.compile(r'(.+?)_v6_ip_\d+')],
-                      ["allowed_address_pairs", "string", "external",
-                       re.compile(r'(.+?)_ip_\d+')],
-                      ["allowed_address_pairs", "comma_delimited_list",
-                       "internal", re.compile(r'(.+?)_int_(.+?)_v6_ips')],
-                      ["allowed_address_pairs", "comma_delimited_list",
-                       "internal", re.compile(r'(.+?)_int_(.+?)_ips')],
-                      ["allowed_address_pairs", "comma_delimited_list",
-                       "external", re.compile(r'(.+?)_v6_ips')],
-                      ["allowed_address_pairs", "comma_delimited_list",
-                       "external", re.compile(r'(.+?)_ips')],
-                      ]
+        [
+            "allowed_address_pairs",
+            "string",
+            "internal",
+            re.compile(r"(.+?)_int_(.+?)_floating_v6_ip"),
+        ],
+        [
+            "allowed_address_pairs",
+            "string",
+            "internal",
+            re.compile(r"(.+?)_int_(.+?)_floating_ip"),
+        ],
+        [
+            "allowed_address_pairs",
+            "string",
+            "external",
+            re.compile(r"(.+?)_floating_v6_ip"),
+        ],
+        [
+            "allowed_address_pairs",
+            "string",
+            "external",
+            re.compile(r"(.+?)_floating_ip"),
+        ],
+        [
+            "allowed_address_pairs",
+            "string",
+            "internal",
+            re.compile(r"(.+?)_int_(.+?)_v6_ip_\d+"),
+        ],
+        [
+            "allowed_address_pairs",
+            "string",
+            "internal",
+            re.compile(r"(.+?)_int_(.+?)_ip_\d+"),
+        ],
+        ["allowed_address_pairs", "string", "external", re.compile(r"(.+?)_v6_ip_\d+")],
+        ["allowed_address_pairs", "string", "external", re.compile(r"(.+?)_ip_\d+")],
+        [
+            "allowed_address_pairs",
+            "comma_delimited_list",
+            "internal",
+            re.compile(r"(.+?)_int_(.+?)_v6_ips"),
+        ],
+        [
+            "allowed_address_pairs",
+            "comma_delimited_list",
+            "internal",
+            re.compile(r"(.+?)_int_(.+?)_ips"),
+        ],
+        [
+            "allowed_address_pairs",
+            "comma_delimited_list",
+            "external",
+            re.compile(r"(.+?)_v6_ips"),
+        ],
+        [
+            "allowed_address_pairs",
+            "comma_delimited_list",
+            "external",
+            re.compile(r"(.+?)_ips"),
+        ],
+    ]
 
     with open(heat_template) as fh:
         yml = yaml.load(fh)
@@ -98,17 +135,18 @@ def test_allowed_address_pairs_format(heat_template):
     invalid_allowed_address_pairs = []
 
     for v1 in yml["resources"].values():
-        if (not isinstance(v1, dict)
-                or "properties" not in v1
-                or v1.get("type") != "OS::Neutron::Port"
-                or property_uses_get_resource(v1, "network")):
+        if (
+            not isinstance(v1, dict) or
+                "properties" not in v1 or
+                v1.get("type") != "OS::Neutron::Port" or
+                property_uses_get_resource(v1, "network")
+        ):
             continue
         network_role = get_network_role_from_port(v1)
 
         v2 = v1["properties"].get("allowed_address_pairs", {})
         for v3 in v2:
-            if ("ip_address" not in v3
-                    or "get_param" not in v3["ip_address"]):
+            if "ip_address" not in v3 or "get_param" not in v3["ip_address"]:
                 continue
 
             param = v3["ip_address"]["get_param"]
@@ -119,17 +157,21 @@ def test_allowed_address_pairs_format(heat_template):
                 # check if pattern matches
                 m = v4[3].match(param)
                 if m:
-                    if (v4[2] == "internal"
-                            and len(m.groups()) > 1
-                            and m.group(2) == network_role):
+                    if (
+                        v4[2] == "internal" and
+                            len(m.groups()) > 1 and
+                            m.group(2) == network_role
+                    ):
                         break
-                    elif (v4[2] == "external"
-                            and len(m.groups()) > 0
-                            and m.group(1).endswith("_" + network_role)):
+                    elif (
+                        v4[2] == "external"
+                        and len(m.groups()) > 0
+                        and m.group(1).endswith("_" + network_role)
+                    ):
                         break
             else:
                 invalid_allowed_address_pairs.append(param)
 
-    assert not set(invalid_allowed_address_pairs), (
-            'invalid_allowed_address_pairs %s' % list(
-                    set(invalid_allowed_address_pairs)))
+    assert not set(
+        invalid_allowed_address_pairs
+    ), "invalid_allowed_address_pairs %s" % list(set(invalid_allowed_address_pairs))

@@ -38,11 +38,11 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-'''
+"""
 Ensure that if a resource_id has an {index}, then all resources of
 the same vm-type have an index, the indices are consecutive and start
 with 0.
-'''
+"""
 
 import collections
 import re
@@ -53,15 +53,15 @@ from .structures import Heat
 from .helpers import validates
 from .utils import vm_types
 
-VERSION = '1.1.0'
+VERSION = "1.1.0"
 
-RE_INDEXED_RESOURCE_ID = re.compile(r'\w+_(?P<index>\d+)$')
+RE_INDEXED_RESOURCE_ID = re.compile(r"\w+_(?P<index>\d+)$")
 
 
-@validates('R-11690')
+@validates("R-11690")
 def test_indices(heat_templates):
-    '''validate indices
-    '''
+    """validate indices
+    """
     indexed_resource_ids = {}
     resources = {}
     for heat_template in heat_templates:
@@ -70,14 +70,14 @@ def test_indices(heat_templates):
             indexed_resource_ids.update(get_indexed_resource_ids(h.resources))
             resources.update(h.resources)
     if not resources:
-        pytest.skip('No resources found')
+        pytest.skip("No resources found")
 
     if not indexed_resource_ids:
-        pytest.skip('No resources with {index} found')
+        pytest.skip("No resources with {index} found")
 
     types = get_types(resources, indexed_resource_ids)
     if not types:
-        pytest.skip('No resources with {vm-type} found')
+        pytest.skip("No resources with {vm-type} found")
 
     indices = collections.defaultdict(list)
     for resource_id, vm_type in types.items():
@@ -89,10 +89,18 @@ def test_indices(heat_templates):
                 bad[vm_type] = index_list
                 break
     assert not bad, (
-            'vm-type indices must be consecutive, unique,'
-            ' and start at 0.\n    %s' % (
-                    '\n    '.join(['Resource ID %s: VM Type: %s' % (x, y)
-                                   for x, y in types.items() if y in bad])))
+        "vm-type indices must be consecutive, unique,"
+        " and start at 0.\n    %s"
+        % (
+            "\n    ".join(
+                [
+                    "Resource ID %s: VM Type: %s" % (x, y)
+                    for x, y in types.items()
+                    if y in bad
+                ]
+            )
+        )
+    )
 
 
 def get_indexed_resource_ids(resources):
@@ -103,7 +111,7 @@ def get_indexed_resource_ids(resources):
     for resource in resources:
         match = RE_INDEXED_RESOURCE_ID.match(resource)
         if match:
-            indexed_resource_ids[resource] = int(match.groupdict()['index'])
+            indexed_resource_ids[resource] = int(match.groupdict()["index"])
     return indexed_resource_ids
 
 

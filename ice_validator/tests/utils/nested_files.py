@@ -45,15 +45,15 @@ from os import path
 import re
 import yaml
 
-VERSION = '1.0.2'
+VERSION = "1.0.2"
 
 
 def get_list_of_nested_files(yml, dirpath):
-    '''
+    """
     return a list of all nested files
-    '''
+    """
 
-    if not hasattr(yml, 'items'):
+    if not hasattr(yml, "items"):
         return []
 
     nested_files = []
@@ -68,34 +68,29 @@ def get_list_of_nested_files(yml, dirpath):
                 nested_files.append(filepath)
                 nested_files.extend(get_list_of_nested_files(t_yml, dirpath))
             elif t == "OS::Heat::ResourceGroup":
-                rdt = (v.get("properties", {})
-                        .get("resource_def", {})
-                        .get("type", None))
+                rdt = v.get("properties", {}).get("resource_def", {}).get("type", None)
                 if rdt and (rdt.endswith(".yml") or rdt.endswith(".yaml")):
                     filepath = path.join(dirpath, rdt)
                     with open(filepath) as fh:
                         rdt_yml = yaml.load(fh)
                     nested_files.append(filepath)
-                    nested_files.extend(
-                        get_list_of_nested_files(rdt_yml, dirpath))
+                    nested_files.extend(get_list_of_nested_files(rdt_yml, dirpath))
         if isinstance(v, dict):
-            nested_files.extend(
-                get_list_of_nested_files(v, dirpath))
+            nested_files.extend(get_list_of_nested_files(v, dirpath))
         elif isinstance(v, list):
             for d in v:
-                nested_files.extend(
-                    get_list_of_nested_files(d, dirpath))
+                nested_files.extend(get_list_of_nested_files(d, dirpath))
     return nested_files
 
 
 def check_for_invalid_nesting(yml, yaml_file, dirpath):
-    '''
+    """
     return a list of all nested files
-    '''
-    if not hasattr(yml, 'items'):
+    """
+    if not hasattr(yml, "items"):
         return []
     invalid_nesting = []
-    p = re.compile('^[A-z]*::[A-z]*::[A-z]*$')
+    p = re.compile("^[A-z]*::[A-z]*::[A-z]*$")
 
     for v in yml.values():
         if isinstance(v, dict) and "type" in v:
@@ -108,8 +103,8 @@ def check_for_invalid_nesting(yml, yaml_file, dirpath):
                     invalid_nesting.append(yaml_file)
                     continue
                 elif not p.match(rd["type"]) and not (
-                        rd["type"].endswith(".yml")
-                        or rd["type"].endswith(".yaml")):
+                    rd["type"].endswith(".yml") or rd["type"].endswith(".yaml")
+                ):
                     filepath = path.join(dirpath, rd["type"])
                 else:
                     continue
@@ -120,20 +115,11 @@ def check_for_invalid_nesting(yml, yaml_file, dirpath):
                     yml = yaml.load(fh)
             except yaml.YAMLError as e:
                 invalid_nesting.append(filepath)
-                print(e)    # pylint: disable=superfluous-parens
-            invalid_nesting.extend(check_for_invalid_nesting(
-                    yml,
-                    filepath,
-                    dirpath))
+                print(e)  # pylint: disable=superfluous-parens
+            invalid_nesting.extend(check_for_invalid_nesting(yml, filepath, dirpath))
         if isinstance(v, dict):
-            invalid_nesting.extend(check_for_invalid_nesting(
-                    v,
-                    yaml_file,
-                    dirpath))
+            invalid_nesting.extend(check_for_invalid_nesting(v, yaml_file, dirpath))
         elif isinstance(v, list):
             for d in v:
-                invalid_nesting.extend(check_for_invalid_nesting(
-                        d,
-                        yaml_file,
-                        dirpath))
+                invalid_nesting.extend(check_for_invalid_nesting(d, yaml_file, dirpath))
     return invalid_nesting

@@ -2,11 +2,11 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -56,8 +56,8 @@ def test_valid_nesting(yaml_files):
         if "resources" not in yml:
             continue
         invalid_nesting.extend(check_for_invalid_nesting(
-                yml["resources"],
-                yaml_file,
-                path.dirname(yaml_file)))
+            yml["resources"],
+            yaml_file,
+            path.dirname(yaml_file)))
 
     assert not set(invalid_nesting)

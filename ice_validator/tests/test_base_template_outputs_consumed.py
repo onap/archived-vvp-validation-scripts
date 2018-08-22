@@ -38,9 +38,9 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-'''
+"""
 test_base_template_outputs_consumed
-'''
+"""
 
 from os import path, sep
 
@@ -49,27 +49,29 @@ import yaml
 
 from .helpers import validates
 
-VERSION = '1.0.0'
+VERSION = "1.0.0"
 
 # pylint: disable=invalid-name
 
 
-@validates('R-52753')
+@validates("R-52753")
 def test_base_template_outputs_consumed(heat_templates):
-    '''
+    """
     Check that all outputs in the base template is consumed
     by another template. The exception is the predefined output
     parameters.
-    '''
+    """
     base_template = ""
     base_template_yml = ""
     for heat_template in heat_templates:
         with open(heat_template) as fh:
             yml = yaml.load(fh)
         basename = path.splitext(heat_template)[0].rsplit(sep, 1)[1]
-        if (basename.endswith("_base")
-                or basename.startswith("base_")
-                or basename.find("_base_") > 0):
+        if (
+            basename.endswith("_base") or
+                basename.startswith("base_") or
+                basename.find("_base_") > 0
+        ):
             base_template = heat_template
             base_template_yml = yml
 
@@ -77,8 +79,7 @@ def test_base_template_outputs_consumed(heat_templates):
     if "outputs" not in base_template_yml:
         pytest.skip("No outputs specified in the base template")
 
-    predefined_outputs = ['oam_management_v4_address',
-                          'oam_management_v6_address']
+    predefined_outputs = ["oam_management_v4_address", "oam_management_v6_address"]
     base_outputs = set(base_template_yml["outputs"]) - set(predefined_outputs)
 
     # get all add-on templates
@@ -94,6 +95,6 @@ def test_base_template_outputs_consumed(heat_templates):
         parameters = yml["parameters"].keys()
         non_base_parameters.extend(parameters)
 
-    assert base_outputs <= set(non_base_parameters), (
-            'unconsumed outputs %s' % list(
-                    base_outputs - set(non_base_parameters)))
+    assert base_outputs <= set(non_base_parameters), "unconsumed outputs %s" % list(
+        base_outputs - set(non_base_parameters)
+    )

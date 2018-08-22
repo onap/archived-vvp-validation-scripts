@@ -2,11 +2,11 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -45,11 +45,11 @@ from .utils.vm_types import get_vm_type_for_nova_server
 
 
 def test_volume_resource_ids(heat_template):
-    '''
+    """
     Check that all resource ids for cinder volumes follow the right
     naming convention to include the {vm_type} of the
     nova server it is associated to
-    '''
+    """
     with open(heat_template) as fh:
         yml = yaml.load(fh)
 
@@ -57,25 +57,24 @@ def test_volume_resource_ids(heat_template):
     if "resources" not in yml:
         pytest.skip("No resources specified in the heat template")
 
-    volume_pattern = re.compile(r'(.+?)_volume_id_\d+')
-    resources = yml['resources']
+    volume_pattern = re.compile(r"(.+?)_volume_id_\d+")
+    resources = yml["resources"]
 
     invalid_volumes = []
     for k, v in resources.items():
         if not isinstance(v, dict):
             continue
-        if 'type' not in v:
+        if "type" not in v:
             continue
-        if v['type'] not in ['OS::Nova::Server',
-                             'OS::Cinder::VolumeAttachment']:
+        if v["type"] not in ["OS::Nova::Server", "OS::Cinder::VolumeAttachment"]:
             continue
 
-        if v['type'] == 'OS::Nova::Server':
+        if v["type"] == "OS::Nova::Server":
             # check block_device_mapping and make sure the right
             # {vm_type} is used
-            if 'properties' not in v:
+            if "properties" not in v:
                 continue
-            if 'block_device_mapping' not in v['properties']:
+            if "block_device_mapping" not in v["properties"]:
                 continue
 
             vm_type = get_vm_type_for_nova_server(v)
@@ -84,17 +83,15 @@ def test_volume_resource_ids(heat_template):
             vm_type = vm_type.lower()
 
             # get the volume_id from the block_device_mapping
-            properties = v['properties']
-            for v2 in properties['block_device_mapping']:
+            properties = v["properties"]
+            for v2 in properties["block_device_mapping"]:
                 for k3, v3 in v2.items():
-                    if k3 != 'volume_id':
+                    if k3 != "volume_id":
                         continue
                     if not isinstance(v3, dict):
                         continue
 
-                    volume_id = (
-                        v3.get('get_param') or
-                        v3.get('get_resource'))
+                    volume_id = v3.get("get_param") or v3.get("get_resource")
                     if not volume_id:
                         continue
                     if isinstance(volume_id, list):
@@ -102,30 +99,30 @@ def test_volume_resource_ids(heat_template):
                     else:
                         volume_id = volume_id.lower()
 
-                    if vm_type+"_" not in volume_id:
+                    if vm_type + "_" not in volume_id:
                         invalid_volumes.append(volume_id)
 
-        elif v['type'] == 'OS::Cinder::VolumeAttachment':
+        elif v["type"] == "OS::Cinder::VolumeAttachment":
             # check the volume attachment and the {vm_type}
             # of the corresponding nova server
-            if 'properties' not in v:
+            if "properties" not in v:
                 continue
-            if 'volume_id' not in v['properties']:
+            if "volume_id" not in v["properties"]:
                 continue
-            if 'instance_uuid' not in v['properties']:
+            if "instance_uuid" not in v["properties"]:
                 continue
 
-            properties = v['properties']
+            properties = v["properties"]
 
             # get the instance_uuid and when applicable
             # the nova server instance
             instance_uuid = None
             nova_server = None
 
-            if 'get_param' in properties['instance_uuid']:
+            if "get_param" in properties["instance_uuid"]:
                 continue
-            elif 'get_resource' in properties['instance_uuid']:
-                instance_uuid = properties['instance_uuid']['get_resource']
+            elif "get_resource" in properties["instance_uuid"]:
+                instance_uuid = properties["instance_uuid"]["get_resource"]
                 if not resources[instance_uuid]:
                     continue
                 nova_server = resources[instance_uuid]
@@ -135,9 +132,9 @@ def test_volume_resource_ids(heat_template):
 
             # get the volume_id
             volume_id = None
-            volume_id = (
-                properties['volume_id'].get('get_param') or
-                properties['volume_id'].get('get_resource'))
+            volume_id = properties["volume_id"].get("get_param") or properties[
+                "volume_id"
+            ].get("get_resource")
             if not volume_id:
                 continue
             if isinstance(volume_id, list):
@@ -155,14 +152,14 @@ def test_volume_resource_ids(heat_template):
                 if not vm_type:
                     continue
                 vm_type = vm_type.lower()
-                if vm_type+"_" not in volume_id:
+                if vm_type + "_" not in volume_id:
                     invalid_volumes.append(volume_id)
             else:
                 # extract the assumed {vm_type} from volume_id
                 m = volume_pattern.match(volume_id)
                 if m:
                     vm_type = m.group(1).lower()
-                    if vm_type+"_" not in instance_uuid:
+                    if vm_type + "_" not in instance_uuid:
                         invalid_volumes.append(volume_id)
                 else:
                     continue

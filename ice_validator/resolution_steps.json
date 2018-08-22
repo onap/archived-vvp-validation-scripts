@@ -1,0 +1,290 @@
+[
+  {
+    "module": "test_get_file_only_reference_local_files",
+    "function": "test_get_file_only_reference_local_files",
+    "resolution_steps": "Make sure that any use of the get_file function only references local files.  Local files must be referenced by a local path, not via http, https, file, ftp, ftps funcitons. To do so: \n1) locate the use of get_file in your templates \n. - Ensure the file only contains local path plus the file name.",
+    "header": "Get file only references local files"
+  },
+  {
+    "module": "test_heat_pairs_provided",
+    "function": "test_heat_pairs_provided",
+    "resolution_steps": "Make sure that every yaml file is submitted with an associated environment (.env) file, and every environment file has an associated yaml file. Also make sure every volume template is paired to an incremental or base module. Do note that nested files do not require an associated environment file, but must be referenced in the templates.",
+    "header": "Every yaml has an env"
+  },
+  {
+    "module": "test_heat_template_parameters_contain_required_fields",
+    "function": "test_heat_template_parameters_contain_required_fields",
+    "resolution_steps": "Make sure that any defined parameter in a heat template contains the required fields type and description. Please go through the parameters section in the associated files to make sure all parameters have those two properties defined. To do so: \n1) Locate the parameters section of each yaml template file \n -  Ensure that for every parameter defined in this section, they have both a type, and description defined. \n -  Ensure that those definitions are properly aligned",
+    "header": "All parameters do not contain the required fields"
+  },
+  {
+    "module": "test_heat_template_structure",
+    "function": "test_heat_template_structure",
+    "resolution_steps": "Make sure only allowed heat template section are provided in heat template(s). \n\nTo do so please review the heat template(s) and verify only the sections 'heat_template_version', 'description', 'parameter_groups', 'parameters', 'resources', 'outputs',and  'conditions' are used and those sections declared contain values.",
+    "header": "Heat template including sections that are not allowed. "
+  },
+  {
+    "module": "test_heat_template_structure",
+    "function": "test_heat_template_structure_contains_required_sections",
+    "resolution_steps": "Make sure all required heat template sections are provided in heat template(s). \n\nTo do so please review the heat template(s) and verify the sections 'heat_template_version', 'description', 'parameters', and 'resources' are present, and those sections contain values.",
+    "header": "test_heat_template_structure_contains_required_sections"
+  },
+  {
+    "module": "test_heat_template_structure",
+    "function": "test_parameter_type",
+    "resolution_steps": "Make sure all parameters are an accepted 'type'.(\n'string',\n'number',\n'json',\n'comma_delimited_list',\n'boolean'\n)",
+    "header": "Test correct parameter types"
+  },
+  {
+    "module": "test_nested_templates",
+    "function": "test_all_nested_templates_provided",
+    "resolution_steps": "Make sure that all templates referenced as nested templates were provided in the git repo. To do so: \n\n 1) Look for any references to files within templates (likely in a resource group) \n  - Make sure that the file referenced is included in the repo, and named exactly the same",
+    "header": "All nested templates provided"
+  },
+  {
+    "module": "test_all_referenced_resources_exists",
+    "function": "test_all_referenced_resources_exists",
+    "resolution_steps": "Make sure that any resource referenced via get_resource in a heat template is also defined in the same heat template. Do note that a resource in a nested file is not directly accessible in the parent template. To do so: \n\n1) Please check the resources, and outputs sections of all yaml files for any references to the function get_resource \n\n2) Then check that those resources are also defined within in the resources section of the same heat template",
+    "header": "All referenced resources are not defined in the same heat template"
+  },
+  {
+    "module": "test_allowed_address_pairs_include_vm_type_network_role",
+    "function": "test_allowed_address__pairs_include_vm_type_network_role",
+    "resolution_steps": "Make sure that any map property ip_address under the allowed_address_pairs property for any OS::Neutron::Port meet the naming conventions specified in the guidelines. This includes using a consistent {network_role}. Do note that this naming convention is not enforced within nested files. To do so: \n\n1) Identify the network referenced in the port's definition. Do note that this may be a parameter or a resource. \n  - Ensure it follows naming conventions and that it's {network_role} is included in the port's resource id, and the ip_address map property of allowed_address_pairs",
+    "header": "Allowed address pairs include both {vm_type} and {network_role}"
+  },
+  {
+    "module": "test_availability_zone",
+    "function": "test_availability_zone_naming",
+    "resolution_steps": "Make sure all availability zones are properly formatted as per the guidelines. To do so: \n\nVerify the availability _zone property of all OS::Nova::Servers retrieves a parameter that is type string, and that each is appended with an index.",
+    "header": "Availability Zones correctly named"
+  },
+  {
+    "module": "test_base_template_names",
+    "function": "test_base_template_names",
+    "resolution_steps": "Make sure that only the the base template pair (.yaml and .env) contains the keyword 'base'. If the base template has an associated independent volume template those should also contain the keyword 'base'. To do so: \n\n1) Look at the file names for all templates of your VNF \n - Ensure that there are only one environment and yaml file have the word 'base' in them Do note that if the base heat template has an associated independent volume template, one additional environment and yaml file will also have 'base' in their filenames.",
+    "header": "Only the the base template pair (.yaml and .env) must contain the keyword base"
+  },
+  {
+    "module": "test_base_template_outputs_consumed",
+    "function": "test_base_template_outputs_consumed",
+    "resolution_steps": "Any output parameter defined in the base template must be consumed by another add-on module. Check that all parameters defined in your base template's output section are in the parameters and resources section of another template. To do so: \n\n1) Locate the outputs section of your base template \n\n2) Ensure that every output in that base template is defined as a parameter which is consumed in another template",
+    "header": "Base template outputs consumed"
+  },
+  {
+    "module": "test_heat_parameter_section",
+    "function": "test_default_values",
+    "resolution_steps": "Make sure no default values are set for any parameter in the heat templates.  Note any default value for a parameter should be specified in the ENV file. \n\nTo do so look at the parameters in the heat templates and look for the key default.",
+    "header": "Default key is specified for parameters in the heat templates. "
+  },
+  {
+    "module": "test_heat_parameter_section",
+    "function": "test_parameter_names",
+    "resolution_steps": "Make sure parameter names only contain alphanumberic characters or underscores",
+    "header": "Test acceptable parameter names"
+  },
+  {
+    "module": "test_env_and_yaml_same_name",
+    "function": "test_env_and_yaml_same_name",
+    "resolution_steps": "Make sure all ENV filenames are identical to an associated Heat template filename.  To do so: \n\n1) Locate all .env files \n2) Ensure there is a corresponding .yaml file; that is, both files should have the same name up to the file extension (.env or .yaml)",
+    "header": "ENV file names not matching heat template names."
+  },
+  {
+    "module": "test_env_files_provided",
+    "function": "test_env_files_provided",
+    "resolution_steps": "Make sure the necessary environment file(s) have been provided. Do note that the git repo must have a flat directory structure which means that no subfolders or compressed files are allowed in the repository. \n\nTo do so, please follow the instructions found in the Documentation section for how to commit or upload those environment file(s).",
+    "header": "Make sure the necessary environment file(s) has/have been provided"
+  },
+  {
+    "module": "test_environment_file_structure",
+    "function": "test_environment_file_contains_required_sections",
+    "resolution_steps": "Make sure environment filed have the required sections as per the guidelines. ",
+    "header": "Environment file is missing required section"
+  },
+  {
+    "module": "test_heat_template_and_env_file_extension",
+    "function": "test_environment_file_extension",
+    "resolution_steps": "Make sure that values of parameters in the environment file are valid per the guidelines. \n\nTo do so check that parameter values are not dictionaries.",
+    "header": "Parameter values are dictionaries"
+  },
+  {
+    "module": "test_environment_file_structure",
+    "function": "test_environment_structure",
+    "resolution_steps": "Make sure environment files only have the allowed sections as per the guidelines. ",
+    "header": "Environment file has invalid sections"
+  },
+  {
+    "module": "test_fixed_ips_format",
+    "function": "test_fixed_ips_format",
+    "resolution_steps": "Make sure that any map property ip_address under the fixed_ips property for any OS::Neutron::Port meet the naming conventions per as specified in the guidelines. This includes using a consistent {network_role}. Do note that this naming convention is not enforced within nested files. To do so: \n\n1) Identify the network referenced in the port's definition. Do note that this may be a parameter or a resource. \n - Ensure it follows naming conventions and that it's {network_role} is included in the port's resource ID, and the ip_address map property of fixed_ips",
+    "header": "The map property ip_address in fixed_ips do not follow the naming convention"
+  },
+  {
+    "module": "test_fixed_ips_include_vm_type_network_role",
+    "function": "test_fixed_ips_include_vm_type_network_role",
+    "resolution_steps": "Make sure that any map property ip_address under the fixed_ips property for any OS::Neutron::Port include using a consistent {vm-type}, and {network_role}. Do note that this naming convention is not enforced within nested files. To do so: \n\n1) Identify the network referenced in the port's definition. Do note that this may be a parameter or a resource. \n - Ensure it follows naming conventions and that it's {network_role} is included in the port's resource ID, and the ip_address map property of fixed_ips \n\n2) Identify the Nova server the port is attached to \n - Ensure that server's {vm_type} is properly included in all ip_address map property of fixed_ips",
+    "header": "Fixed IPs include both {vm_type} and {network_role}"
+  },
+  {
+    "module": "test_heat_templates_provided",
+    "function": "test_heat_templates_provided",
+    "resolution_steps": "Make sure the necessary Heat template(s) have been provided. Do note that the git repo must have a flat directory structure which means that no subfolders or compressed files are allowed in the repository. \n\nTo do so, please follow the instructions found in the Documentation section for how to commit or upload the Heat template(s).",
+    "header": "Make sure the necessary Heat template(s) have been provided"
+  },
+  {
+    "module": "test_network_format",
+    "function": "test_network_format",
+    "resolution_steps": "Make sure that any network property for any OS::Neutron::Port meets the naming conventions per as specified in the guidelines including a consistent {network_role}. Do note that there is no naming convention applied within nested files. To do so: \n\n1) Identify the network referenced in the port's definition. Do note that this may be a parameter or a resource. \n - Ensure that the network property is following the naming convention per as outlined in the guidelines. \n - Ensure that the required port property 'network' is used in the templates (not the commonly mistaken used network_id instead of network)",
+    "header": "The network port property do not follow the right format"
+  },
+  {
+    "module": "test_no_unused_parameters_between_env_and_templates",
+    "function": "test_no_unused_parameters_between_env_and_templates",
+    "resolution_steps": "Conditional (on the test result A OR B): \n\n A (Left set)): Make sure that all parameters defined in environment file are also defined as parameters corresponding heat template. To do so: \n1) Locate the parameters section of the environment file, and it's corresponding yaml file \n - Ensure that the parameters defined in the environment file are also defined in the yaml file \n\n OR ===================================================== \n\nB (Right set)): Make sure that all parameters defined in heat template are also defined as a parameter in the environment file. Do note that you should not comment out any parameters in the environment file. To do so: \n1) Locate the parameters section of the yaml file, and it's corresponding environment file \n - Ensure that the parameters defined in the yaml file are also defined, and not commented out in the environment file",
+    "header": "Parameters are either missing in the environment file or the corresponding heat template"
+  },
+  {
+    "module": "test_nova_servers_correct_parameter_types",
+    "function": "test_nova_servers_correct_parameter_types",
+    "resolution_steps": "Make sure all nova servers have properly assigned types for the parameters used for their name, image and flavor as per the guidelines. To do so: \n\n1) Identify the OS::Nova::Server properties Name, Image and Flavor. \n2) Identify the parameter passed to Name, Image and Flavor \n3) Verify the type for each parameter is correct.",
+    "header": "Server parameters correct types"
+  },
+  {
+    "module": "test_nova_servers_resource_ids",
+    "function": "test_nova_servers_valid_resource_ids",
+    "resolution_steps": "Make sure all OS::Nova::Servers have valid resource ID as per the guidelines. To do so: \n\n1) Identify the Image and Flavor property for the server \n - Ensure the {vm-type} of the Flavor and Image match the {vm-type} in the server resource ID.",
+    "header": "Nova server resource ID is valid"
+  },
+  {
+    "module": "test_heat_numeric_parameters",
+    "function": "test_numeric_parameter",
+    "resolution_steps": "Make sure that all parameters with the type number have the constraints either `range` or `allowed_values` defined.  To do so: \n\n1) Locate any parameter with the type 'number' in the parameters section of any yaml file of your VNF \n2) Ensure that each has either `range` or `allowed_values` properly defined",
+    "header": "Numeric parameter constraints"
+  },
+  {
+    "module": "test_heat_parameter_section",
+    "function": "test_parameter_valid_keys",
+    "resolution_steps": "Make sure the keys specified for parameters in the heat template are valid per the guidelines. To do so check the keys for parameter in the heat templates. ",
+    "header": "Heat template parameters using invalid keys"
+  },
+  {
+    "module": "test_parse_yaml",
+    "function": "test_parse_yaml",
+    "resolution_steps": "Make sure all files contain valid yaml.",
+    "header": "Invalid yaml"
+  },
+  {
+    "module": "test_port_resource_ids",
+    "function": "test_port_resource_ids",
+    "resolution_steps": "Make sure that all Port resource IDs follow the right naming convention to include the {vm_type} of the nova server its associated to and also contains the {network_role} of the network its associated with. To do so: \n\n1) Identify the Nova server the port is attached to \n - Ensure that server's {vm_type} is properly included in the resource id for the port \n2) Identify the network referenced in the port's definition. Do note that this may be a parameter or a resource. \n - Ensure it follows naming conventions and that it's {network_role} is included in the port's resource ID. \n3) If the port is associated with a single internal network, its resource id should include int_{network-role}",
+    "header": "Port resource IDs must include the {vm_type} and {network_role} they're associated with"
+  },
+  {
+    "module": "test_referenced_and_defined_parameters_match",
+    "function": "test_referenced_and_defined_parameters_match",
+    "resolution_steps": "Conditional (on the test result A OR B): \n\n(RIGHT SET) \nA) Make sure that any parameter which is referenced in the heat template is also defined in the parameter section in the same yaml heat template. \nTo do so: \n1) Locate any parameter referenced by the get_param function in the resources section of a yaml heat template \n - Ensure that each parameter is defined in the parameters section of that file \n\nOR ===================================================== \n\n(LEFT SET) \nB) Make sure that any parameter found in the parameter section is referenced in the same heat template. \n1) Locate the parameters section of the yaml heat template \n - Ensure that every parameter defined is referenced in the resource section of the template via the get_param function",
+    "header": "All referenced and defined parameters must match 1:1"
+  },
+  {
+    "module": "test_required_parameters_specified_in_env_files",
+    "function": "test_required_parameters_provided_in_env_file",
+    "resolution_steps": "Make sure that the required metadata (vnf_id, vf_module_id, and vnf_name) is defined in the environment file if the corresponding heat template contains any OS::Nova::Server resources. To do so: \n\n1) Check if any OS::Nova::Server resources are defined in a Heat template \n - If there are, ensure that the required parameters vnf_id, vf_module_id, and vnf_name are defined in the corresponding environment file",
+    "header": "The required metadata parameters are missing in the environment file"
+  },
+  {
+    "module": "test_required_parameters_specified_in_heat_templates",
+    "function": "test_required_parameters_provided_in_heat_template",
+    "resolution_steps": "Make sure that the required metadata (vnf_id, vf_module_id, and vnf_name) is defined in the same yaml file of the corresponding heat template that defines OS::Nova::Server resources. To do so: \n\n1) Check if any OS::Nova::Server resources are defined in a Heat template \n - If there are, ensure that the required parameters vnf_id, vf_module_id, and vnf_name are defined in that template's parameters section",
+    "header": "The required metadata parameters are missing in the yaml file"
+  },
+  {
+    "module": "test_reserve_port_fixed_ips_has_base_outputs",
+    "function": "test_reserve_port_fixed_ips_has_base_outputs",
+    "resolution_steps": "Make sure all fixed_ips specified in reserved ports are also exported as outputs in the same base template. To do so: \n\n1) Identify all OS::Neutron::Ports that are reserved ports by looking for 'reserve' at the. beginning of the resource id for the port. \n2) Verify each 'reserve' port has a corrisponding output parameter",
+    "header": "Reserve port fixed_ips have outputs in base template"
+  },
+  {
+    "module": "test_servers_have_required_metadata",
+    "function": "test_servers_have_required_metadata",
+    "resolution_steps": "Make sure that the required metadata (vnf_id, vf_module_id, and vnf_name) are specified as metadata for all OS::Nova::Server resources in a heat template. Do note that this also applies for any OS::Nova::Server resources specified in nested files. To do so: \n\n1) Identify each OS::Nova::Server resources in a Heat template \n - Ensure that the required parameters vnf_id, vf_module_id, and vnf_name are defined as metadata to the same resource",
+    "header": "Make sure all required parameters are specified properly in the heat template if a server resource is defined"
+  },
+  {
+    "module": "test_servers_metadata_use_get_param",
+    "function": "test_servers_metadata_use_get_param",
+    "resolution_steps": "Make sure that the required metadata fields (vnf_id, vf_module_id, and vnf_name) use the get_param function to assign their values. Do note that this also applies for any OS::Nova::Server resources specified in nested files. To do so: \n\n1) Identify each OS::Nova::Server resources in a Heat template \n2) Locate the metadata section for each server \n - Ensure that the required metadata vnf_id, vf_module_id, and vnf_name use the get_param function to assign their values \n - Ensure they are formatted as valid heat",
+    "header": "Server metadata uses get_param"
+  },
+  {
+    "module": "test_subnet_format",
+    "function": "test_subnet_format",
+    "resolution_steps": "Make sure that any map property subnet_id under the subnet property for any OS::Neutron::Port meet the naming conventions per as specified in the guidelines. This includes using a consistent {network_role}. Do note that this naming convention is not enforced within nested files. To do so: \n\n1)  Identify the network referenced in the port's definition. Do note that this may be a parameter or a resource. \n - Ensure it follows naming conventions and that it's {network_role} is included in the subnet_id map property of subnet",
+    "header": "The map property subnet_id in subnet do not follow the naming convention"
+  },
+  {
+    "module": "test_unique_name_resources",
+    "function": "test_unique_name_resources",
+    "resolution_steps": "Make sure that the property 'name' for each resource is unique across all templates in the VNF. To do so: \n\n1) Locate the property 'name' under any resource \n2) Ensure that parameter is not used for other resources across the template set",
+    "header": "Unique name properties for resources"
+  },
+  {
+    "module": "test_unique_name_str_replace_use_req_params",
+    "function": "test_unique_name_str_replace_use_req_params",
+    "resolution_steps": "Make sure any resource's property, name, which uses str_replace also uses the required parameters (vnf_name and/or vf_module_id) to construct the name. To do so: \n\n1) Locate any resource definition which uses str_replace in its name property \n - Ensure that vnf_name, vf_module_id, or both are used to construct the name",
+    "header": "Resources using str_replace to specific the name are not using the required params"
+  },
+  {
+    "module": "test_unique_name_str_replace_use_req_params_in_tmpl",
+    "function": "test_unique_name_str_replace_use_req_params_in_tmpl",
+    "resolution_steps": "Make sure that all parameters used to define the resource property name via str_replace is defined in the parameters section. To do so: \n\n1) Locate any resource definition which uses str_replace in its name property \n - Ensure that any parameter used in the template section of the str_replace function are in the parameters section of the str_replace function",
+    "header": "Resources using str_replace to specific the name are not using the required params"
+  },
+  {
+    "module": "test_unique_resources_across_all_templates",
+    "function": "test_unique_resources_across_all_yaml_files",
+    "resolution_steps": "Make sure all resource IDs are unique across all yaml files in your repository. To do so: 1) Locate all resource definitions in the template set - Ensure that the resource id is unique across all templates",
+    "header": "Resource IDs must be unique across all templates"
+  },
+  {
+    "module": "test_nova_servers_vm_types_use_get_param",
+    "function": "test_vm_type_assignments_on_nova_servers_only_use_get_param",
+    "resolution_steps": "Ensure that the OS::Nova::Server properties for name, flavor, and image only use the get_param function. To do so: \n\n1) Locate any OS::Nova::Server resource \n - Ensure that the properties: name, flavor, and image do not use any function other than get_param.",
+    "header": "Nova Server name, flavor, and image use get_param"
+  },
+  {
+    "module": "test_nova_servers_vm_types",
+    "function": "test_vm_type_consistent_on_nova_servers",
+    "resolution_steps": "Make sure a consistent {vm-type} is used across the server properties: name, flavor, and image. Also, ensure that they follow the guideline naming convention.  To do so: \n\n1)  Locate any OS::Nova::Server resource \n - Make sure that the parameter names for the image, flavor, and name use a consistent {vm-type}, and that they follow the defined naming conventions.",
+    "header": "Consistent VM type in key server properties"
+  },
+  {
+    "module": "test_volume_format_outputs",
+    "function": "test_volume_format_outputs",
+    "resolution_steps": "Make sure the format of output parameters in volume modules is valid as per the guidelines. To do so: \n\nVerify that each volume is output and that get_resource or get_attr is used to retrieve the resource.",
+    "header": "Volume output  format "
+  },
+  {
+    "module": "test_volume_outputs_consumed",
+    "function": "test_volume_outputs_consumed",
+    "resolution_steps": "Make sure that all volume template's outputs are consumed in the corresponding heat template. To do so: \n\n1) Locate the outputs of your independent volume templat \n2) Ensure that each output is defined as a parameter in the corresponding heat template (the corresponding heat template will have the same name, but not include _volume)",
+    "header": "Volume templates outputs consumed"
+  },
+  {
+    "module": "test_volume_templates_outputs",
+    "function": "test_volume_templates_contains_outputs",
+    "resolution_steps": "Make sure that all volume template's contain output values",
+    "header": "Volume templates outputs consumed"
+  },
+  {
+    "module": "test_volume_resource_ids",
+    "function": "test_volume_resource_ids",
+    "resolution_steps": "Make sure that all resource ids for cinder volumes follow the right naming convention to include the {vm_type} of the nova server it is associated to as per the guidelines.",
+    "header": "Volume resources IDs are valid"
+  },
+  {
+    "module": "test_volume_templates_outputs_match_resources",
+    "function": "test_volume_templates_outputs_match_resources",
+    "resolution_steps": "Make sure that all resource ids for cinder volumes follow the right naming convention to include the {vm_type} of the nova server it is associated to as per the guidelines.",
+    "header": "Volume resources referenced in volume template outputs do not exist."
+  }
+]

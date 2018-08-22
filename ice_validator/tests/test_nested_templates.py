@@ -2,11 +2,11 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -44,12 +44,12 @@ from os import path
 from .utils.nested_files import get_list_of_nested_files
 
 
-@validates('R-70276')
+@validates("R-70276")
 def test_all_nested_templates_provided(yaml_files):
-    '''
+    """
     Check that all templates marked as volume templates are
     in fact volume templates
-    '''
+    """
     nested_yaml_files = []
 
     for yaml_file in yaml_files:
@@ -57,13 +57,13 @@ def test_all_nested_templates_provided(yaml_files):
             yml = yaml.load(fh)
         if "resources" not in yml:
             continue
-        nested_yaml_files.extend(get_list_of_nested_files(
-                yml["resources"], path.dirname(yaml_file)))
+        nested_yaml_files.extend(
+            get_list_of_nested_files(yml["resources"], path.dirname(yaml_file))
+        )
 
     # detect all provided nested files
-    provided_nested_yaml_files = [f1
-                                  for f1 in nested_yaml_files
-                                  for f2 in yaml_files
-                                  if f1 in f2]
+    provided_nested_yaml_files = [
+        f1 for f1 in nested_yaml_files for f2 in yaml_files if f1 in f2
+    ]
 
     assert set(provided_nested_yaml_files) == set(nested_yaml_files)

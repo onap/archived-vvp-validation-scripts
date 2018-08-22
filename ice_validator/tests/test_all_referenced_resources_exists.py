@@ -38,24 +38,24 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-'''test_all_referenced_resources_exists
-'''
+"""test_all_referenced_resources_exists
+"""
 
 import pytest
 import yaml
 
 from .utils.nested_iterables import find_all_get_resource_in_yml
 
-VERSION = '1.0.0'
+VERSION = "1.0.0"
 
 # pylint: disable=invalid-name
 
 
 def test_all_referenced_resources_exists(yaml_file):
-    '''
+    """
     Check that all resources referenced by get_resource
     actually exists in all yaml files
-    '''
+    """
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
@@ -63,7 +63,7 @@ def test_all_referenced_resources_exists(yaml_file):
     if "resources" not in yml:
         pytest.skip("No resources specified in the yaml file")
 
-    resource_ids = yml['resources'].keys()
+    resource_ids = yml["resources"].keys()
     referenced_resource_ids = find_all_get_resource_in_yml(yml)
 
     missing_referenced_resources = set()
@@ -71,6 +71,6 @@ def test_all_referenced_resources_exists(yaml_file):
         if referenced_resource_id not in resource_ids:
             missing_referenced_resources.add(referenced_resource_id)
 
-    assert not missing_referenced_resources, (
-            'missing referenced resources %s' % list(
-                    missing_referenced_resources))
+    assert not missing_referenced_resources, "missing referenced resources %s" % list(
+        missing_referenced_resources
+    )

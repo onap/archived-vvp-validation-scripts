@@ -38,8 +38,8 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-'''structures
-'''
+"""structures
+"""
 
 import os
 
@@ -47,7 +47,7 @@ import yaml
 
 from .utils import nested_dict
 
-VERSION = '1.4.0'
+VERSION = "1.4.0"
 
 
 class Heat(object):
@@ -55,6 +55,7 @@ class Heat(object):
     filepath - absolute path to template file.
     envpath - absolute path to environmnt file.
     """
+
     def __init__(self, filepath=None, envpath=None):
         self.filepath = None
         self.basename = None
@@ -81,14 +82,13 @@ class Heat(object):
         self.dirname = os.path.dirname(self.filepath)
         with open(self.filepath) as fi:
             self.yml = yaml.load(fi)
-        self.heat_template_version = self.yml.get('heat_template_version',
-                                                  None)
-        self.description = self.yml.get('description', '')
-        self.parameter_groups = self.yml.get('parameter_groups', {})
-        self.parameters = self.yml.get('parameters', {})
-        self.resources = self.yml.get('resources', {})
-        self.outputs = self.yml.get('outputs', {})
-        self.conditions = self.yml.get('conditions', {})
+        self.heat_template_version = self.yml.get("heat_template_version", None)
+        self.description = self.yml.get("description", "")
+        self.parameter_groups = self.yml.get("parameter_groups", {})
+        self.parameters = self.yml.get("parameters", {})
+        self.resources = self.yml.get("resources", {})
+        self.outputs = self.yml.get("outputs", {})
+        self.conditions = self.yml.get("conditions", {})
 
     def load_env(self, envpath):
         """Load the Environment template given a envpath.
@@ -105,22 +105,21 @@ class Heat(object):
 class Env(Heat):
     """An Environment file
     """
+
     pass
 
 
 class Resource(object):
     """A Resource
     """
+
     def __init__(self, resource_id=None, resource=None):
-        self.resource_id = resource_id or ''
+        self.resource_id = resource_id or ""
         self.resource = resource or {}
 
     @staticmethod
     def get_index_var(resource):
         """Return the index_var for this resource.
         """
-        index_var = nested_dict.get(
-                resource,
-                'properties',
-                'index_var') or 'index'
+        index_var = nested_dict.get(resource, "properties", "index_var") or "index"
         return index_var

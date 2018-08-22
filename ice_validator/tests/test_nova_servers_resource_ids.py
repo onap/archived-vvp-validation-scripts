@@ -2,11 +2,11 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
-# under the Apache License, Version 2.0 (the “License”);
+# under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -21,7 +21,7 @@
 #
 #
 # Unless otherwise specified, all documentation contained herein is licensed
-# under the Creative Commons License, Attribution 4.0 Intl. (the “License”);
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
 # You may obtain a copy of the License at
 #
@@ -44,11 +44,11 @@ from .helpers import validates
 from .utils.vm_types import get_vm_type_for_nova_server
 
 
-@validates('R-01455', 'R-48067', 'R-00977')
+@validates("R-01455", "R-48067", "R-00977")
 def test_nova_servers_valid_resource_ids(heat_template):
-    '''
+    """
     Make sure all nova servers have valid resource ids
-    '''
+    """
 
     with open(heat_template) as fh:
         yml = yaml.load(fh)
@@ -71,7 +71,7 @@ def test_nova_servers_valid_resource_ids(heat_template):
             continue
         vm_type = vm_type.lower()
 
-        if vm_type+"_" not in k1.lower():
+        if vm_type + "_" not in k1.lower():
             invalid_nova_servers.append(k1)
 
     assert not set(invalid_nova_servers)
