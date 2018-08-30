@@ -70,7 +70,11 @@ report = collections.OrderedDict(report_columns)
 
 
 def extract_error_msg(rep):
-    msg = str(rep.longrepr.reprcrash)
+    try:
+        msg = str(rep.longrepr.reprcrash)
+    except AttributeError:
+        msg = str(rep)
+
     if "AssertionError:" in msg:
         return msg.split("AssertionError:")[1]
     else:
@@ -142,9 +146,9 @@ def pytest_sessionfinish(session, exitstatus):
 def pytest_runtest_setup(item):
     profile = item.session.config.option.validation_profile
     markers = set(m.name for m in item.iter_markers())
-    if not profile and markers:
+    if not profile and markers and not "xfail" in markers:
         pytest.skip("No validation profile selected. Skipping tests with marks.")
-    if profile and markers and profile not in markers:
+    if profile and markers and profile not in markers and "xfail" not in markers:
         pytest.skip("Doesn't match selection validation profile")
 
 
