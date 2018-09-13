@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright Â© 2018 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -44,6 +44,7 @@ import json
 import os
 import sys
 import time
+import requests
 
 import docutils.core
 import pytest
@@ -532,6 +533,11 @@ def hash_directory(path):
 
 def load_current_requirements():
     """Loads dict of current requirements or empty dict if file doesn't exist"""
+
+    url = 'https://onap.readthedocs.io/en/latest/_downloads/needs.json'
+    r = requests.get(url)
+    with open('requirements.json', 'wb') as needs:
+        needs.write(r.content)
     path = "requirements.json"
     if not os.path.exists(path):
         return {}
@@ -570,7 +576,8 @@ def pytest_report_collectionfinish(config, startdir, items):
     mapping_errors = set()
     for item in mapped:
         for req_id in item.function.requirement_ids:
-            req_to_test[req_id].add(item)
+            if req_id not in req_to_test:
+                req_to_test[req_id].add(item)
             if req_id not in requirements:
                 mapping_errors.add(
                     (req_id, item.function.__module__, item.function.__name__)
