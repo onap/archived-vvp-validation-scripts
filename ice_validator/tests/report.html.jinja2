@@ -1,0 +1,220 @@
+{## ============LICENSE_START=======================================================#}
+{## org.onap.vvp/validation-scripts#}
+{## ===================================================================#}
+{## Copyright © 2018 AT&T Intellectual Property. All rights reserved.#}
+{## ===================================================================#}
+{###}
+{## Unless otherwise specified, all software contained herein is licensed#}
+{## under the Apache License, Version 2.0 (the "License");#}
+{## you may not use this software except in compliance with the License.#}
+{## You may obtain a copy of the License at#}
+{###}
+{##             http://www.apache.org/licenses/LICENSE-2.0#}
+{###}
+{## Unless required by applicable law or agreed to in writing, software#}
+{## distributed under the License is distributed on an "AS IS" BASIS,#}
+{## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.#}
+{## See the License for the specific language governing permissions and#}
+{## limitations under the License.#}
+{###}
+{###}
+{###}
+{## Unless otherwise specified, all documentation contained herein is licensed#}
+{## under the Creative Commons License, Attribution 4.0 Intl. (the "License");#}
+{## you may not use this documentation except in compliance with the License.#}
+{## You may obtain a copy of the License at#}
+{###}
+{##             https://creativecommons.org/licenses/by/4.0/#}
+{###}
+{## Unless required by applicable law or agreed to in writing, documentation#}
+{## distributed under the License is distributed on an "AS IS" BASIS,#}
+{## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.#}
+{## See the License for the specific language governing permissions and#}
+{## limitations under the License.#}
+{###}
+{## ============LICENSE_END============================================#}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>HEAT Validation Report</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.datatables.net/v/zf/jszip-2.5.0/dt-1.10.18/b-1.5.2/b-flash-1.5.2/b-html5-1.5.2/b-print-1.5.2/fh-3.1.4/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css"/>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/foundation-sites@6.5.0-rc.2/dist/css/foundation.min.css"
+          integrity="sha256-iJQ8dZac/jUYHxiEnZJsyVpKcdq2sQvdA7t02QFmp30= sha384-SplqNBo/0ZlvSdwrP/riIPDozO5ck8+yIm++KVqyMAC53S6m3BaV+2OLpi7ULOOh sha512-ho6hK4sAWdCeqopNZWNy1d9Ok2hzfTLQLcGSr8ZlRzDzh6tNHkVoqSl6wgLsqls3yazwiG9H9dBCtSfPuiLRCQ=="
+          crossorigin="anonymous">
+
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script type="text/javascript"
+            src="https://cdn.datatables.net/v/zf/jszip-2.5.0/dt-1.10.18/b-1.5.2/b-flash-1.5.2/b-html5-1.5.2/b-print-1.5.2/fh-3.1.4/datatables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/foundation-sites@6.5.0-rc.2/dist/js/foundation.min.js"
+            integrity="sha256-G6jsRyH1fxbsvFIXSCuwYmI1aIDYBa28xscrvmYjJy0= sha384-vtoG68NvPc9azmFJr447vvY8qgdyA4FdaJ5/bqvzIM4eAdZfO0iyRRF8l2AAscYI sha512-43seCcNrHA0BQgrtyajB9sp8yOdv5c8QdYvgjP7zJ7v+dmzAcxYDQ2gupb9aztsNWBq1COIp/3NHYkQs4l/dkg=="
+            crossorigin="anonymous"></script>
+</head>
+<style>
+    #collection_failures {
+        table-layout: fixed;
+    }
+    .fileNames {
+        width: 25%;
+        word-wrap: break-word;
+        word-break: break-all;
+        white-space: normal;
+    }
+    .fixtures {
+        width: 10%;
+    }
+    .errorColumn {
+        width: 40%;
+    }
+    .fileLinks, .errorMessage {
+        word-wrap: break-word;
+        word-break: break-all;
+        white-space: normal;
+    }
+    .details {
+        white-space: nowrap;
+    }
+
+    .codeCell {
+        width: 100%;
+        overflow: auto;
+    }
+</style>
+<body>
+<div class="grid-container fluid">
+
+    <div class="callout {{ "alert" if failures or collection_failures else "success" }}">
+        <h1>Validation Report</h1>
+        <ul>
+            <li><b>Profile:</b> {{ profile_name }}</li>
+            <li><b>Directory Validated:</b> {{ template_dir }}</li>
+            <li><b>Checksum:</b> {{ checksum }}</li>
+            <li><b>Generated:</b> {{ timestamp }}</li>
+            <li><b>Total Failures:</b> {{ num_failures }}</li>
+        </ul>
+    </div>
+    {% if collection_failures %}
+        <div class="callout alert">
+            <h2>WARNING: Errors Occurred During Validation Setup</h2>
+            <p>
+                The following unexpected errors occurred while preparing to validate
+                the the input files. Some validations may not have been executed.
+                Please refer these issue to the VNF Validation Tool team.
+            </p>
+        </div>
+        <table id="collection_failures">
+            <thead>
+            <tr>
+                <th class="fileNames">Validation File</th>
+                <th class="fileNames">Test</th>
+                <th class="fixtures">Fixtures</th>
+                <th class="errorColumnn">Error</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for failure in collection_failures %}
+                <tr>
+                    <td class="fileNames">{{ failure.module }}</td>
+                    <td class="fileNames">{{ failure.test }}</td>
+                    <td class="fixtures">{{ failure.fixtures }}</td>
+                    <td class="errorColumn">
+                        <div class="codeCell">
+                            <pre class="code">{{ failure.error }}</pre>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if failures %}
+        <h2>Validation Failures</h2>
+        <table id="failures">
+            <thead>
+            <tr>
+                <th>File(s)</th>
+                <th>Error Message</th>
+                <th>Requirement(s)</th>
+                <th>Resolution Steps</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for failure in failures %}
+                <tr>
+                    <td>
+                        {{ failure.file_links }}
+                    </td>
+                    <td>
+                        <p><b>Failed:</b> {{ failure.test_id }}</p>
+                        <p>{{ failure.error_message }}
+                            <a class="details" href="#"
+                               data-open="raw-output-{{ loop.index }}">Full&nbsp;Details</a>
+                        </p>
+                    </td>
+                    <td>
+                        {{ failure.requirements }}
+                    </td>
+                    <td>
+                        {{ failure.resolution_steps }}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            {% for failure in failures %}
+                <div id="raw-output-{{ loop.index }}" class="large reveal" data-reveal
+                     aria-labelledby="modalTitle"
+                     aria-hidden="true" role="dialog">
+                    <h2 id="modalTitle">{{ failure.test_id }}</h2>
+                    <pre class="code">
+                            {{ failure.raw_output }}
+                        </pre>
+                    <button class="close-button" data-close aria-label="Close modal"
+                            type="button">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <a class="close-reveal-modal" aria-label="Close">&#215;</a>
+                </div>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h2>No validation errors found.</h2>
+    {% endif %}
+    <script lang="javascript">
+        $(document).foundation();
+        $(document).ready(function () {
+            $('#failures').DataTable({
+                dom: 'Bfrtip',
+                buttons: [
+                    'csv',
+                    'excel',
+                    {
+                        extend: 'pdfHtml5',
+                        orientation: 'landscape',
+                    },
+                    'print'
+                ],
+                fixedHeader: true,
+                pageLength: 50,
+                columns: [
+                    {width: "25%", className: "fileLinks"},
+                    {width: "25%", className: "errorMessage"},
+                    {width: "25%", className: "requirements"},
+                    {width: "25%", className: "resolutionSteps"},
+                ]
+            });
+        });
+    </script>
+</div>
+</body>
+</html>
