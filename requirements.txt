@@ -45,3 +45,4 @@ boltons
 pyinstaller
 xlsxwriter
 docutils
+requests
