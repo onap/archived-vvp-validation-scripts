@@ -97,11 +97,11 @@ parameters:
     description: db_int_intranet_v6_ip_0
 
   db_int_intranet_ips:
-    type: string
+    type: comma_delimited_list
     description: db_int_intranet_ips
 
   db_int_intranet_v6_ips:
-    type: string
+    type: comma_delimited_list
     description: db_int_intranet_v6_ips
 
   db_int_intranet_floating_ip:
@@ -121,11 +121,11 @@ parameters:
     description: lb_extnet_v6_ip_0
 
   lb_extnet_ips:
-    type: string
+    type: comma_delimited_list
     description: lb_extnet_ips
 
   lb_extnet_v6_ips:
-    type: string
+    type: comma_delimited_list
     description: lb_extnet_v6_ips
 
   lb_extnet_floating_ip:

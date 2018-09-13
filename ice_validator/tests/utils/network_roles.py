@@ -43,31 +43,36 @@ import socket
 
 
 def get_network_role_from_port(resource):
-    """
+    '''
     get the network role from a neutron port resource
-    """
+    '''
     if not isinstance(resource, dict):
         return None
-    if "type" not in resource:
+    if 'type' not in resource:
         return None
-    if resource["type"] != "OS::Neutron::Port":
+    if resource['type'] != 'OS::Neutron::Port':
         return None
-    if "properties" not in resource:
+    if 'properties' not in resource:
         return None
 
     formats = [
-        ["network", "string", "internal", re.compile(r"int_(.+?)_net_id")],
-        ["network", "string", "internal", re.compile(r"int_(.+?)_net_name")],
-        ["network", "string", "external", re.compile(r"(.+?)_net_id")],
-        ["network", "string", "external", re.compile(r"(.+?)_net_name")],
-    ]
+              ["network", "string", "internal",
+               re.compile(r'int_(.+?)_net_id')],
+              ["network", "string", "internal",
+               re.compile(r'int_(.+?)_net_name')],
+              ["network", "string", "external",
+               re.compile(r'(.+?)_net_id')],
+              ["network", "string", "external",
+               re.compile(r'(.+?)_net_name')]]
 
     for k1, v1 in resource["properties"].items():
-        if k1 != "network":
+        if k1 != 'network':
             continue
 
         # get the network id or name
-        network = v1.get("get_param") or v1.get("get_resource")
+        network = (
+            v1.get('get_param') or
+            v1.get('get_resource'))
         if not network:
             continue
 
@@ -79,28 +84,41 @@ def get_network_role_from_port(resource):
     return None
 
 
+def get_network_roles(resources):
+    network_roles = []
+    for v in resources.values():
+        nr = get_network_role_from_port(v)
+        if nr:
+            network_roles.append(nr)
+
+    return set(network_roles)
+
+
 def get_network_type_from_port(resource):
-    """
+    '''
     get the network type from a neutron port resource
-    """
+    '''
     if not isinstance(resource, dict):
         return None
-    if "type" not in resource:
+    if 'type' not in resource:
         return None
-    if resource["type"] != "OS::Neutron::Port":
+    if resource['type'] != 'OS::Neutron::Port':
         return None
-    if "properties" not in resource:
+    if 'properties' not in resource:
         return None
 
     formats = [
-        ["network", "string", "internal", re.compile(r"int_(.+?)_net_id")],
-        ["network", "string", "internal", re.compile(r"int_(.+?)_net_name")],
-        ["network", "string", "external", re.compile(r"(.+?)_net_id")],
-        ["network", "string", "external", re.compile(r"(.+?)_net_name")],
-    ]
+              ["network", "string", "internal",
+               re.compile(r'int_(.+?)_net_id')],
+              ["network", "string", "internal",
+               re.compile(r'int_(.+?)_net_name')],
+              ["network", "string", "external",
+               re.compile(r'(.+?)_net_id')],
+              ["network", "string", "external",
+               re.compile(r'(.+?)_net_name')]]
 
     for k1, v1 in resource["properties"].items():
-        if k1 != "network":
+        if k1 != 'network':
             continue
         if "get_param" not in v1:
             continue
@@ -112,22 +130,22 @@ def get_network_type_from_port(resource):
     return None
 
 
-def is_valid_ip_address(ip_address, ip_type="ipv4"):
-    """
+def is_valid_ip_address(ip_address, ip_type='ipv4'):
+    '''
     check if an ip address is valid
-    """
-    if ip_type == "ipv4":
+    '''
+    if ip_type == 'ipv4':
         return is_valid_ipv4_address(ip_address)
-    elif ip_type == "ipv6":
+    elif ip_type == 'ipv6':
         return is_valid_ipv6_address(ip_address)
     return False
 
 
 def is_valid_ipv4_address(ip_address):
-    """
+    '''
     check if an ip address of the type ipv4
     is valid
-    """
+    '''
     try:
         socket.inet_pton(socket.AF_INET, ip_address)
     except AttributeError:
@@ -135,17 +153,17 @@ def is_valid_ipv4_address(ip_address):
             socket.inet_aton(ip_address)
         except (OSError, socket.error):
             return False
-        return ip_address.count(".") == 3
+        return ip_address.count('.') == 3
     except (OSError, socket.error):
         return False
     return True
 
 
 def is_valid_ipv6_address(ip_address):
-    """
+    '''
     check if an ip address of the type ipv6
     is valid
-    """
+    '''
     try:
         socket.inet_pton(socket.AF_INET6, ip_address)
     except (OSError, socket.error):
@@ -154,13 +172,13 @@ def is_valid_ipv6_address(ip_address):
 
 
 def property_uses_get_resource(resource, property_name):
-    """
+    '''
     returns true if a port's network property
     uses the get_resource function
-    """
+    '''
     if not isinstance(resource, dict):
         return False
-    if "properties" not in resource:
+    if 'properties' not in resource:
         return False
     for k1, v1 in resource["properties"].items():
         if k1 != property_name:

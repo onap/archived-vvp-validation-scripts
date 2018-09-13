@@ -42,7 +42,7 @@
 """
 
 from os import path
-import yaml
+from tests import cached_yaml as yaml
 
 VERSION = '1.0.0'
 

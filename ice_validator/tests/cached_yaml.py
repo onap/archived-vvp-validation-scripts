@@ -1,8 +1,8 @@
 # -*- coding: utf8 -*-
-# ============LICENSE_START=======================================================
+# ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -34,13 +34,27 @@
 # limitations under the License.
 #
 # ============LICENSE_END============================================
-#
-# ECOMP is a trademark and service mark of AT&T Intellectual Property.
-#
+
+import os
+
+import yaml
+
+YAML_CACHE = {}
+resolver = yaml.resolver
+YAMLError = yaml.YAMLError
+constructor = yaml.constructor
 
 
-def test_heat_templates_provided(heat_templates):
-    '''
-    Make sure heat templates have been provided
-    '''
-    assert len(heat_templates) > 0
+def add_constructor(tag, constructor):
+    yaml.add_constructor(
+        tag,
+        constructor,
+    )
+
+
+def load(fp):
+    """Provides cached loading of yaml files"""
+    abs_path = os.path.abspath(fp.name)
+    if abs_path not in YAML_CACHE:
+        YAML_CACHE[abs_path] = yaml.safe_load(fp)
+    return YAML_CACHE[abs_path]

@@ -62,3 +62,4 @@ def is_dict_has_key(obj, key):
     '''return True/False `obj` is a dict and has `key`
     '''
     return isinstance(obj, dict) and key in obj
+

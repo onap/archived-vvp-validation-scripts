@@ -45,3 +45,6 @@ boltons
 pyinstaller
 xlsxwriter
 docutils
+appdirs
+jinja2
+yamllint

@@ -41,8 +41,9 @@
 """Helpers
 """
 
+import os
 from boltons import funcutils
-import yaml
+from tests import cached_yaml as yaml
 
 VERSION = '1.1.0'
 
@@ -106,3 +107,20 @@ def validates(*requirement_ids):
         return wrapper
     decorator.requirement_ids = requirement_ids
     return decorator
+
+
+def get_environment_pair(heat_template):
+    """Returns a yaml/env pair given a yaml file"""
+    base_dir, filename = os.path.split(heat_template)
+    basename = os.path.splitext(filename)[0]
+    env_template = os.path.join(base_dir, "{}.env".format(basename))
+    if os.path.exists(env_template):
+        with open(heat_template, "r") as fh:
+            yyml = yaml.load(fh)
+        with open(env_template, "r") as fh:
+            eyml = yaml.load(fh)
+
+        environment_pair = {"name": basename, "yyml": yyml, "eyml": eyml}
+        return environment_pair
+
+    return None
