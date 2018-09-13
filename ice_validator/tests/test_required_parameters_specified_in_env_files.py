@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -40,13 +40,20 @@
 
 import pytest
 
+from .helpers import get_environment_pair
 
-def test_required_parameters_provided_in_env_file(environment_pair):
+
+@pytest.mark.heat_only
+def test_required_parameters_provided_in_env_file(heat_template):
     '''
     Make sure all required parameters are specified properly
     in the environment file if a server is defined in the
     corresponding heat template
     '''
+    environment_pair = get_environment_pair(heat_template)
+    if not environment_pair:
+        pytest.skip("No heat/env pair could be identified")
+
     required_parameters = ["vnf_id", "vf_module_id", "vnf_name"]
 
     if "resources" not in environment_pair["yyml"]:
