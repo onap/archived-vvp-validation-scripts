@@ -46,3 +46,6 @@ pyinstaller
 xlsxwriter
 docutils
 requests
+appdirs
+jinja2
+yamllint

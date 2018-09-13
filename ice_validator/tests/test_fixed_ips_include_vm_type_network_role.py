@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -37,10 +37,11 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-from .helpers import validates
 
 import pytest
-import yaml
+from tests import cached_yaml as yaml
+
+from .helpers import validates
 from .utils.ports import get_invalid_ip_addresses
 
 
@@ -51,7 +52,8 @@ from .utils.ports import get_invalid_ip_addresses
            'R-78380',
            'R-23503',
            'R-71577',
-           'R-04697')
+           'R-04697',
+           'R-34037')
 def test_fixed_ips_include_vm_type_network_role(heat_template):
     '''
     Check that all fixed_ips ip addresses include the {vm_type} of the
@@ -65,7 +67,11 @@ def test_fixed_ips_include_vm_type_network_role(heat_template):
     if "resources" not in yml:
         pytest.skip("No resources specified in the heat template")
 
+    if "parameters" not in yml:
+        pytest.skip("No parameters specified in the heat template")
+
     invalid_ip_addresses = get_invalid_ip_addresses(yml['resources'],
-                                                    "fixed_ips")
+                                                    "fixed_ips",
+                                                    yml["parameters"])
 
     assert not set(invalid_ip_addresses)
