@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-# ============LICENSE_START=======================================================
+# ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
 # Copyright © 2017 AT&T Intellectual Property. All rights reserved.
@@ -37,9 +37,12 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
+
+# VERSION = '1.0.0'
+
 ---
 parameters:
-  a!:
+  a$:
     type: string
     label: human-readable name of the parameter
     description: description of the parameter
@@ -52,3 +55,4 @@ parameters:
         description: User name must start with an uppercase character
     immutable: true
     dummy_key: "dummy_key"
+

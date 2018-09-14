@@ -39,7 +39,7 @@
 #
 
 import pytest
-import yaml
+from tests import cached_yaml as yaml
 
 
 def test_vm_type_assignments_on_nova_servers_only_use_get_param(heat_template):

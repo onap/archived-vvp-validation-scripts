@@ -69,6 +69,7 @@ def test_vm_type_syntax(heat_template):
         pytest.skip("No resources")
     t = set()
     t.update(*[vm_types.get_vm_types_for_resource(r)
-               for r in v.resources.values()])
+             for r in v.resources.values()])
     bad = [x for x in t if not RE_VM_TYPE.match(x) or RE_VM_TYPE_NG.match(x)]
     assert not bad, 'bad vm-types %s' % bad
+

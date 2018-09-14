@@ -39,7 +39,7 @@
 #
 
 import pytest
-import yaml
+from tests import cached_yaml as yaml
 
 
 def test_subnet_format_use_get_param_or_get_resource(heat_template):

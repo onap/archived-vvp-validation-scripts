@@ -39,37 +39,34 @@
 #
 
 import re
+
 import pytest
-import yaml
+from tests import cached_yaml as yaml
+
 from .helpers import validates
+from .utils.network_roles import get_network_role_from_port, \
+    get_network_type_from_port, \
+    property_uses_get_resource
 from .utils.vm_types import get_vm_type_for_nova_server
-from .utils.network_roles import (
-    get_network_role_from_port,
-    get_network_type_from_port,
-    property_uses_get_resource,
-)
 
 
-@validates(
-    "R-29865",
-    "R-69014",
-    "R-05201",
-    "R-68936",
-    "R-32025",
-    "R-11168",
-    "R-84322",
-    "R-96983",
-    "R-26506",
-    "R-20453",
-    "R-26351",
-)
+@validates('R-69014',
+           'R-05201',
+           'R-68936',
+           'R-32025',
+           'R-11168',
+           'R-84322',
+           'R-96983',
+           'R-26506',
+           'R-20453',
+           'R-26351')
 def test_port_resource_ids(heat_template):
-    """
+    '''
     Check that all resource ids for ports follow the right
     naming convention to include the {vm_type} of the
     nova server it is associated to and also contains the
     {network_role} of the network it is associated with
-    """
+    '''
     with open(heat_template) as fh:
         yml = yaml.load(fh)
 
@@ -77,23 +74,21 @@ def test_port_resource_ids(heat_template):
     if "resources" not in yml:
         pytest.skip("No resources specified in the heat template")
 
-    port_patterns = {
-        "internal": re.compile(r"(.+?)_\d+_int_(.+?)_port_\d+"),
-        "external": re.compile(r"(.+?)_\d+_(.+?)_port_\d+"),
-    }
-    resources = yml["resources"]
+    port_patterns = {'internal': re.compile(r'(.+?)_\d+_int_(.+?)_port_\d+'),
+                     'external': re.compile(r'(.+?)_\d+_(.+?)_port_\d+')}
+    resources = yml['resources']
 
     invalid_ports = []
     for k, v in resources.items():
         if not isinstance(v, dict):
             continue
-        if "type" not in v:
+        if 'type' not in v:
             continue
-        if v["type"] not in "OS::Nova::Server":
+        if v['type'] not in 'OS::Nova::Server':
             continue
-        if "properties" not in v:
+        if 'properties' not in v:
             continue
-        if "networks" not in v["properties"]:
+        if 'networks' not in v['properties']:
             continue
 
         has_vm_type = False
@@ -106,18 +101,18 @@ def test_port_resource_ids(heat_template):
         vm_type = vm_type.lower()
 
         # get all ports associated with the nova server
-        properties = v["properties"]
-        for v2 in properties["networks"]:
+        properties = v['properties']
+        for v2 in properties['networks']:
             for k3, v3 in v2.items():
-                if k3 != "port":
+                if k3 != 'port':
                     continue
                 if not isinstance(v3, dict):
                     continue
 
-                if "get_param" in v3:
+                if 'get_param' in v3:
                     continue
-                elif "get_resource" in v3:
-                    port_id = v3["get_resource"]
+                elif 'get_resource' in v3:
+                    port_id = v3['get_resource']
                     if not resources[port_id]:
                         continue
                     port_resource = resources[port_id]
@@ -145,9 +140,9 @@ def test_port_resource_ids(heat_template):
                 else:
                     # match the assumed naming convention for ports
                     # if the specified port is provided via get_param
-                    network_type = "external"
+                    network_type = 'external'
                     if "int_" in port_id:
-                        network_type = "internal"
+                        network_type = 'internal'
                     if port_patterns[network_type].match(port_id):
                         has_network_role = True
 

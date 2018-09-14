@@ -60,7 +60,7 @@ resources:
         flavor: { get_param: vm_type_b_flavor_name}
         image: { get_param: vm_type_b_image_name}
 
-  VM_TYPE_B_SERVER_1:
+  vm_type_b_server_1:
         type: OS::Nova::Server
         properties:
           name: { get_param: vm_type_b_name_1  }

@@ -43,18 +43,18 @@
 import re
 
 import pytest
-import yaml
+from tests import cached_yaml as yaml
 
 from .helpers import validates
 
-VERSION = "1.1.0"
+VERSION = '1.1.0'
 
 
-@validates("R-98450")
+@validates('R-98450')
 def test_availability_zone_naming(heat_template):
-    """
+    '''
     Make sure all availability zones are properly formatted
-    """
+    '''
 
     with open(heat_template) as fh:
         yml = yaml.load(fh)
@@ -65,7 +65,7 @@ def test_availability_zone_naming(heat_template):
 
     invalid_availability_zones = set()
 
-    for v1 in yml["resources"].values():
+    for k1, v1 in yml["resources"].items():
         if not isinstance(v1, dict):
             continue
         if "properties" not in v1:
@@ -75,13 +75,16 @@ def test_availability_zone_naming(heat_template):
 
         if v1["type"] == "OS::Nova::Server":
             for k2, v2 in v1["properties"].items():
-                if k2 != "availability_zone":
+                if k2 != 'availability_zone':
                     continue
-                if "str_replace" in v2:
+                if 'str_replace' in v2:
                     continue
-                if not re.match(r"availability_zone_\d+", v2["get_param"]):
+                if "get_param" not in v2:
+                    invalid_availability_zones.add(k1)
+                elif not re.match(r'availability_zone_\d+', v2["get_param"]):
                     invalid_availability_zones.add(v2["get_param"])
 
-    assert not invalid_availability_zones, "invalid availability zones %s" % list(
-        invalid_availability_zones
-    )
+    assert not invalid_availability_zones, (
+        'invalid availability zones %s' % list(
+            invalid_availability_zones))
+

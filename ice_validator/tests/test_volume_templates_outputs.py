@@ -38,7 +38,7 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-import yaml
+from tests import cached_yaml as yaml
 
 
 def test_volume_templates_contains_outputs(volume_template):

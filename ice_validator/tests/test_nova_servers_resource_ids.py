@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -39,18 +39,20 @@
 #
 
 import pytest
-import yaml
+from tests import cached_yaml as yaml
+
 from .helpers import validates
 from .utils.vm_types import get_vm_type_for_nova_server
 
 
-@validates("R-01455", "R-48067", "R-00977")
-def test_nova_servers_valid_resource_ids(heat_template):
-    """
+@validates('R-40499',
+           'R-57282')
+def test_nova_servers_valid_resource_ids(yaml_file):
+    '''
     Make sure all nova servers have valid resource ids
-    """
+    '''
 
-    with open(heat_template) as fh:
+    with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
     # skip if resources are not defined
@@ -68,10 +70,29 @@ def test_nova_servers_valid_resource_ids(heat_template):
 
         vm_type = get_vm_type_for_nova_server(v1)
         if not vm_type:
-            continue
-        vm_type = vm_type.lower()
+            # could not determine vm_type
+            invalid_nova_servers.append({"resource": k1, "vm_type": "none found"})
+        else:
+            k1_split = k1.split("_server_")
+            k1_prefix = k1_split[0]
+            if k1_prefix != vm_type:
+                # vm_type on server doesn't match
+                invalid_nova_servers.append({"resource": k1, "vm_type": vm_type})
+            else:
+                if len(k1_split) == 2:
+                    k1_suffix = k1_split[1]
+                    try:
+                        int(k1_suffix)
+                    except ValueError:
+                        # vm_type_index is not an integer
+                        invalid_nova_servers.append({"resource": k1, "vm_type": vm_type, "vm_type_index": k1_suffix})
+                else:
+                    # vm_type_index not found
+                    invalid_nova_servers.append({"resource": k1, "vm_type": vm_type, "vm_type_index": "none found"})
 
-        if vm_type + "_" not in k1.lower():
-            invalid_nova_servers.append(k1)
-
-    assert not set(invalid_nova_servers)
+    assert not invalid_nova_servers, \
+        "Invalid OS::Nova::Server resource ids detected {}\n" \
+        "OS::Nova::Server resource ids must be in the form " \
+        "<vm_type>_server_<vm_type_index> \n" \
+        "<vm_type> is derived from flavor, image and name properties " \
+        "".format(invalid_nova_servers)

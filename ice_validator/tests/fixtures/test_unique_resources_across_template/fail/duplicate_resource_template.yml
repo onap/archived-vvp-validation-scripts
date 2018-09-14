@@ -42,17 +42,9 @@ resources:
   volume_1:
         type: OS::Cinder::Volume
         properties:
-            name:
-                str_replace:
-                    template: VF_NAME_STACK_NAME_oam_volume
-                    params:
-                        VNF_NAME: {get_param: vnf_module_id }
+            name: test_name
+
   volume_1:
         type: OS::Cinder::Volume
         properties:
-            name:
-                str_replace:
-                    template: VF_NAME_STACK_NAME_oam_volume
-                    params:
-                        VNF_NAME: {get_param: vnf_name }
-                        STACK_NAME: { get_param: 'OS::stack_name' }
+            name: test_name

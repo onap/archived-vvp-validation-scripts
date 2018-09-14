@@ -67,4 +67,15 @@ resources:
           name: { get_param: vm_type_b_name_1  }
           flavor: { get_param: vm_type_b_flavor_name}
           image: { get_param: vm_type_b_image_name}
- 
+          networks:
+            - port: { get_resource: vm_type_b_0_int_vm_type_b_port_0 }
+  
+  int_vm_type_b_net_id:
+      type: OS::Neutron::Net
+      properties:
+          fnsdf: nksldfnkl
+
+  vm_type_b_0_int_vm_type_b_port_0:
+      type: OS::Neutron::Port
+      properties:
+          network: { get_resource: int_vm_type_b_net_id }

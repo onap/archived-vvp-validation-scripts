@@ -1,0 +1,22 @@
+heat_template_version: 2015-04-30
+
+description: fdsafsfsa
+
+parameters:
+
+  my_nested_parameter:
+    type: number
+    description: sdfnklafd
+    #constraints:
+    #  - range: { min: 100, max: 400 }
+
+resources:
+
+  my_nested_resource2:
+    type: test
+    properties:
+      my_nested_parameter: {get_param:  my_nested_parameter}
+
+outputs:
+  test_value: 
+    value: { get_param: my_nested_parameter }

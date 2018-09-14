@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -38,23 +38,29 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-import pytest
-import yaml
-from .utils.network_roles import get_network_role_from_port, property_uses_get_resource
 import re
+
+import pytest
+from tests import cached_yaml as yaml
+
+from .utils.network_roles import get_network_role_from_port, \
+    property_uses_get_resource
 
 
 def test_subnet_format(heat_template):
-    """
+    '''
     Make sure all subnet properties follow the allowed naming
     conventions
-    """
+    '''
     formats = [
-        ["subnet_id", "string", "internal", re.compile(r"int_(.+?)_subnet_id")],
-        ["subnet_id", "string", "internal", re.compile(r"int_(.+?)_v6_subnet_id")],
-        ["subnet_id", "string", "external", re.compile(r"(.+?)_subnet_id")],
-        ["subnet_id", "string", "external", re.compile(r"(.+?)_v6_subnet_id")],
-    ]
+              ["subnet_id", "string", "internal",
+               re.compile(r'int_(.+?)_subnet_id')],
+              ["subnet_id", "string", "internal",
+               re.compile(r'int_(.+?)_v6_subnet_id')],
+              ["subnet_id", "string", "external",
+               re.compile(r'(.+?)_subnet_id')],
+              ["subnet_id", "string", "external",
+               re.compile(r'(.+?)_v6_subnet_id')]]
 
     with open(heat_template) as fh:
         yml = yaml.load(fh)
@@ -82,9 +88,9 @@ def test_subnet_format(heat_template):
             continue
 
         # define the network_type
-        network_type = "external"
-        if network_param.startswith("int_"):
-            network_type = "internal"
+        network_type = 'external'
+        if network_param.startswith('int_'):
+            network_type = 'internal'
 
         for k2, v2 in v1["properties"].items():
             if k2 != "fixed_ips":

@@ -39,9 +39,12 @@
 #
 
 import pytest
-import yaml
+from tests import cached_yaml as yaml
+
+from .helpers import validates
 
 
+@validates('R-93177')
 def test_network_format_use_get_param_or_get_resource(heat_template):
     '''
     Make sure all network properties only use get_param

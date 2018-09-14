@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -39,7 +39,7 @@
 #
 
 import pytest
-import yaml
+from tests import cached_yaml as yaml
 
 
 def test_required_parameters_provided_in_heat_template(heat_template):

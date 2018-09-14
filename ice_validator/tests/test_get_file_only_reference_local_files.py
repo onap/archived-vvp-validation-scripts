@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -38,12 +38,14 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-from os import sep
-import pytest
 import re
-import yaml
-from .utils.nested_iterables import find_all_get_file_in_yml
+from os import sep
+
+import pytest
+from tests import cached_yaml as yaml
+
 from .helpers import validates
+from .utils.nested_iterables import find_all_get_file_in_yml
 
 
 @validates('R-99646')

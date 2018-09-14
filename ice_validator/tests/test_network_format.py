@@ -37,11 +37,13 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-from .helpers import validates
 
 import pytest
-import yaml
-from .utils.network_roles import get_network_role_from_port, property_uses_get_resource
+from tests import cached_yaml as yaml
+
+from .helpers import validates
+from .utils.network_roles import get_network_role_from_port, \
+    property_uses_get_resource
 
 
 @validates('R-62983', 'R-86182')

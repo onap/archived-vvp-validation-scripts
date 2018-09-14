@@ -70,7 +70,10 @@ def test_base_template_names(template_dir):
         if check_basename_ending('volume', filename):
             continue
 
-        if RE_BASE.search(filename):
+        if RE_BASE.search(filename.lower()):
             base_template_count += 1
-    msg = 'must be 1 "*_base_*" in %s not %d' % (filenames, base_template_count)
-    assert base_template_count == 1, msg
+    assert base_template_count == 1, (
+        'must be 1 "*_base_*" in %s not %d' % (
+            filenames,
+            base_template_count))
+

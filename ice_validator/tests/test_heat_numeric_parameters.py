@@ -37,13 +37,15 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-from .helpers import validates
+
 import pytest
-import yaml
+from tests import cached_yaml as yaml
+
+from .helpers import validates
 
 
 @validates('R-88863')
-def test_numeric_parameter(yaml_file):
+def test_numeric_parameter(heat_template):
     '''
     Make sure all numeric parameters has either `range` or `allowed_values`
     specified
@@ -51,7 +53,7 @@ def test_numeric_parameter(yaml_file):
     key_values = ["range", "allowed_values"]
     missing_constraints = []
 
-    with open(yaml_file) as fh:
+    with open(heat_template) as fh:
         yml = yaml.load(fh)
 
     # skip if parameters are not defined

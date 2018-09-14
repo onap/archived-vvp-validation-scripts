@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-# ============LICENSE_START=======================================================
+# ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
 # Copyright © 2017 AT&T Intellectual Property. All rights reserved.
@@ -37,12 +37,15 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
+
+# VERSION = '1.0.0'
+
 ---
 resources:
   vm_type_b_server_0:
       type: OS::Nova::Server
       properties:
-        availability_zone: { str_replace: availability_zone_0 }
+        availability_zone: { not_str_replace: availability_zone_0 }
         name: { get_param: vm_type_b_name_0  }
         flavor: { get_param: vm_type_b_flavor_name}
         image: { get_param: vm_type_b_image_name}
@@ -51,3 +54,4 @@ resources:
           vnf_id: { get_param: vnf_id }
           vf_module_id: { get_param: vf_module_id }
         key_name: { get_param: vm_type_b_key_name }
+

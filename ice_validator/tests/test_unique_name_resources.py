@@ -37,10 +37,11 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-from .helpers import validates
 
-import yaml
+from tests import cached_yaml as yaml
 import pytest
+
+from .helpers import validates
 
 
 @validates('R-40899')

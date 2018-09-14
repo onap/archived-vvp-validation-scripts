@@ -1,8 +1,8 @@
 # -*- coding: utf8 -*-
-# ============LICENSE_START=======================================================
+# ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -37,76 +37,84 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
+
+"""Test heat template structure
+"""
+
+from tests import cached_yaml as yaml
 from .helpers import validates
-import yaml
+
+VERSION = '1.2.0'
+
+# pylint: disable=invalid-name
 
 
-def test_heat_template_structure(yaml_file):
-    '''
-    Check that all heat templates only have the allowed sections
-    '''
-    key_values = ["heat_template_version", "description",
-                  "parameter_groups", "parameters", "resources",
-                  "outputs", "conditions"]
-
-    with open(yaml_file) as fh:
-        yml = yaml.load(fh)
-    assert all([k in key_values for k in yml])
-
-
-@validates('R-27078', 'R-39402', 'R-35414')
-def test_heat_template_structure_contains_required_sections(yaml_file):
+@validates('R-27078')
+def test_heat_template_structure_contains_heat_template_version(yaml_file):
     '''
     Check that all heat templates have the required sections
     '''
-    required_key_values = ["heat_template_version", "description",
-                           "parameters", "resources"]
+    required_key_values = ["heat_template_version"]
 
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
-    assert all([k in yml for k in required_key_values])
+    assert all([k in yml for k in required_key_values]), (
+        "{} doesn't contain the {} section, but it is required"
+        .format(yaml_file, required_key_values[0]))
 
 
-def test_heat_template_structure_sections_have_the_right_format(yaml_file):
+@validates('R-39402')
+def test_heat_template_structure_contains_description(yaml_file):
     '''
-    Check that all heat templates have sections of the right format.
-    Do note that it only tests for dicts or not dicts currently.
+    Check that all heat templates have the required sections
     '''
-    key_values = ["heat_template_version", "description",
-                  "parameter_groups", "parameters", "resources",
-                  "outputs", "conditions"]
-    key_values_not_dicts = ["heat_template_version", "description"]
+    required_key_values = ["description"]
 
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
+    assert all([k in yml for k in required_key_values]), (
+        "{} doesn't contain the {} section, but it is required"
+        .format(yaml_file, required_key_values[0]))
 
-    is_dict = 0
-    should_be_dict = 0
-    is_not_dict = 0
-    should_not_be_dict = 0
-    for key_value in key_values:
-        if key_value in yml:
-            if isinstance(yml[key_value], dict):
-                is_dict += 1
-                if key_value not in key_values_not_dicts:
-                    should_be_dict += 1
-            elif not isinstance(yml[key_value], list):
-                is_not_dict += 1
-                if key_value in key_values_not_dicts:
-                    should_not_be_dict += 1
-    assert (is_dict == should_be_dict and
-            is_not_dict == should_not_be_dict)
+
+@validates('R-35414')
+def test_heat_template_structure_contains_parameters(yaml_file):
+    '''
+    Check that all heat templates have the required sections
+    '''
+    required_key_values = ["parameters"]
+
+    with open(yaml_file) as fh:
+        yml = yaml.load(fh)
+    assert all([k in yml for k in required_key_values]), (
+        "{} doesn't contain the {} section, but it is required"
+        .format(yaml_file, required_key_values[0]))
+
+
+@validates('R-23664')
+def test_heat_template_structure_contains_resources(heat_template):
+    '''
+    Check that all heat templates have the required sections
+    '''
+    required_key_values = ["resources"]
+
+    with open(heat_template) as fh:
+        yml = yaml.load(fh)
+    assert all([k in yml for k in required_key_values]), (
+        "{} doesn't contain the {} section, but it is required"
+        .format(heat_template, required_key_values[0]))
 
 
 @validates('R-11441')
 def test_parameter_type(yaml_file):
-    types = [
-        'string',
-        'number',
-        'json',
-        'comma_delimited_list',
-        'boolean',
-    ]
+    '''A VNF's Heat Orchestration Template's parameter type **MUST**
+    be one of the following values:
+    '''
+    types = ['string',
+             'number',
+             'json',
+             'comma_delimited_list',
+             'boolean']
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
     for key, param in yml.get('parameters', {}).items():
@@ -121,3 +129,4 @@ def test_parameter_type(yaml_file):
             yaml_file,
             key,
             typ)
+

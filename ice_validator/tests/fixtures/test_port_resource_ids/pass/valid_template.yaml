@@ -94,7 +94,7 @@ parameters:
 
   int_vpnnet_net_id:
     type: string
-    description: network id for the internal network vpnnet 
+    description: network id for the internal network vpnnet
   int_oam_net_name:
     type: string
     description: name for the OAM network to be created in the resources section

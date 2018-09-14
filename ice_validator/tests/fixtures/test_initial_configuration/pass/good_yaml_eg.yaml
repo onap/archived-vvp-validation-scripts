@@ -38,25 +38,15 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 ---
-nested_template_description: base
+ a: 1
+ b:
+    c: 3
+    d: 4
+    e:
+       f: 4
+    g:
+       h:
+          test: test
+       k: g
 
-parameters:
-    vm_type_volume_name_0:
-        type: string
-    vm_type_volume_size_0:
-        type: number
-
-resources:
-    server_0:
-        type: nested_template_1.yaml
-        properties:
-            name: {get_param: server_name_0}
-    my_resource_group_1:
-        type: OS::Nova::Server
-        properties:
-            count: 5
-            resource_def: { type: nested_template_2.yaml }
-
-outputs:
-    vm_type_volume_id_0:
-        value: {get_resource: vm_type_volume_0}
+    test: out
