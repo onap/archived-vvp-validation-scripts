@@ -46,6 +46,7 @@ import sys
 import time
 import requests
 import traceback
+import warnings
 
 import docutils.core
 import jinja2
@@ -593,10 +594,17 @@ def load_current_requirements():
     """Loads dict of current requirements or empty dict if file doesn't exist"""
 
     url = 'https://onap.readthedocs.io/en/latest/_downloads/needs.json'
-    r = requests.get(url)
-    with open('requirements.json', 'wb') as needs:
-        needs.write(r.content)
-    path = "heat_requirements.json"
+
+    try:
+        r = requests.get(url)
+        if r.headers.get('content-type') == 'applicaiton/json':
+            with open('requirements.json', 'wb') as needs:
+                needs.write(r.content)
+    except requests.exceptions.RequestException as e:
+        warnings.warn("Error downloading latest JSON, using last saved copy.")
+        warnings.warn(UserWarning(e))
+        traceback.print_exc()
+    path = "requirements.json"
     if not os.path.exists(path):
         return {}
     with io.open(path, encoding="utf8", mode="r") as f:
