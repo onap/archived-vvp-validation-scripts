@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_cbe91eb8",
+        "filename": "ice_validator/tests/conftest.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 604,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2018-09-17T19:58:14Z",
+      "side": 1,
+      "message": "Thanks for adding this, but I think you need to make sure the message is clearer as to what happened.\n\nwarnings.warning(\"Unexpected content-type ({}) encountered downloading requirements.json, using last saved copy\".format(r.headers.get(\u0027content-type\u0027))",
+      "revId": "5a8c494a6e4b23608c4f4cf0f761d4fd350dc35c",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
