@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_eb3ada97",
+        "filename": "ice_validator/tests/conftest.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 600,
+      "author": {
+        "id": 3013
+      },
+      "writtenOn": "2018-09-17T19:11:50Z",
+      "side": 1,
+      "message": "oops - i think you\u0027ve got a typo. should be \u0027application/json\u0027",
+      "range": {
+        "startLine": 600,
+        "startChar": 45,
+        "endLine": 600,
+        "endChar": 56
+      },
+      "revId": "229aa58d1de2e4e7dca2d733362b602f26c52ced",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
