@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_1aa202fd",
+        "filename": "ice_validator/tests/conftest.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 538,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2018-09-17T13:10:04Z",
+      "side": 1,
+      "message": "The issue I see here is that if the request fails for any reason (timeout, not reachable, etc.), then the validation scripts can\u0027t run at all.  Can we wrap this in a try/catch block and fall back to the packaged requirements.json if that happens?",
+      "revId": "8de26dd1cc9ed33c3ab85a5014ac949f174db932",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
