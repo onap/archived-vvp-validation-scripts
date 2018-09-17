@@ -38,7 +38,7 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-pytest
+pytest==3.7.4
 PyYAML
 pytest-tap
 boltons
