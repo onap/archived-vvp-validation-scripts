@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_10ce632e",
+        "filename": "ice_validator/tests/conftest.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 600,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2018-09-17T17:56:31Z",
+      "side": 1,
+      "message": "This r \u003d \"requirements.json\" is never used.  \n\nI think you can just simplify this with:\n\nif r.headers.get(\u0027content-type\u0027) \u003d\u003d \u0027applicaiton/json\u0027:\n   with open(\u0027requirements.json\u0027, \u0027wb\u0027) as needs:\n      needs.write(r.content)",
+      "revId": "cfa25205d98fe5f5fa6a0f0ba06fcc64ea7b7927",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_d0d30bd3",
+        "filename": "ice_validator/tests/conftest.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 605,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2018-09-17T17:56:31Z",
+      "side": 1,
+      "message": "This assignment doesn\u0027t do anything.  What I would propose instead  is writing a warning that states there was an error downloading the file so you\u0027re falling back the the currently available requirements file, and then printing the traceback so you can debug the error.",
+      "revId": "cfa25205d98fe5f5fa6a0f0ba06fcc64ea7b7927",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
