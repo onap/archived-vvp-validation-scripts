@@ -601,7 +601,7 @@ def load_current_requirements():
             with open('requirements.json', 'wb') as needs:
                 needs.write(r.content)
         else:
-            warnings.warning("Unexpected content-type ({}) encountered downloading requirements.json, using last saved copy".format(r.headers.get('content-type')))
+            warnings.warn("Unexpected content-type ({}) encountered downloading requirements.json, using last saved copy".format(r.headers.get('content-type')))
     except requests.exceptions.RequestException as e:
         warnings.warn("Error downloading latest JSON, using last saved copy.")
         warnings.warn(UserWarning(e))
