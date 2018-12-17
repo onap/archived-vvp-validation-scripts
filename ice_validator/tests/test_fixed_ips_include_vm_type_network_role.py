@@ -45,21 +45,23 @@ from .helpers import validates
 from .utils.ports import get_invalid_ip_addresses
 
 
-@validates('R-40971',
-           'R-27818',
-           'R-29765',
-           'R-85235',
-           'R-78380',
-           'R-23503',
-           'R-71577',
-           'R-04697',
-           'R-34037')
+@validates(
+    "R-40971",
+    "R-27818",
+    "R-29765",
+    "R-85235",
+    "R-78380",
+    "R-23503",
+    "R-71577",
+    "R-04697",
+    "R-34037",
+)
 def test_fixed_ips_include_vm_type_network_role(heat_template):
-    '''
+    """
     Check that all fixed_ips ip addresses include the {vm_type} of the
     nova server it is associated to and also contains the {network_role}
     of the network it is associated with
-    '''
+    """
     with open(heat_template) as fh:
         yml = yaml.load(fh)
 
@@ -70,8 +72,11 @@ def test_fixed_ips_include_vm_type_network_role(heat_template):
     if "parameters" not in yml:
         pytest.skip("No parameters specified in the heat template")
 
-    invalid_ip_addresses = get_invalid_ip_addresses(yml['resources'],
-                                                    "fixed_ips",
-                                                    yml["parameters"])
+    invalid_ip_addresses = get_invalid_ip_addresses(
+        yml["resources"], "fixed_ips", yml["parameters"]
+    )
 
-    assert not set(invalid_ip_addresses)
+    msg = "The following fixed_ips are declared incorrectly: {}".format(
+        ", ".join(invalid_ip_addresses)
+    )
+    assert not set(invalid_ip_addresses), msg

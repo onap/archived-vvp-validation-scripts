@@ -45,12 +45,11 @@ from .helpers import validates
 from .utils.vm_types import get_vm_type_for_nova_server
 
 
-@validates('R-40499',
-           'R-57282')
+@validates("R-40499", "R-57282")
 def test_nova_servers_valid_resource_ids(yaml_file):
-    '''
+    """
     Make sure all nova servers have valid resource ids
-    '''
+    """
 
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
@@ -85,14 +84,27 @@ def test_nova_servers_valid_resource_ids(yaml_file):
                         int(k1_suffix)
                     except ValueError:
                         # vm_type_index is not an integer
-                        invalid_nova_servers.append({"resource": k1, "vm_type": vm_type, "vm_type_index": k1_suffix})
+                        invalid_nova_servers.append(
+                            {
+                                "resource": k1,
+                                "vm_type": vm_type,
+                                "vm_type_index": k1_suffix,
+                            }
+                        )
                 else:
                     # vm_type_index not found
-                    invalid_nova_servers.append({"resource": k1, "vm_type": vm_type, "vm_type_index": "none found"})
+                    invalid_nova_servers.append(
+                        {
+                            "resource": k1,
+                            "vm_type": vm_type,
+                            "vm_type_index": "none found",
+                        }
+                    )
 
-    assert not invalid_nova_servers, \
-        "Invalid OS::Nova::Server resource ids detected {}\n" \
-        "OS::Nova::Server resource ids must be in the form " \
-        "<vm_type>_server_<vm_type_index> \n" \
-        "<vm_type> is derived from flavor, image and name properties " \
+    assert not invalid_nova_servers, (
+        "Invalid OS::Nova::Server resource ids detected {}\n"
+        "OS::Nova::Server resource ids must be in the form "
+        "<vm_type>_server_<vm_type_index> \n"
+        "<vm_type> is derived from flavor, image and name properties "
         "".format(invalid_nova_servers)
+    )

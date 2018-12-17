@@ -44,19 +44,19 @@
 from os import path
 from tests import cached_yaml as yaml
 
-VERSION = '1.0.0'
+VERSION = "1.0.0"
 
 
 def get_volume_resources(heat_template):
-    '''
+    """
     get the resources from the volume template
     Note: Returns an empty dict if there is no
     volume template or for any other error
-    '''
+    """
     basename = path.splitext(heat_template)[0]
 
-    for ext in ['.yaml', '.yml']:
-        volume_template = basename + '_volume' + ext
+    for ext in [".yaml", ".yml"]:
+        volume_template = basename + "_volume" + ext
         if path.isfile(volume_template):
             break
     else:
@@ -66,12 +66,12 @@ def get_volume_resources(heat_template):
         with open(volume_template) as fh:
             yml = yaml.load(fh)
     except yaml.YAMLError as e:
-        print(e)    # pylint: disable=superfluous-parens
+        print(e)  # pylint: disable=superfluous-parens
         return {}
 
-    if 'outputs' not in yml:
+    if "outputs" not in yml:
         return {}
-    if 'resources' not in yml:
+    if "resources" not in yml:
         return {}
 
-    return yml['resources']
+    return yml["resources"]

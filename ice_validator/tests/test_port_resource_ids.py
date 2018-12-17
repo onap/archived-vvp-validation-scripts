@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -44,29 +44,22 @@ import pytest
 from tests import cached_yaml as yaml
 
 from .helpers import validates
-from .utils.network_roles import get_network_role_from_port, \
-    get_network_type_from_port, \
-    property_uses_get_resource
+from .utils.network_roles import (
+    get_network_role_from_port,
+    get_network_type_from_port,
+    property_uses_get_resource,
+)
 from .utils.vm_types import get_vm_type_for_nova_server
 
 
-@validates('R-69014',
-           'R-05201',
-           'R-68936',
-           'R-32025',
-           'R-11168',
-           'R-84322',
-           'R-96983',
-           'R-26506',
-           'R-20453',
-           'R-26351')
+@validates("R-20453", "R-26351", "R-26506" "R-681859")
 def test_port_resource_ids(heat_template):
-    '''
+    """
     Check that all resource ids for ports follow the right
     naming convention to include the {vm_type} of the
     nova server it is associated to and also contains the
     {network_role} of the network it is associated with
-    '''
+    """
     with open(heat_template) as fh:
         yml = yaml.load(fh)
 
@@ -74,26 +67,20 @@ def test_port_resource_ids(heat_template):
     if "resources" not in yml:
         pytest.skip("No resources specified in the heat template")
 
-    port_patterns = {'internal': re.compile(r'(.+?)_\d+_int_(.+?)_port_\d+'),
-                     'external': re.compile(r'(.+?)_\d+_(.+?)_port_\d+')}
-    resources = yml['resources']
+    resources = yml["resources"]
 
     invalid_ports = []
     for k, v in resources.items():
         if not isinstance(v, dict):
             continue
-        if 'type' not in v:
+        if "type" not in v:
             continue
-        if v['type'] not in 'OS::Nova::Server':
+        if v["type"] not in "OS::Nova::Server":
             continue
-        if 'properties' not in v:
+        if "properties" not in v:
             continue
-        if 'networks' not in v['properties']:
+        if "networks" not in v["properties"]:
             continue
-
-        has_vm_type = False
-        has_network_role = True
-        port_resource = None
 
         vm_type = get_vm_type_for_nova_server(v)
         if not vm_type:
@@ -101,18 +88,18 @@ def test_port_resource_ids(heat_template):
         vm_type = vm_type.lower()
 
         # get all ports associated with the nova server
-        properties = v['properties']
-        for v2 in properties['networks']:
+        properties = v["properties"]
+        for v2 in properties["networks"]:
             for k3, v3 in v2.items():
-                if k3 != 'port':
+                if k3 != "port":
                     continue
                 if not isinstance(v3, dict):
                     continue
 
-                if 'get_param' in v3:
+                if "get_param" in v3:
                     continue
-                elif 'get_resource' in v3:
-                    port_id = v3['get_resource']
+                elif "get_resource" in v3:
+                    port_id = v3["get_resource"]
                     if not resources[port_id]:
                         continue
                     port_resource = resources[port_id]
@@ -120,34 +107,30 @@ def test_port_resource_ids(heat_template):
                 else:
                     continue
 
-                has_vm_type = vm_type + "_" in port_id
-                has_network_role = False
-
-                if port_resource:
-                    if property_uses_get_resource(v, "network"):
-                        continue
-                    network_role = get_network_role_from_port(port_resource)
-                    if not network_role:
-                        continue
-                    network_role = network_role.lower()
-
-                    network_type = get_network_type_from_port(port_resource)
-                    if not network_type:
-                        continue
-
-                    if port_patterns[network_type].match(port_id):
-                        has_network_role = True
-                else:
-                    # match the assumed naming convention for ports
-                    # if the specified port is provided via get_param
-                    network_type = 'external'
-                    if "int_" in port_id:
-                        network_type = 'internal'
-                    if port_patterns[network_type].match(port_id):
-                        has_network_role = True
-
-                if has_vm_type and has_network_role:
+                if property_uses_get_resource(v, "network"):
                     continue
-                invalid_ports.append(port_id)
+                network_role = get_network_role_from_port(port_resource)
+                if not network_role:
+                    continue
+                network_role = network_role.lower()
 
-    assert not set(invalid_ports)
+                network_type = get_network_type_from_port(port_resource)
+                if not network_type:
+                    continue
+                if network_type == "external":
+                    expected_r_id = r"{}_\d+_{}_port_\d+".format(vm_type, network_role)
+                else:
+                    expected_r_id = r"{}_\d+_int_{}_port_\d+".format(
+                        vm_type, network_role
+                    )
+                if not re.match(expected_r_id, port_id):
+                    invalid_ports.append(
+                        (port_id, "Did not match {}".format(expected_r_id))
+                    )
+
+    port_errors = "; ".join(
+        "{} -> {}".format(port, error) for port, error in invalid_ports
+    )
+    msg = "The following ports have invalid resource IDs: {}".format(port_errors)
+    msg = msg.replace(r"\d+", "{index}")
+    assert not invalid_ports, msg

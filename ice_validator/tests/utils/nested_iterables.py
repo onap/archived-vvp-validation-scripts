@@ -40,10 +40,10 @@
 
 
 def parse_nested_dict(d, key=""):
-    '''
+    """
     parse the nested dictionary and return values of
     given key of function parameter only
-    '''
+    """
     nested_elements = []
     for k, v in d.items():
         if isinstance(v, dict):
@@ -60,29 +60,27 @@ def parse_nested_dict(d, key=""):
 
 
 def find_all_get_param_in_yml(yml):
-    '''
+    """
     Recursively find all referenced parameters in a parsed yaml body
     and return a list of parameters
-    '''
-    os_pseudo_parameters = ['OS::stack_name',
-                            'OS::stack_id',
-                            'OS::project_id']
+    """
+    os_pseudo_parameters = ["OS::stack_name", "OS::stack_id", "OS::project_id"]
 
-    if not hasattr(yml, 'items'):
+    if not hasattr(yml, "items"):
         return []
     params = []
     for k, v in yml.items():
-        if k == 'get_param' and v not in os_pseudo_parameters:
+        if k == "get_param" and v not in os_pseudo_parameters:
             if isinstance(v, list) and not isinstance(v[0], dict):
                 params.append(v[0])
             elif not isinstance(v, dict) and isinstance(v, str):
                 params.append(v)
-            for item in (v if isinstance(v, list) else [v]):
+            for item in v if isinstance(v, list) else [v]:
                 if isinstance(item, dict):
                     params.extend(find_all_get_param_in_yml(item))
             continue
-        elif k == 'list_join':
-            for item in (v if isinstance(v, list) else [v]):
+        elif k == "list_join":
+            for item in v if isinstance(v, list) else [v]:
                 if isinstance(item, list):
                     for d in item:
                         params.extend(find_all_get_param_in_yml(d))
@@ -96,15 +94,15 @@ def find_all_get_param_in_yml(yml):
 
 
 def find_all_get_resource_in_yml(yml):
-    '''
+    """
     Recursively find all referenced resources
     in a parsed yaml body and return a list of resource ids
-    '''
-    if not hasattr(yml, 'items'):
+    """
+    if not hasattr(yml, "items"):
         return []
     resources = []
     for k, v in yml.items():
-        if k == 'get_resource':
+        if k == "get_resource":
             if isinstance(v, list):
                 resources.append(v[0])
             else:
@@ -119,15 +117,15 @@ def find_all_get_resource_in_yml(yml):
 
 
 def find_all_get_file_in_yml(yml):
-    '''
+    """
     Recursively find all get_file in a parsed yaml body
     and return the list of referenced files/urls
-    '''
-    if not hasattr(yml, 'items'):
+    """
+    if not hasattr(yml, "items"):
         return []
     resources = []
     for k, v in yml.items():
-        if k == 'get_file':
+        if k == "get_file":
             if isinstance(v, list):
                 resources.append(v[0])
             else:
@@ -142,37 +140,35 @@ def find_all_get_file_in_yml(yml):
 
 
 def find_all_get_resource_in_resource(resource):
-    '''
+    """
     Recursively find all referenced resources
     in a heat resource and return a list of resource ids
-    '''
-    if not hasattr(resource, 'items'):
+    """
+    if not hasattr(resource, "items"):
         return []
 
     resources = []
     for k, v in resource.items():
-        if k == 'get_resource':
+        if k == "get_resource":
             if isinstance(v, list):
                 resources.append(v[0])
             else:
                 resources.append(v)
             continue
         if isinstance(v, dict):
-            resources.extend(
-                find_all_get_resource_in_resource(v))
+            resources.extend(find_all_get_resource_in_resource(v))
         elif isinstance(v, list):
             for d in v:
-                resources.extend(
-                    find_all_get_resource_in_resource(d))
+                resources.extend(find_all_get_resource_in_resource(d))
     return resources
 
 
 def get_associated_resources_per_resource(resources):
-    '''
+    """
     Recursively find all referenced resources for each resource
     in a list of resource ids
-    '''
-    if not hasattr(resources, 'items'):
+    """
+    if not hasattr(resources, "items"):
         return None
 
     resources_dict = {}
@@ -183,8 +179,7 @@ def get_associated_resources_per_resource(resources):
         get_resources = []
 
         for k, v in res_value:
-            if k == 'get_resource' and\
-               isinstance(v, dict):
+            if k == "get_resource" and isinstance(v, dict):
                 get_resources = find_all_get_resource_in_resource(v)
 
         # if resources found, add to dict
@@ -201,9 +196,9 @@ def get_associated_resources_per_resource(resources):
 
 
 def flatten(items):
-    '''
+    """
     flatten items from any nested iterable
-    '''
+    """
 
     merged_list = []
     for item in items:

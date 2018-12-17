@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -38,25 +38,25 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-'''test env file has no resource_registry
-'''
+"""test env file has no resource_registry
+"""
 
 from tests import cached_yaml as yaml
 
 from .helpers import validates
 
-VERSION = '1.0.0'
+VERSION = "1.0.0"
 
 
-@validates('R-67231')
+@validates("R-67231")
 def test_env_no_resource_registry(env_files):
-    '''
+    """
     A VNF's Heat Orchestration template's Environment File's
     **MUST NOT** contain the "resource_registry:" section.
-    '''
+    """
     for filename in env_files:
         with open(filename) as fi:
             yml = yaml.load(fi)
-        assert 'resource_registry' not in yml, (
-            '%s contains "resource_registry"' % filename)
-
+        assert "resource_registry" not in yml, (
+            '%s contains "resource_registry"' % filename
+        )

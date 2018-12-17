@@ -38,10 +38,10 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-'''
+"""
 A VNF's Heat Orchestration Template's Resource ``OS::Heat::CloudConfig``
 Resource ID **MUST** contain the ``{vm-type}``.
-'''
+"""
 
 import pytest
 
@@ -49,24 +49,24 @@ from .structures import Heat
 from .helpers import validates
 from .utils import vm_types
 
-VERSION = '1.0.0'
+VERSION = "1.0.0"
 
 
-@validates('R-04747')
+@validates("R-04747")
 def test_cloud_config(heat_template):
-    '''validate resource ids
-    '''
+    """validate resource ids
+    """
     h = Heat(filepath=heat_template)
     if not h.resources:
-        pytest.skip('No resources in this template')
+        pytest.skip("No resources in this template")
 
     cloud_configs = get_cloud_configs(h)
     if not cloud_configs:
-        pytest.skip('No CloudConfig resources in this template')
+        pytest.skip("No CloudConfig resources in this template")
 
     resource_vm_types = vm_types.get_vm_types(h.resources)
     if not resource_vm_types:
-        pytest.skip('No resources with {vm-type} in this template')
+        pytest.skip("No resources with {vm-type} in this template")
 
     bad = set()
     for rid in cloud_configs:
@@ -75,14 +75,17 @@ def test_cloud_config(heat_template):
                 break
         else:
             bad.add(rid)
-    assert not bad, 'CloudConfigs %s have {vm-type} not in %s' % (
+    assert not bad, "CloudConfigs %s have {vm-type} not in %s" % (
         list(bad),
-        list(resource_vm_types))
+        list(resource_vm_types),
+    )
 
 
 def get_cloud_configs(heat):
     """Return list of resource_id whose type is OS::Heat::CloudConfig.
     """
-    return [rid for rid, resource in heat.resources.items()
-            if heat.nested_get(resource, 'type') == 'OS::Heat::CloudConfig']
-
+    return [
+        rid
+        for rid, resource in heat.resources.items()
+        if heat.nested_get(resource, "type") == "OS::Heat::CloudConfig"
+    ]

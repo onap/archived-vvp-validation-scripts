@@ -97,6 +97,7 @@
         <h1>Validation Report</h1>
         <ul>
             <li><b>Profile:</b> {{ profile_name }}</li>
+            <li><b>Tool Version:</b> {{ version }}</li>
             <li><b>Directory Validated:</b> {{ template_dir }}</li>
             <li><b>Checksum:</b> {{ checksum }}</li>
             <li><b>Generated:</b> {{ timestamp }}</li>
@@ -197,7 +198,6 @@
                 dom: 'Bfrtip',
                 buttons: [
                     'csv',
-                    'excel',
                     {
                         extend: 'pdfHtml5',
                         orientation: 'landscape',

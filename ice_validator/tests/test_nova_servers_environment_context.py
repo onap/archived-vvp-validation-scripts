@@ -38,24 +38,28 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-'''environment context
-'''
+"""environment context
+"""
 
 import pytest
 from tests import cached_yaml as yaml
 
 from .helpers import validates
 
-VERSION = '1.0.0'
+VERSION = "1.0.0"
 
 
-@validates('R-20308')
+@validates("R-20308")
 def test_environment_context(heat_template):
-    '''
+    """
+    A VNF's Heat Orchestration Template's OS::Nova::Server Resource
+    **MUST**
+    contain the metadata map value parameter 'environment_context'.
+
     A VNF's Heat Orchestration Template's OS::Nova::Server Resource
     metadata map value parameter 'environment_context' **MUST**
     be declared as type: 'string'.
-    '''
+    """
     with open(heat_template) as fh:
         yml = yaml.load(fh)
 
@@ -65,38 +69,38 @@ def test_environment_context(heat_template):
         pytest.skip("No resources specified in the heat template")
 
     for resource, v in yml["resources"].items():
-        if (not isinstance(v, dict)
-                or v.get('type') != 'OS::Nova::Server'
-                or 'properties' not in v):
+        if (
+            not isinstance(v, dict)
+            or v.get("type") != "OS::Nova::Server"
+            or "properties" not in v
+        ):
             continue
-        metadata = v['properties'].get('metadata')
+        metadata = v["properties"].get("metadata")
         if not isinstance(metadata, dict):
             continue
-        error = validate_metadata(metadata, yml['parameters'])
+        error = validate_metadata(metadata, yml["parameters"])
         if error:
-            assert False, '%s resource "%s" %s' % (
-                heat_template,
-                resource,
-                error)
+            assert False, '%s resource "%s" %s' % (heat_template, resource, error)
 
 
 def validate_metadata(metadata, parameters):
-    '''validate metatdata.
-    Ensure metadata references parameter environment_context
-    is a string.
+    """validate metatdata.
+    Ensure metadata references parameter environment_context,
+    and that it is a string.
     Return error message string or None if no errors.
-    '''
+    """
     for value in metadata.values():
         if isinstance(value, dict):
-            if 'get_param' in value:
-                if value['get_param'] == 'environment_context':
-                    wc = parameters.get('environment_context', {})
-                    if wc.get('type') == 'string':
+            if "get_param" in value:
+                if value["get_param"] == "environment_context":
+                    wc = parameters.get("environment_context", {})
+                    if wc.get("type") == "string":
                         break
                     else:
-                        return ('must have parameter "environment_context"'
-                                ' of type "string"')
+                        return (
+                            'must have parameter "environment_context"'
+                            ' of type "string"'
+                        )
                     break
     else:
         return None
-

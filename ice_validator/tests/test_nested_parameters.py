@@ -41,40 +41,101 @@
 """heat parameters
 """
 
-import os
-
 import pytest
 from tests import cached_yaml as yaml
+from tests.structures import Resource
 
 from .helpers import validates
-from .utils.nested_files import get_list_of_nested_files
 
-VERSION = '1.0.0'
+VERSION = "1.0.0"
 
 
-@validates('R-00011')
-def test_nested_parameter(yaml_file):
-    '''
-    A VNF's Heat Orchestration Template's Nested YAML file's
-    parameter's **MUST NOT** have a parameter constraint defined.
+def check_nested_parameter_doesnt_change(yaml_file, parameter):
 
-    '''
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
-    dirname = os.path.dirname(yaml_file)
-    nested_files = get_list_of_nested_files(yml, dirname)
-    if nested_files:
-        for filename in nested_files:
-            with open(filename) as fh:
-                template = yaml.load(fh)
-            parameters = template.get('parameters')
-            if parameters and isinstance(parameters, dict):
-                for param, value in parameters.items():
-                    if isinstance(value, dict):
-                        assert 'constraints' not in value, (
-                            '%s parameter "%s" has "constraints"' % (
-                                filename,
-                                param))
-    else:
-        pytest.skip('No nested files')
 
+    # skip if resources are not defined
+    if "resources" not in yml:
+        pytest.skip("No resources specified in the heat template")
+
+    invalid_parameters = []
+
+    """
+    checking if property: { get_param: <parameter> }, then property == <parameter>
+
+    resource_id:
+        type: nested.yaml
+        properties:
+            property: { get_param: <parameter> }
+
+    resource_id:
+        type: OS::Heat::ResourceGroup
+        properties:
+            resource_def:
+                properties:
+                    property: { get_param: <parameter> }
+    """
+    for resource_id, resource in yml.get("resources", {}).items():
+        r = Resource(resource_id=resource_id, resource=resource)
+        properties = r.get_nested_properties()
+        for k1, v1 in properties.items():
+            if (
+                isinstance(v1, dict)
+                and "get_param" in v1
+                and parameter == v1.get("get_param")
+            ):
+                if k1 != parameter:
+                    invalid_parameters.append(
+                        {
+                            "resource": r.resource_id,
+                            "nested parameter": k1,
+                            "parameter": parameter,
+                        }
+                    )
+
+    assert (
+        not invalid_parameters
+    ), "Invalid parameter name change detected in nested template {}".format(
+        invalid_parameters
+    )
+
+
+@validates("R-70757")
+def test_vm_role_doesnt_change_in_nested_template(yaml_file):
+    check_nested_parameter_doesnt_change(yaml_file, "vm_role")
+
+
+@validates("R-44491")
+def test_vnf_id_doesnt_change_in_nested_template(yaml_file):
+    check_nested_parameter_doesnt_change(yaml_file, "vnf_id")
+
+
+@validates("R-86237")
+def test_vf_module_id_doesnt_change_in_nested_template(yaml_file):
+    check_nested_parameter_doesnt_change(yaml_file, "vf_module_id")
+
+
+@validates("R-16576")
+def test_vnf_name_doesnt_change_in_nested_template(yaml_file):
+    check_nested_parameter_doesnt_change(yaml_file, "vnf_name")
+
+
+@validates("R-49177")
+def test_vf_module_name_doesnt_change_in_nested_template(yaml_file):
+    check_nested_parameter_doesnt_change(yaml_file, "vf_module_name")
+
+
+@validates("R-22441")
+def test_vf_module_index_name_doesnt_change_in_nested_template(yaml_file):
+    check_nested_parameter_doesnt_change(yaml_file, "vf_module_index")
+
+
+@validates("R-62954")
+def test_environment_context_name_doesnt_change_in_nested_template(yaml_file):
+    check_nested_parameter_doesnt_change(yaml_file, "environment_context")
+
+
+@validates("R-75202")
+def test_workload_context_name_doesnt_change_in_nested_template(yaml_file):
+    check_nested_parameter_doesnt_change(yaml_file, "workload_context")

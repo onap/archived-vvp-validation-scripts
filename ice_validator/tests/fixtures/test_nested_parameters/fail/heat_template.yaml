@@ -48,12 +48,37 @@ parameters:
         type: string
     vm_type_volume_size_0:
         type: number
+    vm_role:
+        type: string
+    vnf_id:
+        type: string
+    vf_module_id:
+        type: string
+    vnf_name:
+        type: string
+    vf_module_name:
+        type: string
+    vf_module_index:
+        type: string
+    environment_context:
+        type: string
+    workload_context:
+        type: string
 
 resources:
     server_0:
         type: nested_template_1.yaml
         properties:
             name: { get_param: server_name_0 }
+            vm_1role: { get_param: vm_role }
+            vnf_1id: { get_param: vnf_id }
+            vf_module_1id: { get_param: vf_module_id }
+            vnf_1name: { get_param: vnf_name }
+            vf_module_1name: { get_param: vf_module_name }
+            vf_module_1index: { get_param: vf_module_index }
+            environment_cont1ext: { get_param: environment_context }
+            workload_cont1ext: { get_param: workload_context }
+    
     my_resource_group_1:
         type: OS::Heat::ResourceGroup
         properties:

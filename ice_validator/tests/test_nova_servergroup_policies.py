@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -43,11 +43,11 @@ import pytest
 
 
 def test_nova_servergroup_policies(yaml_file):
-    '''
+    """
     Check that nova servergroup resources using either anti-affinity or
     affinity rules in policies
-    '''
-    req_rules = ['affinity', 'anti-affinity']
+    """
+    req_rules = ["affinity", "anti-affinity"]
 
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
@@ -56,8 +56,8 @@ def test_nova_servergroup_policies(yaml_file):
     if "resources" not in yml:
         pytest.skip("No resources specified in the heat template")
 
-    has_req_rules = []
-    for v1 in yml["resources"].values():
+    invalid_policies = []
+    for r_id, v1 in yml["resources"].items():
         if not isinstance(v1, dict):
             continue
         if "properties" not in v1:
@@ -70,11 +70,19 @@ def test_nova_servergroup_policies(yaml_file):
         try:
             all_rules = v1["properties"]["policies"]
             detected_rules = set(all_rules) & set(req_rules)
-            has_req_rules.append(len(detected_rules) > 0)
-        except (ValueError):
+            if len(detected_rules) == 0:
+                invalid_policies.append(
+                    "{} policies must include one of {}".format(
+                        r_id, ", ".join(req_rules)
+                    )
+                )
+            elif len(detected_rules) > 1:
+                invalid_policies.append(
+                    "{} policies must include only one of {}".format(
+                        r_id, ", ".join(req_rules)
+                    )
+                )
+        except ValueError:
             continue
 
-    if not has_req_rules:
-        pytest.skip("No policies Nova::ServerGroup instances were detected")
-
-    assert all(has_req_rules)
+    assert not invalid_policies, ". ".join(invalid_policies)

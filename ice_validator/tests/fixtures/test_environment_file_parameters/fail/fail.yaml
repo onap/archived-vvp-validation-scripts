@@ -12,7 +12,11 @@ parameters:
     type: string
     description: nasfln
 
-  STARKDB_private_v6_ips:
+  TESTDB_valet_hosts:
+    type: string
+    description: nsfadl
+
+  STARKDB_int_private_v6_ips:
     type: comma_delimited_list
     description: ndsajlfn
 
@@ -144,6 +148,7 @@ resources:
         #int_network_id: { get_resource: int_priv_network }
         workload_context: { get_param: workload_context }
         environment_context: { get_param: environment_context }
+        #valet_groups: "safnkl, sdaflksanl"
       networks:
         - port: { get_resource: STARKDB_0_int_priv_port_0 }
         - port: { get_resource: STARKDB_0_PRIV_port_1}
@@ -165,6 +170,7 @@ resources:
         #int_network_id: { get_resource: int_priv_network }
         workload_context: { get_param: workload_context }
         environment_context: { get_param: environment_context }
+        #valet_groups: "safnkl, sdaflksanl"
       networks:
         - port: {get_resource: STARKDB_1_int_priv_port_0}
         - port: {get_resource: STARKDB_1_crazy_port_0}
@@ -183,6 +189,7 @@ resources:
         #int_network_id: { get_resource: int_priv_network }
         workload_context: { get_param: workload_context }
         environment_context: { get_param: environment_context }
+        #valet_groups: "safnkl, sdaflksanl"
       networks:
         - port: {get_resource: TESTDB_0_int_priv_port_0}
         - network: { get_param: int_priv_net_id }
@@ -203,9 +210,18 @@ resources:
         #int_network_id: { get_resource: int_priv_network }
         workload_context: { get_param: workload_context }
         environment_context: { get_param: environment_context }
+        #valet_groups: "safnkl, sdaflksanl"
       networks:
         - port: {get_resource: TESTDB_0_int_priv_port_0}
         - network: { get_param: int_priv_net_id }
+
+      availability_zone: 
+        str_replace:
+          template: $AZ$VALET_HOST_ASSIGNMENT
+          params:
+            $AZ: { get_param: availability_zone_0 }
+            $VALET_HOST_ASSIGNMENT: { get_param: [ TESTDB_valet_hosts, 0 ] }
+
 
   vol_attachment:
     type: OS::Cinder::VolumeAttachment
@@ -239,8 +255,8 @@ resources:
     properties:
       network: { get_resource: int_private_net_id }
       fixed_ips:
-        - subnet_id: { get_resource: int_priv_subnet }
-        - ip_address: { get_param: STARKDB_private_v6_ips }
+        - subnet: { get_resource: int_priv_subnet }
+        - ip_address: { get_param: STARKDB_int_private_v6_ips }
 
       
   STARKDB_0_crazy_port_0:
@@ -248,7 +264,7 @@ resources:
     properties:
       network: { get_param: crazy_net_id }
       fixed_ips: 
-        - subnet_id: { get_param: crazy_subnet_id }
+        - subnet: { get_param: crazy_subnet_id }
         - ip_address: { get_param: STARKDB_crazy_ip_0 }
       allowed_address_pairs: [ { "ip_address": {get_param:
         STARKDB_crazy_floating_ip}}]
@@ -259,7 +275,7 @@ resources:
     properties:
       network: { get_param: crazy_net_id }
       fixed_ips: 
-        - subnet_id: { get_param: crazy_subnet_id }
+        - subnet: { get_param: crazy_subnet_id }
         - ip_address: { get_param: STARKDB_crazy_ip_1 }
       allowed_address_pairs: [ { "ip_address": {get_param:
         STARKDB_crazy_floating_ip}}]

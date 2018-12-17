@@ -42,29 +42,31 @@
 """
 
 import os
+from collections import defaultdict
+
 from boltons import funcutils
 from tests import cached_yaml as yaml
 
-VERSION = '1.1.0'
+VERSION = "1.1.0"
 
 
 def check_basename_ending(template_type, basename):
-    '''
+    """
     return True/False if the template type is matching
     the filename
-    '''
+    """
     if not template_type:
         return True
-    elif template_type == 'volume':
-        return basename.endswith('_volume')
+    elif template_type == "volume":
+        return basename.endswith("_volume")
     else:
-        return not basename.endswith('_volume')
+        return not basename.endswith("_volume")
 
 
 def get_parsed_yml_for_yaml_files(yaml_files, sections=None):
-    '''
+    """
     get the parsed yaml for a list of yaml files
-    '''
+    """
     sections = [] if sections is None else sections
     parsed_yml_list = []
     for yaml_file in yaml_files:
@@ -73,7 +75,7 @@ def get_parsed_yml_for_yaml_files(yaml_files, sections=None):
                 yml = yaml.load(fh)
         except yaml.YAMLError as e:
             # pylint: disable=superfluous-parens
-            print('Error in %s: %s' % (yaml_file, e))
+            print("Error in %s: %s" % (yaml_file, e))
             continue
         if yml:
             if sections:
@@ -103,8 +105,10 @@ def validates(*requirement_ids):
         @funcutils.wraps(func)
         def wrapper(*args, **kw):
             return func(*args, **kw)
+
         wrapper.requirement_ids = requirement_ids
         return wrapper
+
     decorator.requirement_ids = requirement_ids
     return decorator
 
@@ -124,3 +128,81 @@ def get_environment_pair(heat_template):
         return environment_pair
 
     return None
+
+
+def load_yaml(yaml_file):
+    """
+    Load the YAML file at the given path.  If the file has previously been
+    loaded, then a cached version will be returned.
+
+    :param yaml_file: path to the YAML file
+    :return: data structure loaded from the YAML file
+    """
+    with open(yaml_file) as fh:
+        return yaml.load(fh)
+
+
+def traverse(data, search_key, func, path=None):
+    """
+    Traverse the data structure provided via ``data`` looking for occurences
+    of ``search_key``.  When ``search_key`` is found, the value associated
+    with that key is passed to ``func``
+
+    :param data:        arbitrary data structure of dicts and lists
+    :param search_key:  key field to search for
+    :param func:        Callable object that takes two parameters:
+                        * A list representing the path of keys to search_key
+                        * The value associated with the search_key
+    """
+    path = [] if path is None else path
+    if isinstance(data, dict):
+        for key, value in data.items():
+            curr_path = path + [key]
+            if key == search_key:
+                func(curr_path, value)
+            traverse(value, search_key, func, curr_path)
+    elif isinstance(data, list):
+        for value in data:
+            curr_path = path + [value]
+            if isinstance(value, dict):
+                traverse(value, search_key, func, curr_path)
+            elif value == search_key:
+                func(curr_path, value)
+
+
+def check_indices(pattern, values, value_type):
+    """
+    Checks that indices associated with the matched prefix start at 0 and
+    increment by 1.  It returns a list of messages for any prefixes that
+    violate the rules.
+
+    :param pattern: Compiled regex that whose first group matches the prefix and
+                    second group matches the index
+    :param values:  sequence of string names that may or may not match the pattern
+    :param name:    Type of value being checked (ex: IP Parameters). This will
+                    be included in the error messages.
+    :return:        List of error messages, empty list if no violations found
+    """
+    if not hasattr(pattern, "match"):
+        raise RuntimeError("Pattern must be a compiled regex")
+
+    prefix_indices = defaultdict(set)
+    for value in values:
+        m = pattern.match(value)
+        if m:
+            prefix_indices[m.group(1)].add(int(m.group(2)))
+
+    invalid_params = []
+    for prefix, indices in prefix_indices.items():
+        indices = sorted(indices)
+        if indices[0] != 0:
+            invalid_params.append(
+                "{} with prefix {} do not start at 0".format(value_type, prefix)
+            )
+        elif len(indices) - 1 != indices[-1]:
+            invalid_params.append(
+                (
+                    "Index values of {} with prefix {} do not " + "increment by 1: {}"
+                ).format(value_type, prefix, indices)
+            )
+    return invalid_params

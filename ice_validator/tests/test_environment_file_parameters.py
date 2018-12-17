@@ -46,7 +46,7 @@ import pytest
 from .helpers import validates, get_environment_pair
 
 
-VERSION = '1.0.0'
+VERSION = "1.0.0"
 
 # pylint: disable=invalid-name
 
@@ -62,21 +62,25 @@ def check_parameter_exists(pattern, parameters):
     return False
 
 
-def check_param_in_env_file(environment_pair, param, DESIRED):
+def check_param_in_env_file(environment_pair, param, DESIRED, exclude_parameter=None):
+
+    # workaround for internal/external parameters
+    if exclude_parameter and re.match(exclude_parameter, param):
+        return False
 
     if not environment_pair:
         pytest.skip("No heat/env pair could be identified")
 
     env_file = environment_pair.get("eyml")
 
-    pattern = re.compile(r'^{}$'.format(param))
+    pattern = re.compile(r"^{}$".format(param))
 
     if "parameters" not in env_file:
         pytest.skip("No parameters specified in the environment file")
 
-    return check_parameter_exists(pattern,
-                                  env_file.get("parameters", {})
-                                  ) is not DESIRED
+    return (
+        check_parameter_exists(pattern, env_file.get("parameters", {})) is not DESIRED
+    )
 
 
 """
@@ -95,13 +99,16 @@ resource_id:
 """
 
 
-def check_resource_parameter(environment_pair,
-                             prop,
-                             DESIRED,
-                             resource_type,
-                             resource_type_inverse=False,
-                             nested_prop='',
-                             exclude_resource=''):
+def check_resource_parameter(
+    environment_pair,
+    prop,
+    DESIRED,
+    resource_type,
+    resource_type_inverse=False,
+    nested_prop="",
+    exclude_resource="",
+    exclude_parameter="",
+):
 
     if not environment_pair:
         pytest.skip("No heat/env pair could be identified")
@@ -117,12 +124,13 @@ def check_resource_parameter(environment_pair,
     if template_file:
         for resource, resource_prop in template_file.get("resources", {}).items():
 
+            # workaround for subinterface resource groups
             if exclude_resource and re.match(exclude_resource, resource):
                 continue
 
-            if resource_prop.get("type") == resource_type or \
-                (resource_prop.get("type") != resource_type
-                 and resource_type_inverse):
+            if (
+                resource_prop.get("type") == resource_type and not resource_type_inverse
+            ) or (resource_prop.get("type") != resource_type and resource_type_inverse):
 
                 pattern = False
 
@@ -141,7 +149,10 @@ def check_resource_parameter(environment_pair,
                         if not nested_param:
                             continue
 
-                        pattern = nested_param.get("get_param")
+                        if isinstance(nested_param, dict):
+                            pattern = nested_param.get("get_param")
+                        else:
+                            pattern = ""
 
                         if not pattern:
                             continue
@@ -149,26 +160,37 @@ def check_resource_parameter(environment_pair,
                         if isinstance(pattern, list):
                             pattern = pattern[0]
 
+                        if check_param_in_env_file(
+                            environment_pair,
+                            pattern,
+                            DESIRED,
+                            exclude_parameter=exclude_parameter,
+                        ):
+                            invalid_parameters.append(pattern)
+
                 elif isinstance(resource_parameter, dict):
 
                     if nested_prop and nested_prop in resource_parameter:
                         resource_parameter = resource_parameter.get(nested_prop)
 
                     pattern = resource_parameter.get("get_param")
+                    if not pattern:
+                        continue
 
+                    if check_param_in_env_file(
+                        environment_pair,
+                        pattern,
+                        DESIRED,
+                        exclude_parameter=exclude_parameter,
+                    ):
+                        invalid_parameters.append(pattern)
                 else:
                     continue
-
-                if not pattern:
-                    continue
-
-                if check_param_in_env_file(environment_pair, pattern, DESIRED):
-                    invalid_parameters.append(pattern)
 
     return set(invalid_parameters)
 
 
-@validates('R-91125')
+@validates("R-91125")
 def test_nova_server_image_parameter_exists_in_environment_file(heat_template):
 
     if pytest.config.getoption("validation_profile") == "heat_only":
@@ -180,19 +202,19 @@ def test_nova_server_image_parameter_exists_in_environment_file(heat_template):
     DESIRED = True
     resource_type = "OS::Nova::Server"
 
-    invalid_parameters = check_resource_parameter(environment_pair,
-                                                  prop,
-                                                  DESIRED,
-                                                  resource_type)
+    invalid_parameters = check_resource_parameter(
+        environment_pair, prop, DESIRED, resource_type
+    )
 
-    assert not invalid_parameters, ("OS::Nova::Server {} parameters not"
-                                    " found in {} environment file {}"
-                                    .format(prop,
-                                            environment_pair.get("name"),
-                                            invalid_parameters))
+    assert not invalid_parameters, (
+        "OS::Nova::Server {} parameters not"
+        " found in {} environment file {}".format(
+            prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
 
 
-@validates('R-69431')
+@validates("R-69431")
 def test_nova_server_flavor_parameter_exists_in_environment_file(heat_template):
 
     if pytest.config.getoption("validation_profile") == "heat_only":
@@ -204,19 +226,19 @@ def test_nova_server_flavor_parameter_exists_in_environment_file(heat_template):
     DESIRED = True
     resource_type = "OS::Nova::Server"
 
-    invalid_parameters = check_resource_parameter(environment_pair,
-                                                  prop,
-                                                  DESIRED,
-                                                  resource_type)
+    invalid_parameters = check_resource_parameter(
+        environment_pair, prop, DESIRED, resource_type
+    )
 
-    assert not invalid_parameters, ("OS::Nova::Server {} parameters not"
-                                    " found in {} environment file {}"
-                                    .format(prop,
-                                            environment_pair.get("name"),
-                                            invalid_parameters))
+    assert not invalid_parameters, (
+        "OS::Nova::Server {} parameters not"
+        " found in {} environment file {}".format(
+            prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
 
 
-@validates('R-22838')
+@validates("R-22838")
 def test_nova_server_name_parameter_doesnt_exist_in_environment_file(heat_template):
 
     if pytest.config.getoption("validation_profile") == "heat_only":
@@ -228,19 +250,19 @@ def test_nova_server_name_parameter_doesnt_exist_in_environment_file(heat_templa
     DESIRED = False
     resource_type = "OS::Nova::Server"
 
-    invalid_parameters = check_resource_parameter(environment_pair,
-                                                  prop,
-                                                  DESIRED,
-                                                  resource_type)
+    invalid_parameters = check_resource_parameter(
+        environment_pair, prop, DESIRED, resource_type
+    )
 
-    assert not invalid_parameters, ("OS::Nova::Server {} parameters"
-                                    " found in {} environment file {}"
-                                    .format(prop,
-                                            environment_pair.get("name"),
-                                            invalid_parameters))
+    assert not invalid_parameters, (
+        "OS::Nova::Server {} parameters"
+        " found in {} environment file {}".format(
+            prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
 
 
-@validates('R-59568')
+@validates("R-59568")
 def test_nova_server_az_parameter_doesnt_exist_in_environment_file(heat_template):
 
     if pytest.config.getoption("validation_profile") == "heat_only":
@@ -252,19 +274,19 @@ def test_nova_server_az_parameter_doesnt_exist_in_environment_file(heat_template
     DESIRED = False
     resource_type = "OS::Nova::Server"
 
-    invalid_parameters = check_resource_parameter(environment_pair,
-                                                  prop,
-                                                  DESIRED,
-                                                  resource_type)
+    invalid_parameters = check_resource_parameter(
+        environment_pair, prop, DESIRED, resource_type
+    )
 
-    assert not invalid_parameters, ("OS::Nova::Server {} parameters"
-                                    " found in {} environment file {}"
-                                    .format(prop,
-                                            environment_pair.get("name"),
-                                            invalid_parameters))
+    assert not invalid_parameters, (
+        "OS::Nova::Server {} parameters"
+        " found in {} environment file {}".format(
+            prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
 
 
-@validates('R-20856')
+@validates("R-20856")
 def test_nova_server_vnf_id_parameter_doesnt_exist_in_environment_file(heat_template):
 
     if pytest.config.getoption("validation_profile") == "heat_only":
@@ -275,19 +297,20 @@ def test_nova_server_vnf_id_parameter_doesnt_exist_in_environment_file(heat_temp
     prop = "vnf_id"
     DESIRED = False
 
-    invalid_parameters = check_param_in_env_file(environment_pair,
-                                                 prop,
-                                                 DESIRED)
+    invalid_parameters = check_param_in_env_file(environment_pair, prop, DESIRED)
 
-    assert not invalid_parameters, ("{} parameters"
-                                    " found in {} environment file {}"
-                                    .format(prop,
-                                            environment_pair.get("name"),
-                                            invalid_parameters))
+    assert not invalid_parameters, (
+        "{} parameters"
+        " found in {} environment file {}".format(
+            prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
 
 
-@validates('R-72871')
-def test_nova_server_vf_module_id_parameter_doesnt_exist_in_environment_file(heat_template):
+@validates("R-72871")
+def test_nova_server_vf_module_id_parameter_doesnt_exist_in_environment_file(
+    heat_template
+):
 
     if pytest.config.getoption("validation_profile") == "heat_only":
         pytest.skip("skipping test because validation profile is heat only")
@@ -297,18 +320,40 @@ def test_nova_server_vf_module_id_parameter_doesnt_exist_in_environment_file(hea
     prop = "vf_module_id"
     DESIRED = False
 
-    invalid_parameters = check_param_in_env_file(environment_pair,
-                                                 prop,
-                                                 DESIRED)
+    invalid_parameters = check_param_in_env_file(environment_pair, prop, DESIRED)
 
-    assert not invalid_parameters, ("{} parameters"
-                                    " found in {} environment file {}"
-                                    .format(prop,
-                                            environment_pair.get("name"),
-                                            invalid_parameters))
+    assert not invalid_parameters, (
+        "{} parameters"
+        " found in {} environment file {}".format(
+            prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
 
 
-@validates('R-36542')
+@validates("R-37039")
+def test_nova_server_vf_module_index_parameter_doesnt_exist_in_environment_file(
+    heat_template
+):
+
+    if pytest.config.getoption("validation_profile") == "heat_only":
+        pytest.skip("skipping test because validation profile is heat only")
+
+    environment_pair = get_environment_pair(heat_template)
+
+    prop = "vf_module_index"
+    DESIRED = False
+
+    invalid_parameters = check_param_in_env_file(environment_pair, prop, DESIRED)
+
+    assert not invalid_parameters, (
+        "{} parameters"
+        " found in {} environment file {}".format(
+            prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
+
+
+@validates("R-36542")
 def test_nova_server_vnf_name_parameter_doesnt_exist_in_environment_file(heat_template):
 
     if pytest.config.getoption("validation_profile") == "heat_only":
@@ -319,19 +364,20 @@ def test_nova_server_vnf_name_parameter_doesnt_exist_in_environment_file(heat_te
     prop = "vnf_name"
     DESIRED = False
 
-    invalid_parameters = check_param_in_env_file(environment_pair,
-                                                 prop,
-                                                 DESIRED)
+    invalid_parameters = check_param_in_env_file(environment_pair, prop, DESIRED)
 
-    assert not invalid_parameters, ("{} parameters"
-                                    " found in {} environment file {}"
-                                    .format(prop,
-                                            environment_pair.get("name"),
-                                            invalid_parameters))
+    assert not invalid_parameters, (
+        "{} parameters"
+        " found in {} environment file {}".format(
+            prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
 
 
-@validates('R-80374')
-def test_nova_server_vf_module_name_parameter_doesnt_exist_in_environment_file(heat_template):
+@validates("R-80374")
+def test_nova_server_vf_module_name_parameter_doesnt_exist_in_environment_file(
+    heat_template
+):
 
     if pytest.config.getoption("validation_profile") == "heat_only":
         pytest.skip("skipping test because validation profile is heat only")
@@ -341,19 +387,20 @@ def test_nova_server_vf_module_name_parameter_doesnt_exist_in_environment_file(h
     prop = "vf_module_name"
     DESIRED = False
 
-    invalid_parameters = check_param_in_env_file(environment_pair,
-                                                 prop,
-                                                 DESIRED)
+    invalid_parameters = check_param_in_env_file(environment_pair, prop, DESIRED)
 
-    assert not invalid_parameters, ("{} parameters"
-                                    " found in {} environment file {}"
-                                    .format(prop,
-                                            environment_pair.get("name"),
-                                            invalid_parameters))
+    assert not invalid_parameters, (
+        "{} parameters"
+        " found in {} environment file {}".format(
+            prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
 
 
-@validates('R-02691')
-def test_nova_server_workload_context_parameter_doesnt_exist_in_environment_file(heat_template):
+@validates("R-02691")
+def test_nova_server_workload_context_parameter_doesnt_exist_in_environment_file(
+    heat_template
+):
 
     if pytest.config.getoption("validation_profile") == "heat_only":
         pytest.skip("skipping test because validation profile is heat only")
@@ -363,19 +410,20 @@ def test_nova_server_workload_context_parameter_doesnt_exist_in_environment_file
     prop = "workload_context"
     DESIRED = False
 
-    invalid_parameters = check_param_in_env_file(environment_pair,
-                                                 prop,
-                                                 DESIRED)
+    invalid_parameters = check_param_in_env_file(environment_pair, prop, DESIRED)
 
-    assert not invalid_parameters, ("{} parameters"
-                                    " found in {} environment file {}"
-                                    .format(prop,
-                                            environment_pair.get("name"),
-                                            invalid_parameters))
+    assert not invalid_parameters, (
+        "{} parameters"
+        " found in {} environment file {}".format(
+            prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
 
 
-@validates('R-13194')
-def test_nova_server_environment_context_parameter_doesnt_exist_in_environment_file(heat_template):
+@validates("R-13194")
+def test_nova_server_environment_context_parameter_doesnt_exist_in_environment_file(
+    heat_template
+):
 
     if pytest.config.getoption("validation_profile") == "heat_only":
         pytest.skip("skipping test because validation profile is heat only")
@@ -385,18 +433,17 @@ def test_nova_server_environment_context_parameter_doesnt_exist_in_environment_f
     prop = "environment_context"
     DESIRED = False
 
-    invalid_parameters = check_param_in_env_file(environment_pair,
-                                                 prop,
-                                                 DESIRED)
+    invalid_parameters = check_param_in_env_file(environment_pair, prop, DESIRED)
 
-    assert not invalid_parameters, ("{} parameters"
-                                    " found in {} environment file {}"
-                                    .format(prop,
-                                            environment_pair.get("name"),
-                                            invalid_parameters))
+    assert not invalid_parameters, (
+        "{} parameters"
+        " found in {} environment file {}".format(
+            prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
 
 
-@validates('R-29872')
+@validates("R-29872")
 def test_nova_server_network_parameter_doesnt_exist_in_environment_file(heat_template):
 
     if pytest.config.getoption("validation_profile") == "heat_only":
@@ -409,33 +456,22 @@ def test_nova_server_network_parameter_doesnt_exist_in_environment_file(heat_tem
     DESIRED = False
     resource_type = "OS::Nova::Server"
 
-    invalid_parameters = check_resource_parameter(environment_pair,
-                                                  prop,
-                                                  DESIRED,
-                                                  resource_type,
-                                                  nested_prop=nested_prop)
+    invalid_parameters = check_resource_parameter(
+        environment_pair, prop, DESIRED, resource_type, nested_prop=nested_prop
+    )
 
-    assert not invalid_parameters, ("{} {} parameters"
-                                    " found in {} environment file {}"
-                                    .format(resource_type,
-                                            nested_prop,
-                                            environment_pair.get("name"),
-                                            invalid_parameters))
+    assert not invalid_parameters, (
+        "{} {} parameters"
+        " found in {} environment file {}".format(
+            resource_type, nested_prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
 
 
-@validates('R-39841',
-           'R-87123',
-           'R-28795',
-           'R-97201',
-           'R-62590',
-           'R-93496',
-           'R-98905',
-           'R-93030',
-           'R-90206',
-           'R-98569',
-           'R-62590',
-           'R-93496')
-def test_neutron_port_fixedips_ipaddress_parameter_doesnt_exist_in_environment_file(heat_template):
+@validates("R-39841", "R-87123", "R-62590", "R-98905", "R-93030", "R-62590")
+def test_neutron_port_external_fixedips_ipaddress_parameter_doesnt_exist_in_environment_file(
+    heat_template
+):
 
     if pytest.config.getoption("validation_profile") == "heat_only":
         pytest.skip("skipping test because validation profile is heat only")
@@ -446,26 +482,29 @@ def test_neutron_port_fixedips_ipaddress_parameter_doesnt_exist_in_environment_f
     nested_prop = "ip_address"
     DESIRED = False
     resource_type = "OS::Neutron::Port"
+    exclude_parameter = re.compile(r"^(.+?)_int_(.+?)$")
 
-    invalid_parameters = check_resource_parameter(environment_pair,
-                                                  prop,
-                                                  DESIRED,
-                                                  resource_type,
-                                                  nested_prop=nested_prop)
+    invalid_parameters = check_resource_parameter(
+        environment_pair,
+        prop,
+        DESIRED,
+        resource_type,
+        nested_prop=nested_prop,
+        exclude_parameter=exclude_parameter,
+    )
 
-    assert not invalid_parameters, ("{} {} parameters"
-                                    " found in {} environment file {}"
-                                    .format(resource_type,
-                                            nested_prop,
-                                            environment_pair.get("name"),
-                                            invalid_parameters))
+    assert not invalid_parameters, (
+        "{} {} external parameters"
+        " found in {} environment file {}".format(
+            resource_type, nested_prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
 
 
-@validates('R-83677',
-           'R-80829',
-           'R-69634',
-           'R-22288')
-def test_neutron_port_fixedips_subnet_parameter_doesnt_exist_in_environment_file(heat_template):
+@validates("R-28795", "R-97201", "R-93496", "R-90206", "R-98569", "R-93496")
+def test_neutron_port_internal_fixedips_ipaddress_parameter_exists_in_environment_file(
+    heat_template
+):
 
     if pytest.config.getoption("validation_profile") == "heat_only":
         pytest.skip("skipping test because validation profile is heat only")
@@ -473,26 +512,56 @@ def test_neutron_port_fixedips_subnet_parameter_doesnt_exist_in_environment_file
     environment_pair = get_environment_pair(heat_template)
 
     prop = "fixed_ips"
-    nested_prop = "subnet_id"
+    nested_prop = "ip_address"
+    DESIRED = True
+    resource_type = "OS::Neutron::Port"
+    exclude_parameter = re.compile(r"^((?!_int_).)*$")
+
+    invalid_parameters = check_resource_parameter(
+        environment_pair,
+        prop,
+        DESIRED,
+        resource_type,
+        nested_prop=nested_prop,
+        exclude_parameter=exclude_parameter,
+    )
+
+    assert not invalid_parameters, (
+        "{} {} internal parameters"
+        " not found in {} environment file {}".format(
+            resource_type, nested_prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
+
+
+@validates("R-83677", "R-80829", "R-69634", "R-22288")
+def test_neutron_port_fixedips_subnet_parameter_doesnt_exist_in_environment_file(
+    heat_template
+):
+
+    if pytest.config.getoption("validation_profile") == "heat_only":
+        pytest.skip("skipping test because validation profile is heat only")
+
+    environment_pair = get_environment_pair(heat_template)
+
+    prop = "fixed_ips"
+    nested_prop = "subnet"
     DESIRED = False
     resource_type = "OS::Neutron::Port"
 
-    invalid_parameters = check_resource_parameter(environment_pair,
-                                                  prop,
-                                                  DESIRED,
-                                                  resource_type,
-                                                  nested_prop=nested_prop)
+    invalid_parameters = check_resource_parameter(
+        environment_pair, prop, DESIRED, resource_type, nested_prop=nested_prop
+    )
 
-    assert not invalid_parameters, ("{} {} parameters"
-                                    " found in {} environment file {}"
-                                    .format(resource_type,
-                                            nested_prop,
-                                            environment_pair.get("name"),
-                                            invalid_parameters))
+    assert not invalid_parameters, (
+        "{} {} parameters"
+        " found in {} environment file {}".format(
+            resource_type, nested_prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
 
 
-@validates('R-83412',
-           'R-83418')
+@validates("R-83412", "R-83418")
 def test_neutron_port_aap_ip_parameter_doesnt_exist_in_environment_file(heat_template):
 
     if pytest.config.getoption("validation_profile") == "heat_only":
@@ -505,21 +574,19 @@ def test_neutron_port_aap_ip_parameter_doesnt_exist_in_environment_file(heat_tem
     DESIRED = False
     resource_type = "OS::Neutron::Port"
 
-    invalid_parameters = check_resource_parameter(environment_pair,
-                                                  prop,
-                                                  DESIRED,
-                                                  resource_type,
-                                                  nested_prop=nested_prop)
+    invalid_parameters = check_resource_parameter(
+        environment_pair, prop, DESIRED, resource_type, nested_prop=nested_prop
+    )
 
-    assert not invalid_parameters, ("{} {} parameters"
-                                    " found in {} environment file {}"
-                                    .format(resource_type,
-                                            nested_prop,
-                                            environment_pair.get("name"),
-                                            invalid_parameters))
+    assert not invalid_parameters, (
+        "{} {} parameters"
+        " found in {} environment file {}".format(
+            resource_type, nested_prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
 
 
-@validates('R-99812')
+@validates("R-99812")
 def test_non_nova_server_name_parameter_doesnt_exist_in_environment_file(heat_template):
 
     if pytest.config.getoption("validation_profile") == "heat_only":
@@ -531,21 +598,19 @@ def test_non_nova_server_name_parameter_doesnt_exist_in_environment_file(heat_te
     DESIRED = False
     resource_type = "OS::Nova::Server"
 
-    invalid_parameters = check_resource_parameter(environment_pair,
-                                                  prop,
-                                                  DESIRED,
-                                                  resource_type,
-                                                  resource_type_inverse=True)
+    invalid_parameters = check_resource_parameter(
+        environment_pair, prop, DESIRED, resource_type, resource_type_inverse=True
+    )
 
-    assert not invalid_parameters, ("non-{} {} parameters"
-                                    " found in {} environment file {}"
-                                    .format(resource_type,
-                                            prop,
-                                            environment_pair.get("name"),
-                                            invalid_parameters))
+    assert not invalid_parameters, (
+        "non-{} {} parameters"
+        " found in {} environment file {}".format(
+            resource_type, prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
 
 
-@validates('R-92193')
+@validates("R-92193")
 def test_network_fqdn_parameter_doesnt_exist_in_environment_file(heat_template):
 
     if pytest.config.getoption("validation_profile") == "heat_only":
@@ -553,22 +618,23 @@ def test_network_fqdn_parameter_doesnt_exist_in_environment_file(heat_template):
 
     environment_pair = get_environment_pair(heat_template)
 
-    prop = r'^(.+?)_net_fqdn$'
+    prop = r"^(.+?)_net_fqdn$"
     DESIRED = False
 
-    invalid_parameters = check_param_in_env_file(environment_pair,
-                                                 prop,
-                                                 DESIRED)
+    invalid_parameters = check_param_in_env_file(environment_pair, prop, DESIRED)
 
-    assert not invalid_parameters, ("{} parameters"
-                                    " found in {} environment file {}"
-                                    .format(prop,
-                                            environment_pair.get("name"),
-                                            invalid_parameters))
+    assert not invalid_parameters, (
+        "{} parameters"
+        " found in {} environment file {}".format(
+            prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
 
 
-@validates('R-76682')
-def test_contrail_route_prefixes_parameter_doesnt_exist_in_environment_file(heat_template):
+@validates("R-76682")
+def test_contrail_route_prefixes_parameter_doesnt_exist_in_environment_file(
+    heat_template
+):
 
     if pytest.config.getoption("validation_profile") == "heat_only":
         pytest.skip("skipping test because validation profile is heat only")
@@ -580,21 +646,19 @@ def test_contrail_route_prefixes_parameter_doesnt_exist_in_environment_file(heat
     DESIRED = False
     resource_type = "OS::ContrailV2::InterfaceRouteTable"
 
-    invalid_parameters = check_resource_parameter(environment_pair,
-                                                  prop,
-                                                  DESIRED,
-                                                  resource_type,
-                                                  nested_prop=nested_prop)
+    invalid_parameters = check_resource_parameter(
+        environment_pair, prop, DESIRED, resource_type, nested_prop=nested_prop
+    )
 
-    assert not invalid_parameters, ("{} {} parameters"
-                                    " found in {} environment file {}"
-                                    .format(resource_type,
-                                            nested_prop,
-                                            environment_pair.get("name"),
-                                            invalid_parameters))
+    assert not invalid_parameters, (
+        "{} {} parameters"
+        " found in {} environment file {}".format(
+            resource_type, nested_prop, environment_pair.get("name"), invalid_parameters
+        )
+    )
 
 
-@validates('R-50011')
+@validates("R-50011")
 def test_heat_rg_count_parameter_exists_in_environment_file(heat_template):
 
     if pytest.config.getoption("validation_profile") == "heat_only":
@@ -605,17 +669,19 @@ def test_heat_rg_count_parameter_exists_in_environment_file(heat_template):
     prop = "count"
     DESIRED = True
     resource_type = "OS::Heat::ResourceGroup"
-    exclude_resource = re.compile(r'^(.+?)_subint_(.+?)_port_(.+?)_subinterfaces$')
+    exclude_resource = re.compile(r"^(.+?)_subint_(.+?)_port_(.+?)_subinterfaces$")
 
-    invalid_parameters = check_resource_parameter(environment_pair,
-                                                  prop,
-                                                  DESIRED,
-                                                  resource_type,
-                                                  exclude_resource=exclude_resource)
+    invalid_parameters = check_resource_parameter(
+        environment_pair,
+        prop,
+        DESIRED,
+        resource_type,
+        exclude_resource=exclude_resource,
+    )
 
-    assert not invalid_parameters, ("{} {} parameters not"
-                                    " found in {} environment file {}"
-                                    .format(resource_type,
-                                            prop,
-                                            environment_pair.get("name"),
-                                            invalid_parameters))
+    assert not invalid_parameters, (
+        "{} {} parameters not"
+        " found in {} environment file {}".format(
+            resource_type, prop, environment_pair.get("name"), invalid_parameters
+        )
+    )

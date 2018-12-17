@@ -38,28 +38,30 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-'''nested_dict.get
-'''
+"""nested_dict.get
+"""
 
-VERSION = '1.0.0'
+VERSION = "1.1.1"
 
 
-def get(dic, *keys):
-    '''Return the value of the last key given a (nested) dict
-    and list of keys.  If any key is missing, or if the value
-    of any key except the last is not a dict, then None is returned.
-    '''
+def get(dic, *keys, **kwargs):
+    """Return the value of the last key given a (nested) dict and
+    list of keys.  If any key is missing, or if the value of any key
+    except the last is not a dict, then the default value is returned.
+    The default value may be passed in using the keyword 'default=',
+    otherwise the default value is None.
+    """
     d = dic
+    default = kwargs.get("default", None)
     for key in keys:
-        if hasattr(d, 'get'):
-            d = d.get(key)
+        if hasattr(d, "get"):
+            d = d.get(key, default)
         else:
-            return None
+            return default
     return d
 
 
 def is_dict_has_key(obj, key):
-    '''return True/False `obj` is a dict and has `key`
-    '''
+    """return True/False `obj` is a dict and has `key`
+    """
     return isinstance(obj, dict) and key in obj
-

@@ -46,20 +46,36 @@ from tests import cached_yaml as yaml
 from .helpers import validates
 
 
-def expected_template_module_pair(volume_path):
-    """Returns the path to the expected base or incremental module for a given volume"""
-    base_dir, filename = os.path.split(volume_path)
-    return os.path.join(base_dir, filename.replace("_volume", ""))
+class VolumePairModule:
+    def __init__(self, volume_path):
+        self.volume_path = volume_path
+
+    @property
+    def path_options(self):
+        expected_path, _ = self.volume_path.rsplit("_volume", maxsplit=1)
+        return (expected_path + ".yaml", expected_path + ".yml")
+
+    @property
+    def exists(self):
+        return any(os.path.exists(option) for option in self.path_options)
+
+    def get_module_path(self):
+        """
+        Return the path of the volume module's pair if it exists,
+        otherwise None
+        """
+        for option in self.path_options:
+            if os.path.exists(option):
+                return option
+        return None
 
 
 @validates("R-82732")
 def test_volume_module_name_matches_incremental_or_base_module(volume_template):
-    expected_template_name = expected_template_module_pair(volume_template)
-    assert os.path.exists(
-        expected_template_name
-    ), "Could not find corresponding module ({}) for volume module ({}".format(
-        expected_template_name, volume_template
-    )
+    pair_module = VolumePairModule(volume_template)
+    assert pair_module.exists, (
+        "Could not find a corresponding module ({}) for " + "volume module ({})"
+    ).format(" or ".join(pair_module.path_options), volume_template)
 
 
 @validates("R-11200", "R-07443")
@@ -68,15 +84,12 @@ def test_volume_outputs_consumed(template_dir, volume_template):
     Check that all outputs in a volume template is consumed
     by the corresponding heat template
     """
-    pair_template = expected_template_module_pair(volume_template)
-
-    # Make sure all the output parameters in the volume module are
-    # consumed by the expected base or incremental module
-    if not os.path.exists(pair_template):
-        pytest.skip("Expected pair module not found")
+    pair_module = VolumePairModule(volume_template)
+    if not pair_module.exists:
+        pytest.skip("No pair module found for volume template")
     with open(volume_template, "r") as f:
         volume = yaml.load(f)
-    with open(pair_template, "r") as f:
+    with open(pair_module.get_module_path(), "r") as f:
         pair = yaml.load(f)
     outputs = set(volume.get("outputs", {}).keys())
     parameters = set(pair.get("parameters", {}).keys())
@@ -84,16 +97,16 @@ def test_volume_outputs_consumed(template_dir, volume_template):
     assert not missing_output_parameters, (
         "The output parameters ({}) in {} were not all "
         "used by the expected module {}".format(
-            ",".join(missing_output_parameters), volume_template, pair_template
+            ",".join(missing_output_parameters), volume_template, pair_module
         )
     )
 
     # Now make sure that none of the output parameters appear in any other
     # template
-    template_files = set(glob.glob("*.yaml"))
+    template_files = set(glob.glob("*.yaml")).union(glob.glob(".yml"))
     errors = {}
     for template_path in template_files:
-        if template_path in (pair_template, volume_template):
+        if template_path in (pair_module, volume_template):
             continue  # Skip these files since we already checked this pair
         with open(template_path, "r") as f:
             template = yaml.load(f)
@@ -104,5 +117,6 @@ def test_volume_outputs_consumed(template_dir, volume_template):
     message = ", ".join(
         "{} ({})".format(path, ", ".join(params)) for path, params in errors.items()
     )
-    assert not errors, "Volume output parameters detected in unexpected modules: " + \
-                       message
+    assert not errors, (
+        "Volume output parameters detected in unexpected modules: " + message
+    )

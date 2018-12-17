@@ -38,8 +38,8 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-'''vm-type syntax
-'''
+"""vm-type syntax
+"""
 
 import re
 
@@ -49,27 +49,25 @@ from .structures import Heat
 from .helpers import validates
 from .utils import vm_types
 
-VERSION = '1.0.0'
+VERSION = "1.0.0"
 
-RE_VM_TYPE = re.compile(r'[\w\d_]+$')
-RE_VM_TYPE_NG = re.compile(r'.*_int|_?int_.*$')
+RE_VM_TYPE = re.compile(r"[\w\d_]+$")
+RE_VM_TYPE_NG = re.compile(r".*_int|_?int_.*$")
 
 
-@validates('R-98407')
+@validates("R-98407")
 def test_vm_type_syntax(heat_template):
-    '''
+    """
     A VNF's Heat Orchestration Template's ``{vm-type}``
     **MUST** contain only
     alphanumeric characters and/or underscores '_' and **MUST NOT**
     contain any of the following strings:
     ``_int`` or ``int_`` or ``_int_``.
-    '''
+    """
     v = Heat(filepath=heat_template)
     if not v.resources:
         pytest.skip("No resources")
     t = set()
-    t.update(*[vm_types.get_vm_types_for_resource(r)
-             for r in v.resources.values()])
+    t.update(*[vm_types.get_vm_types_for_resource(r) for r in v.resources.values()])
     bad = [x for x in t if not RE_VM_TYPE.match(x) or RE_VM_TYPE_NG.match(x)]
-    assert not bad, 'bad vm-types %s' % bad
-
+    assert not bad, "bad vm-types %s" % bad

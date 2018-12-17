@@ -46,10 +46,7 @@ constructor = yaml.constructor
 
 
 def add_constructor(tag, constructor):
-    yaml.add_constructor(
-        tag,
-        constructor,
-    )
+    yaml.add_constructor(tag, constructor)
 
 
 def load(fp):

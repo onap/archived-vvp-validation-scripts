@@ -50,8 +50,11 @@ def raise_duplicates_keys(loader, node, deep=False):
         value = loader.construct_object(value_node, deep=deep)
         if key in mapping:
             raise ConstructorError(
-                "while constructing a mapping", node.start_mark,
-                "found duplicate key (%s)" % key, key_node.start_mark)
+                "while constructing a mapping",
+                node.start_mark,
+                "found duplicate key (%s)" % key,
+                key_node.start_mark,
+            )
         mapping[key] = value
 
     return loader.construct_mapping(node, deep)

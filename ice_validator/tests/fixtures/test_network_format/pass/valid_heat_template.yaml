@@ -59,10 +59,16 @@ resources:
         properties:
           network: { get_param: extnet_net_id }
 
-  int_oam_net:
+  int_oam_network:
         type: OS::Neutron::Net
         properties:
           name: { get_param: int_oam_net_name }
+
+  int_oam_subnet:
+        type: OS::Neutron::Subnet
+        properties:
+          network: { get_resource: int_oam_network }
+  
   vm_type_1_int_oam_1_port:
     type: OS::Neutron::Port
     properties:

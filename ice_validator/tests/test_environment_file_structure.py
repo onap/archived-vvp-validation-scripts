@@ -45,19 +45,19 @@ from tests import cached_yaml as yaml
 
 from .helpers import validates
 
-VERSION = '1.0.0'
+VERSION = "1.0.0"
 
 # pylint: disable=invalid-name
 
 
-@validates('R-03324')
+@validates("R-03324")
 def test_environment_file_contains_required_sections(env_file):
-    '''
+    """
     Check that all environments files only have the allowed sections
-    '''
+    """
     required_keys = ["parameters"]
 
     with open(env_file) as fh:
         yml = yaml.load(fh)
     missing_keys = [v for v in required_keys if v not in yml]
-    assert not missing_keys, '%s missing %s' % (env_file, missing_keys)
+    assert not missing_keys, "%s missing %s" % (env_file, missing_keys)

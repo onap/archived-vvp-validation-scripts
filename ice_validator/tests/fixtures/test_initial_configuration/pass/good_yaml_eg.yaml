@@ -37,16 +37,40 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
----
- a: 1
- b:
-    c: 3
-    d: 4
-    e:
-       f: 4
-    g:
-       h:
-          test: test
-       k: g
+heat_template_version: 2015-04-30
 
-    test: out
+description: Simple template to deploy a single compute instance
+
+parameter_groups:
+  - label: human-readable label of parameter group
+    description: description of the parameter group
+    parameters:
+    - pga
+    - pgb
+
+parameters:
+  b:
+    type: string
+    label: Key Name
+    description: Name of key-pair to be used for compute instance
+  c:
+    type: string
+    label: Key Name
+    description: Name of key-pair to be used for compute instance
+  d:
+    type: string
+    label: Key Name
+    description: Name of key-pair to be used for compute instance
+
+resources:
+  my_instance:
+    type: OS::Nova::Server
+    properties:
+      key_name: { get_param: d }
+      image: { get_param: b }
+      flavor: { get_param: c }
+
+outputs:
+  instance_ip:
+    description: The IP address of the deployed instance
+    value: { get_attr: [my_instance, first_address] }
