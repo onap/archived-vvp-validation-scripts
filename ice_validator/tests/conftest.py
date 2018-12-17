@@ -593,7 +593,7 @@ def hash_directory(path):
 def load_current_requirements():
     """Loads dict of current requirements or empty dict if file doesn't exist"""
 
-    url = 'https://onap.readthedocs.io/en/latest/_downloads/needs.json'
+    url = 'https://onap.readthedocs.io/en/latest/_downloads/789ac64d223325488fb3f120f959d985/needs.json'
 
     try:
         r = requests.get(url)

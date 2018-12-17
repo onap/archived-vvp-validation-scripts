@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -44,24 +44,55 @@ from tests import cached_yaml as yaml
 from .helpers import validates
 
 
-@validates('R-55218', 'R-98374', 'R-44318')
-def test_required_parameters_no_constraints(yaml_file):
-    '''
-    Make sure all required parameters are specified without any
-    constraints in the heat template.
-    '''
-    required_parameters = ["vnf_id", "vf_module_id", "vnf_name"]
+def check_parameters_no_constraints(yaml_file, parameter):
 
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
-    # skip if parameters are not defined
-    if "parameters" not in yml:
-        pytest.skip("No parameters specified in the heat template")
+    param = yml.get("parameters", {}).get(parameter)
+    if not param:
+        pytest.skip("Parameter {} not defined in parameters section".format(parameter))
 
-    invalid_params = []
-    for k1, v1 in yml["parameters"].items():
-        if k1 in required_parameters and "constraints" in v1:
-            invalid_params.append(k1)
+    assert (
+        "constraints" not in param
+    ), "Found constraints defined for parameter: {}".format(parameter)
 
-    assert not set(invalid_params)
+
+@validates("R-55218")
+def test_vnf_id_parameter_has_no_constraints(yaml_file):
+    check_parameters_no_constraints(yaml_file, "vnf_id")
+
+
+@validates("R-98374")
+def test_vf_module_id_parameter_has_no_constraints(yaml_file):
+    check_parameters_no_constraints(yaml_file, "vf_module_id")
+
+
+@validates("R-44318")
+def test_vnf_name_parameter_has_no_constraints(yaml_file):
+    check_parameters_no_constraints(yaml_file, "vnf_name")
+
+
+@validates("R-34055")
+def test_workload_context_parameter_has_no_constraints(yaml_file):
+    check_parameters_no_constraints(yaml_file, "workload_context")
+
+
+@validates("R-56183")
+def test_environment_context_parameter_has_no_constraints(yaml_file):
+    check_parameters_no_constraints(yaml_file, "environment_context")
+
+
+@validates("R-15480")
+def test_vf_module_name_parameter_has_no_constraints(yaml_file):
+    check_parameters_no_constraints(yaml_file, "vf_module_name")
+
+
+@validates("R-67597")
+def test_vm_role_parameter_has_no_constraints(yaml_file):
+    check_parameters_no_constraints(yaml_file, "vm_role")
+
+
+@validates("R-09811")
+def test_vf_module_index_parameter_has_no_constraints(yaml_file):
+    check_parameters_no_constraints(yaml_file, "vf_module_index")

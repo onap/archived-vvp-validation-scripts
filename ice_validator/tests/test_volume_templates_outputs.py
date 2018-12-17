@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -37,14 +37,51 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
+import pytest
 
 from tests import cached_yaml as yaml
+from .helpers import validates
 
 
+@validates("R-89913")
 def test_volume_templates_contains_outputs(volume_template):
-    '''
+    """
     Check that all volume templates include outputs
-    '''
+    """
     with open(volume_template) as fh:
         yml = yaml.load(fh)
-    assert "outputs" in yml
+
+    resources = yml.get("resources")
+    volume_resources = []
+    invalid_resource_ids = []
+    output_resources = []
+
+    if not resources:
+        pytest.skip("No resources detected in template")
+
+    for rid, rprop in resources.items():
+        rtype = rprop.get("type")
+        if not rtype:
+            continue
+        if rtype == "OS::Cinder::Volume":
+            volume_resources.append(rid)
+
+    outputs = yml.get("outputs")
+    if not outputs:
+        pytest.fail("No outputs detected in volume template")
+
+    for k1, v1 in outputs.items():
+        output_value = v1.get("value", {}).get("get_resource")
+        if not output_value:
+            continue
+        output_resources.append(output_value)
+
+    for rid in volume_resources:
+        if rid not in output_resources:
+            invalid_resource_ids.append(rid)
+
+    assert (
+        not invalid_resource_ids
+    ), "volumes resource IDs not found in outputs of volume module {}".format(
+        invalid_resource_ids
+    )

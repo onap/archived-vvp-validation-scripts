@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -45,18 +45,17 @@ from tests import cached_yaml as yaml
 
 from .helpers import validates
 
-from .utils.vm_types import get_vm_types_for_resource
-from .utils.vm_types import get_vm_types
+from .utils.vm_types import get_vm_types_for_resource, get_vm_types
 
 from .utils.network_roles import get_network_roles
 
 
-@validates('R-57282')
+@validates("R-57282")
 def test_vm_type_consistent_on_nova_servers(heat_template):
-    '''
+    """
     Make sure all nova servers have properly formatted properties
     for their name, image and flavor
-    '''
+    """
     with open(heat_template) as fh:
         yml = yaml.load(fh)
 
@@ -68,22 +67,23 @@ def test_vm_type_consistent_on_nova_servers(heat_template):
     for k, v in yml["resources"].items():
         if not isinstance(v, dict):
             continue
-        if v.get('type') != 'OS::Nova::Server':
+        if v.get("type") != "OS::Nova::Server":
             continue
-        if 'properties' not in v:
+        if "properties" not in v:
             continue
 
         vm_types = get_vm_types_for_resource(v)
         if len(vm_types) != 1:
             invalid_nova_servers.append(k)
 
-    assert not set(invalid_nova_servers), \
-        "vm_types not consistant on the following resources {}" \
-        .format(invalid_nova_servers)
+    assert not set(
+        invalid_nova_servers
+    ), "vm_types not consistant on the following resources: {}".format(
+        ",".join(invalid_nova_servers)
+    )
 
 
-@validates('R-48067',
-           'R-00977')
+@validates("R-48067", "R-00977")
 def test_vm_type_network_role_collision(yaml_file):
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
@@ -100,34 +100,37 @@ def test_vm_type_network_role_collision(yaml_file):
     collisions = []
     for nr in network_roles:
         for vt in vm_types:
-            if vt in nr or nr in vt:
-                collisions.append({"vm_type": vt, "network_role": nr})
+            if vt in nr:
+                collisions.append(
+                    (
+                        "vm_type ({}) cannot be a substring " "of network_role ({})"
+                    ).format(vt, nr)
+                )
+            elif nr in vt:
+                collisions.append(
+                    (
+                        "network_role ({}) cannot be a substring " "of vm_type ({})"
+                    ).format(nr, vt)
+                )
 
-    assert not collisions, \
-        "vm_type and network_role should not be substrings {}" .format(collisions)
+    assert not collisions, ", ".join(collisions)
 
 
-@validates('R-50436',
-           'R-45188',
-           'R-40499')
+@validates("R-50436", "R-45188", "R-40499")
 def test_nova_server_flavor_parameter(yaml_file):
 
     prop = "flavor"
     check_nova_parameter_format(prop, yaml_file)
 
 
-@validates('R-51430',
-           'R-54171',
-           'R-87817')
+@validates("R-51430", "R-54171", "R-87817")
 def test_nova_server_name_parameter(yaml_file):
 
     prop = "name"
     check_nova_parameter_format(prop, yaml_file)
 
 
-@validates('R-71152',
-           'R-45188',
-           'R-57282')
+@validates("R-71152", "R-57282", "R-58670")
 def test_nova_server_image_parameter(yaml_file):
 
     prop = "image"
@@ -138,13 +141,11 @@ def check_nova_parameter_format(prop, yaml_file):
 
     formats = {
         "string": {
-            "name": re.compile(r'(.+?)_name_\d+$'),
-            "flavor": re.compile(r'(.+?)_flavor_name$'),
-            "image": re.compile(r'(.+?)_image_name$')
+            "name": re.compile(r"(.+?)_name_\d+$"),
+            "flavor": re.compile(r"(.+?)_flavor_name$"),
+            "image": re.compile(r"(.+?)_image_name$"),
         },
-        "comma_delimited_list": {
-            "name": re.compile(r'(.+?)_names$')
-        }
+        "comma_delimited_list": {"name": re.compile(r"(.+?)_names$")},
     }
 
     with open(yaml_file) as fh:
@@ -163,31 +164,28 @@ def check_nova_parameter_format(prop, yaml_file):
     for k, v in yml["resources"].items():
         if not isinstance(v, dict):
             continue
-        if v.get('type') != 'OS::Nova::Server':
+        if v.get("type") != "OS::Nova::Server":
             continue
 
-        prop_param = v.get("properties", {}) \
-                      .get(prop, {}) \
-                      .get("get_param")
+        prop_val = v.get("properties", {}).get(prop, {})
+        prop_param = prop_val.get("get_param", "") if isinstance(prop_val, dict) else ""
 
         if not prop_param:
             pytest.skip("{} doesn't have property {}".format(k, prop))
         elif isinstance(prop_param, list):
             prop_param = prop_param[0]
 
-        template_param_type = yml.get("parameters", {}) \
-                                 .get(prop_param, {}) \
-                                 .get("type")
+        template_param_type = yml.get("parameters", {}).get(prop_param, {}).get("type")
 
         if not template_param_type:
             pytest.skip("could not determine param type for {}".format(prop_param))
 
-        format_match = formats.get(template_param_type, {}) \
-                              .get(prop)
+        format_match = formats.get(template_param_type, {}).get(prop)
 
         if not format_match or not format_match.match(prop_param):
-            invalid_parameters.append(prop_param)
+            msg = (
+                "Invalid parameter format ({}) on Resource ID ({}) property" " ({})"
+            ).format(prop_param, k, prop)
+            invalid_parameters.append(msg)
 
-    assert not set(invalid_parameters), \
-        "invalid {} parameters detected {}" \
-        .format(prop, invalid_parameters)
+    assert not set(invalid_parameters), ", ".join(invalid_parameters)

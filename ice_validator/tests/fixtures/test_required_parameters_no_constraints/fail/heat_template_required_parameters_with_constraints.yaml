@@ -79,3 +79,43 @@ parameters:
         - 0
         - 5
         - 10
+  environment_context:
+    type: string
+    description: Unique ID for this VNF Module instance
+    constraints:
+      - range: { min: 0, max: 10 }
+        description: allowed range of values
+      - allowed_values:
+        - 0
+        - 5
+        - 10
+  workload_context:
+    type: string
+    description: Unique ID for this VNF Module instance
+    constraints:
+      - range: { min: 0, max: 10 }
+        description: allowed range of values
+      - allowed_values:
+        - 0
+        - 5
+        - 10
+  vf_module_index:
+    type: string
+    description: Unique ID for this VNF Module instance
+    constraints:
+      - range: { min: 0, max: 10 }
+        description: allowed range of values
+      - allowed_values:
+        - 0
+        - 5
+        - 10
+  vm_role:
+    type: string
+    description: Unique ID for this VNF Module instance
+    constraints:
+      - range: { min: 0, max: 10 }
+        description: allowed range of values
+      - allowed_values:
+        - 0
+        - 5
+        - 10

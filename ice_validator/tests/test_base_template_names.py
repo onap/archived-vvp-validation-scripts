@@ -48,32 +48,34 @@ import re
 from .helpers import check_basename_ending
 from .helpers import validates
 
-VERSION = '1.2.0'
+VERSION = "1.2.0"
 
 # is 'base', starts with 'base_', contains '_base_', ends with '_base'
-RE_BASE = re.compile(r'(^base$)|(^base_)|(_base_)|(_base$)')
+RE_BASE = re.compile(r"(^base$)|(^base_)|(_base_)|(_base$)")
 
 
-@validates('R-37028', 'R-87485', 'R-81339', 'R-87247', 'R-76057')
+@validates("R-37028", "R-87485", "R-81339", "R-87247", "R-76057")
 def test_base_template_names(template_dir):
-    '''
+    """
     Check all base templates have a filename that includes "_base_".
-    '''
+    """
     base_template_count = 0
-    filenames = [f for f in listdir(template_dir)
-                 if path.isfile(path.join(template_dir, f)) and
-                 path.splitext(f)[-1] in ['.yaml', '.yml']]
+    filenames = [
+        f
+        for f in listdir(template_dir)
+        if path.isfile(path.join(template_dir, f))
+        and path.splitext(f)[-1] in [".yaml", ".yml"]
+    ]
     for filename in filenames:
         filename = path.splitext(filename)[0]
 
         # volume templates are tied to their parent naming wise
-        if check_basename_ending('volume', filename):
+        if check_basename_ending("volume", filename):
             continue
 
         if RE_BASE.search(filename.lower()):
             base_template_count += 1
-    assert base_template_count == 1, (
-        'must be 1 "*_base_*" in %s not %d' % (
-            filenames,
-            base_template_count))
-
+    assert base_template_count == 1, 'must be 1 "*_base_*" in %s not %d' % (
+        filenames,
+        base_template_count,
+    )

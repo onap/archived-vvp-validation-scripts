@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -39,28 +39,34 @@
 #
 
 import collections
+import os
 
 from tests import cached_yaml as yaml
 
 from .helpers import validates
 
 
-@validates('R-16447')
+@validates("R-16447")
 def test_unique_resources_across_all_yaml_files(yaml_files):
-    '''
+    """
     Check that all instance names are unique
     across all yaml files.
-    '''
-    resources_ids = []
+    """
+    resources_ids = collections.defaultdict(set)
     for yaml_file in yaml_files:
         with open(yaml_file) as fh:
             yml = yaml.load(fh)
-        if 'resources' not in yml:
+        if "resources" not in yml:
             continue
-        resources_ids.extend(yml['resources'].keys())
+        for resource_id in yml["resources"]:
+            resources_ids[resource_id].add(os.path.split(yaml_file)[1])
 
-    dup_ids = [item
-               for item, count in collections.Counter(resources_ids).items()
-               if count > 1]
+    dup_ids = {r_id: files for r_id, files in resources_ids.items() if len(files) > 1}
 
-    assert not dup_ids
+    msg = "The following resource IDs are duplicated in one or more files: "
+    errors = [
+        "ID ({}) appears in {}.".format(r_id, ", ".join(files))
+        for r_id, files in dup_ids.items()
+    ]
+    msg += ", ".join(errors)
+    assert not dup_ids, msg

@@ -42,36 +42,33 @@ import re
 
 
 def get_vm_types_for_resource(resource):
-    '''
+    """
     Get all unique vm_types for a resource
     Notes:
     - Returns set([]) if the resource is not formatted
     properly, the passed resource is not a nova server
     - If more than one vm_type is detected all vm_types will
     be returned
-    '''
+    """
     if not isinstance(resource, dict):
         return set()
-    if 'type' not in resource:
+    if "type" not in resource:
         return set()
-    if resource['type'] != 'OS::Nova::Server':
+    if resource["type"] != "OS::Nova::Server":
         return set()
-    if 'properties' not in resource:
+    if "properties" not in resource:
         return set()
 
     key_values = ["name", "flavor", "image"]
     key_value_formats = [
-                        ["name", "string",
-                         re.compile(r'(.+?)_name_\d+')],
-                        ["name", "comma_delimited_list",
-                         re.compile(r'(.+?)_names')],
-                        ["flavor", "string",
-                         re.compile(r'(.+?)_flavor_name')],
-                        ["image", "string",
-                         re.compile(r'(.+?)_image_name')]]
+        ["name", "string", re.compile(r"(.+?)_name_\d+")],
+        ["name", "comma_delimited_list", re.compile(r"(.+?)_names")],
+        ["flavor", "string", re.compile(r"(.+?)_flavor_name")],
+        ["image", "string", re.compile(r"(.+?)_image_name")],
+    ]
 
     vm_types = []
-    for k2, v2 in resource['properties'].items():
+    for k2, v2 in resource["properties"].items():
         if k2 not in key_values:
             continue
         if "get_param" not in v2:
@@ -89,12 +86,12 @@ def get_vm_types_for_resource(resource):
 
 
 def get_vm_type_for_nova_server(resource):
-    '''
+    """
     Get the vm_type for a resource
     Note: Returns None if not exactly one vm_type
     is detected, if the resource is not formatted properly, or
     the passed resource is not a nova server
-    '''
+    """
     vm_types = get_vm_types_for_resource(resource)
 
     # if more than one vm_type was identified, return None
@@ -105,10 +102,10 @@ def get_vm_type_for_nova_server(resource):
 
 
 def get_vm_types(resources):
-    '''
+    """
     Get all vm_types for a list of heat resources, do note that
     some of the values retrieved may be invalid
-    '''
+    """
     vm_types = []
     for v in resources.values():
         vm_types.extend(list(get_vm_types_for_resource(v)))

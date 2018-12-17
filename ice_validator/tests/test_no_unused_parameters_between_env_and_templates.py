@@ -35,41 +35,59 @@
 #
 # ============LICENSE_END============================================
 #
-# ECOMP is a trademark and service mark of AT&T Intellectual Property.
-#
 import os
 import pytest
 
 from .helpers import validates, get_environment_pair
 
 
+def get_keys(template, key):
+    """
+    Gets the set of keys from an expected dict from the ``template`` mapped to
+    the ``key``.  If the key is not found, or is not a dict, then an empty
+    set is returned
+    """
+    value = template.get(key)
+    if not value or not hasattr(value, "keys"):
+        return set()
+    else:
+        return set(value.keys())
+
+
 @pytest.mark.heat_only
-@validates('R-90279', 'R-01896', 'R-26124')
+@validates("R-01896", "R-26124")
 def test_no_unused_parameters_between_env_and_templates(heat_template):
     """
-    Check all defined parameters are used in the appropiate Heat template.
+    Check all defined parameters are used in the appropriate Heat template.
     """
     environment_pair = get_environment_pair(heat_template)
     if not environment_pair:
         pytest.skip("No heat/env pair could be identified")
 
-    env_parameters = set(environment_pair["eyml"]["parameters"].keys())
-    template_parameters = set(environment_pair["yyml"]["parameters"].keys())
+    env_parameters = get_keys(environment_pair["eyml"], "parameters")
+    template_parameters = get_keys(environment_pair["yyml"], "parameters")
 
     extra_in_template = template_parameters.difference(env_parameters)
     extra_in_env = env_parameters.difference(template_parameters)
 
-    msg = "Mismatched parameters detected for the template and environment pair " \
-          "with basename ({basename}). "
+    msg = (
+        "Mismatched parameters detected for the template and environment pair "
+        "({basename}). Ensure the parameters exist in both "
+        "templates indented under their respective parameters sections. "
+    )
     if extra_in_env:
-        msg += "The following parameters exist in the env file, but not the " \
-               "template: {extra_in_env}. "
+        msg += (
+            "The following parameters exist in the env file, but not the "
+            "template: {extra_in_env}. "
+        )
     if extra_in_template:
-        msg += "The following parameters exist in the template file, but not the " \
-               "environment file: {extra_in_template}"
+        msg += (
+            "The following parameters exist in the template file, but not the "
+            "environment file: {extra_in_template}"
+        )
 
     assert not (extra_in_template or extra_in_env), msg.format(
         basename=os.path.split(environment_pair["name"])[-1],
         extra_in_env=", ".join(extra_in_env),
-        extra_in_template=", ".join(extra_in_template)
+        extra_in_template=", ".join(extra_in_template),
     )

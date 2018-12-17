@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -44,12 +44,12 @@ from tests import cached_yaml as yaml
 from .helpers import validates
 
 
-@validates('R-93177')
+@validates("R-93177")
 def test_network_format_use_get_param_or_get_resource(heat_template):
-    '''
+    """
     Make sure all network properties only use get_param
     or get_resource of an internal network
-    '''
+    """
 
     with open(heat_template) as fh:
         yml = yaml.load(fh)
@@ -58,7 +58,8 @@ def test_network_format_use_get_param_or_get_resource(heat_template):
     if "resources" not in yml:
         pytest.skip("No resources specified in the heat template")
 
-    invalid_ports = []
+    invalid_get_resource = []
+    invalid_get_param = []
     for k1, v1 in yml["resources"].items():
         if not isinstance(v1, dict):
             continue
@@ -67,17 +68,35 @@ def test_network_format_use_get_param_or_get_resource(heat_template):
         if v1.get("type") != "OS::Neutron::Port":
             continue
 
-        valid_network = True
         for k2, v2 in v1["properties"].items():
             if k2 != "network":
                 continue
-            if "get_resource" in v2:
-                if not v2["get_resource"].startswith('int_'):
-                    valid_network = False
+            if not isinstance(v2, dict):
+                invalid_get_param.append(k1)
+            elif "get_resource" in v2:
+                if not v2["get_resource"].startswith("int_"):
+                    invalid_get_resource.append(k1)
             elif "get_param" not in v2:
-                valid_network = False
+                invalid_get_param.append(k1)
+    # TODO:  I don't think this test needs to check get_param as that is
+    #        already covered by another test.
 
-        if not valid_network:
-            invalid_ports.append(k1)
+    msg = (
+        "A OS::Neutron::Port must connect to an internal network using "
+        "get_resource (network created in same template) or get_param "
+        "(network created in a different template)."
+    )
+    if invalid_get_resource:
+        msg = (
+            msg
+            + "  These resources use get_resource to connect to a "
+            + "non-internal network: {}"
+        ).format(", ".join(invalid_get_resource))
+    if invalid_get_param:
+        msg = (
+            msg
+            + "  These resources do not use get_resource or get_param "
+            + "to connect to a network: {}"
+        ).format(", ".join(invalid_get_param))
 
-    assert not set(invalid_ports)
+    assert not (invalid_get_param or invalid_get_resource), msg

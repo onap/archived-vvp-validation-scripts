@@ -1,0 +1,19 @@
+heat_template_version: 2015-04-30
+
+description: fdsafsfsa
+
+parameters:
+
+  test_param:
+    type: string
+
+  availability_zone_1:
+    type: string
+    description: najsf
+
+resources:
+
+  test_resource:
+    type: test::resource
+    properties:
+      test_param: { get_param: test_param }

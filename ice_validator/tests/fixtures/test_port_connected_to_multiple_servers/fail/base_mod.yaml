@@ -1,0 +1,21 @@
+heat_template_version: 2014-10-16
+
+resources:
+
+  vmtype_0_nr_port_0:
+    type: OS::Neutron::Port
+
+  vmtype_0_nr_port_1:
+    type: OS::Neutron::Port
+
+  vmtype_server_0:
+    type: OS::Nova::Server
+    properties:
+      networks:
+        - port: { get_resource: vmtype_0_nr_port_0}
+
+  vmtype_server_1:
+    type: OS::Nova::Server
+    properties:
+      networks:
+        - port: { get_resource: vmtype_0_nr_port_0}

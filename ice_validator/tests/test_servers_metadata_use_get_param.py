@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -44,13 +44,11 @@ from tests import cached_yaml as yaml
 from .helpers import validates
 
 
-@validates('R-97199')
-def test_servers_metadata_use_get_param(yaml_file):
-    '''
+def check_servers_metadata_use_get_param(yaml_file, md):
+    """
     Check all defined nova server instances include
     metadata via the get_param function
-    '''
-    required_metadata = ["vnf_id", "vf_module_id"]
+    """
 
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
@@ -67,11 +65,44 @@ def test_servers_metadata_use_get_param(yaml_file):
         if v1["type"] == "OS::Nova::Server":
             try:
                 for k2, v2 in v1["properties"]["metadata"].items():
-                    if (k2 in required_metadata and not
-                            v2["get_param"] in required_metadata):
-                        invalid_nova_servers.append(k1)
+                    if k2 == md:
+                        if isinstance(v2, dict):
+                            metadata = v2.get("get_param")
+                            if not metadata:
+                                invalid_nova_servers.append(
+                                    {"server": k1, "metadata": k2}
+                                )
+                        else:
+                            invalid_nova_servers.append({"server": k1, "metadata": k2})
             except Exception as e:
                 print(e)
                 invalid_nova_servers.append(k1)
 
-    assert not set(invalid_nova_servers)
+    assert (
+        not invalid_nova_servers
+    ), "OS::Nova::Server metadata MUST use get_param {}".format(invalid_nova_servers)
+
+
+@validates("R-37437")
+def test_servers_vnf_id_metadata_use_get_param(yaml_file):
+    check_servers_metadata_use_get_param(yaml_file, "vnf_id")
+
+
+@validates("R-71493")
+def test_servers_vf_module_id_metadata_use_get_param(yaml_file):
+    check_servers_metadata_use_get_param(yaml_file, "vf_module_id")
+
+
+@validates("R-72483")
+def test_servers_vnf_name_metadata_use_get_param(yaml_file):
+    check_servers_metadata_use_get_param(yaml_file, "vnf_name")
+
+
+@validates("R-68023")
+def test_servers_vf_module_name_metadata_use_get_param(yaml_file):
+    check_servers_metadata_use_get_param(yaml_file, "vf_module_name")
+
+
+@validates("R-50816")
+def test_servers_vf_module_index_metadata_use_get_param(yaml_file):
+    check_servers_metadata_use_get_param(yaml_file, "vf_module_index")

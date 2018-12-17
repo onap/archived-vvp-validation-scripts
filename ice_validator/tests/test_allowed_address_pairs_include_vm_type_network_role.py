@@ -38,9 +38,9 @@
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
-'''
+"""
 test_allowed_address_pairs_include_vm_type_network_role
-'''
+"""
 
 import pytest
 from tests import cached_yaml as yaml
@@ -48,20 +48,18 @@ from tests import cached_yaml as yaml
 from .helpers import validates
 from .utils.ports import get_invalid_ip_addresses
 
-VERSION = '1.0.0'
+VERSION = "1.0.0"
 
 # pylint: disable=invalid-name
 
 
-@validates('R-41492',
-           'R-35735',
-           'R-98748')
+@validates("R-41492", "R-35735", "R-98748")
 def test_allowed_address_pairs_include_vm_type_network_role(heat_template):
-    '''
+    """
     Check that all allowed_address_pairs include the {vm_type} of the
     nova server it is associated to and also contains the
     {network_role} of the network it is associated with
-    '''
+    """
     with open(heat_template) as fh:
         yml = yaml.load(fh)
 
@@ -72,11 +70,10 @@ def test_allowed_address_pairs_include_vm_type_network_role(heat_template):
     if "parameters" not in yml:
         pytest.skip("No parameters specified in the heat template")
 
-    invalid_ip_addresses = get_invalid_ip_addresses(yml['resources'],
-                                                    "allowed_address_pairs",
-                                                    yml["parameters"])
+    invalid_ip_addresses = get_invalid_ip_addresses(
+        yml["resources"], "allowed_address_pairs", yml["parameters"]
+    )
 
-    assert not set(invalid_ip_addresses), (
-        'invalid ip addresses allowed address pairs %s' % list(
-            set(invalid_ip_addresses)))
-
+    assert not set(
+        invalid_ip_addresses
+    ), "invalid ip addresses allowed address pairs %s" % list(set(invalid_ip_addresses))

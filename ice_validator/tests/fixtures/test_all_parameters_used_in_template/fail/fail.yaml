@@ -1,0 +1,15 @@
+heat_template_version: 2015-04-30
+
+description: fdsafsfsa
+
+parameters:
+
+  test_paramassd:
+    type: string
+
+resources:
+
+  test_resource:
+    type: test::resource
+    properties:
+      test_param: { get_param: test_param }

@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -41,11 +41,14 @@
 import pytest
 from tests import cached_yaml as yaml
 
+from .helpers import validates
 
+
+@validates("R-901331", "R-481670", "R-663631")
 def test_vm_type_assignments_on_nova_servers_only_use_get_param(heat_template):
-    '''
+    """
     Make sure all nova servers only use get_param for their properties
-    '''
+    """
     with open(heat_template) as fh:
         yml = yaml.load(fh)
 
@@ -54,7 +57,7 @@ def test_vm_type_assignments_on_nova_servers_only_use_get_param(heat_template):
         pytest.skip("No resources specified in the heat template")
 
     key_values = ["name", "flavor", "image"]
-    invalid_nova_servers = []
+    invalid_nova_servers = set()
 
     for k, v in yml["resources"].items():
         if not isinstance(v, dict):
@@ -69,8 +72,11 @@ def test_vm_type_assignments_on_nova_servers_only_use_get_param(heat_template):
         for k2, v2 in v["properties"].items():
             if k2 in key_values:
                 if not isinstance(v2, dict):
-                    invalid_nova_servers.append(k)
+                    invalid_nova_servers.add(k)
                 elif "get_param" not in v2:
-                    invalid_nova_servers.append(k)
-
-    assert not set(invalid_nova_servers)
+                    invalid_nova_servers.add(k)
+    msg = (
+        "These OS::Nova::Server resources do not derive one or more of "
+        + "their {} properties via get_param: {}"
+    ).format(", ".join(key_values), ", ".join(invalid_nova_servers))
+    assert not invalid_nova_servers, msg

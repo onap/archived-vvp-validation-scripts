@@ -39,32 +39,27 @@
 #
 from .helpers import validates
 
-'''test_env_and_yaml_same_name
-'''
+"""test_env_and_yaml_same_name
+"""
 from os import listdir
 from os import path
 
-VERSION = '1.0.0'
+VERSION = "1.0.0"
 
 
-@validates('R-38474', 'R-81725', 'R-53433')
+@validates("R-38474", "R-81725", "R-53433")
 def test_env_and_yaml_same_name(template_dir):
-    '''
+    """
     Check that all environment template filenames are identical to an
     associated Heat template filenames. Log the result of the check and add the
     filename of any environment file that is badly named.
-    '''
+    """
     files = listdir(template_dir)
-    env_files = [f for f in files
-                 if path.splitext(f)[-1] == ".env"]
-    yaml_files = [f for f in files
-                  if path.splitext(f)[-1] in ['.yml', '.yaml']]
+    env_files = [f for f in files if path.splitext(f)[-1] == ".env"]
+    yaml_files = [f for f in files if path.splitext(f)[-1] in [".yml", ".yaml"]]
     unmatched = []
     for filename in env_files:
         basename = path.splitext(filename)[0]
-        if (basename + '.yaml' not in yaml_files
-                and basename + '.yml' not in yaml_files):
+        if basename + ".yaml" not in yaml_files and basename + ".yml" not in yaml_files:
             unmatched.append(filename)
-    assert not unmatched, (
-        'files with no corresponding .y[a]ml %s' % unmatched)
-
+    assert not unmatched, "files with no corresponding .y[a]ml %s" % unmatched

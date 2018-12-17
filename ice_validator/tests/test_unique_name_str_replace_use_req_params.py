@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -41,13 +41,16 @@
 from tests import cached_yaml as yaml
 import pytest
 
+from tests.helpers import validates
 
+
+@validates("R-85734")
 def test_unique_name_str_replace_use_req_params(yaml_file):
-    '''
+    """
     Check that all occurences of str_replace uses either vnf_name or
     vf_module_id to construct the name
-    '''
-    req_params = ['vnf_name', 'vf_module_id']
+    """
+    req_params = {"vnf_name"}
 
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
@@ -56,28 +59,30 @@ def test_unique_name_str_replace_use_req_params(yaml_file):
     if "resources" not in yml:
         pytest.skip("No resources specified in the heat template")
 
-    has_req_params = []
-    for v1 in yml["resources"].values():
+    missing_req_params = []
+    for r_id, v1 in yml["resources"].items():
         if not isinstance(v1, dict):
             continue
         if "properties" not in v1:
             continue
-        if v1["type"] in ["OS::Nova::Server", "OS::Neutron::Port",
-                          "OS::Heat::ResourceGroup"]:
+        if v1["type"] in ["OS::Nova::Server"]:
             continue
 
         try:
             v2 = v1["properties"]["name"]
             str_replace = v2["str_replace"]
 
-            all_params = []
+            all_params = set()
             for v3 in str_replace["params"].values():
-                all_params.append(v3["get_param"])
-            detected_params = set(all_params) & set(req_params)
-            has_req_params.append(len(detected_params) > 0)
+                all_params.add(v3["get_param"])
+            if req_params.difference(all_params):
+                msg = (
+                    "Resource({}) does not use str_replace "
+                    "and the vnf_name parameter to set "
+                    "the name property"
+                ).format(r_id)
+                missing_req_params.append(msg)
         except (TypeError, KeyError):
             continue
 
-    if not has_req_params:
-        pytest.skip("No str_replace instances were detected")
-    assert all(c for c in has_req_params)
+    assert not missing_req_params, ", ".join(missing_req_params)

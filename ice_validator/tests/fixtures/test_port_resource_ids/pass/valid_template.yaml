@@ -136,7 +136,7 @@ resources:
       name: { get_param: [admin_names, 2]  }
       flavor: { get_param: admin_flavor_name}
       networks:
-        - port: { get_resource: admin_2_int_vpnnet_port_0 }
+        - port: { get_resource: admin_2_int_oam_port_0 }
       metadata:
         vnf_name: { get_param: vnf_name }
         vnf_id: { get_param: vnf_id }
@@ -172,15 +172,14 @@ resources:
       properties:
         network: { get_param: extnet_net_id }
 
-  int_oam_net:
+  int_oam_network:
         type: OS::Neutron::Net
         properties:
           name: { get_param: int_oam_net_name }
 
-  admin_2_int_vpnnet_port_0:
+  admin_2_int_oam_port_0:
        type: OS::Neutron::Port
        properties:
-         network: { get_resource: int_oam_net }
+         network: { get_resource: int_oam_network }
          fixed_ips:
             - ip_address: { get_param: [db_1_int_vpnnet_ips, 0] }
-            - ip_address: { get_param: [db_1_int_vpnnet_ips, 1] }

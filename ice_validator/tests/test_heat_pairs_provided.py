@@ -43,24 +43,54 @@ from os import path
 from .helpers import validates
 
 
-@validates('R-86285', 'R-38474', 'R-81725', 'R-53433', 'R-56438',
-           'R-74304', 'R-91342', 'R-94509', 'R-31141')
+@validates(
+    "R-86285",
+    "R-38474",
+    "R-81725",
+    "R-53433",
+    "R-56438",
+    "R-74304",
+    "R-91342",
+    "R-94509",
+    "R-31141",
+)
 def test_heat_pairs_provided(heat_templates, env_files, volume_templates):
-    '''
+    """
     Check that every yaml file is submitted with
     an associated env file, and every env has an
     associated yaml file.
-    '''
+    """
 
+    env_files_missing_template = []
     for filename in env_files:
         basename = path.splitext(filename)[0]
-        assert basename + '.yaml' in heat_templates or \
-            basename + '.yml' in heat_templates or \
-            basename + '.yml' in volume_templates or \
-            basename + '.yaml' in volume_templates
+        if not (
+            basename + ".yaml" in heat_templates
+            or basename + ".yml" in heat_templates
+            or basename + ".yml" in volume_templates
+            or basename + ".yaml" in volume_templates
+        ):
+            env_files_missing_template.append(filename)
+
+    heat_template_missing_env = []
     for filename in heat_templates:
         basename = path.splitext(filename)[0]
-        assert basename + '.env' in env_files
+        if not basename + ".env" in env_files:
+            heat_template_missing_env.append(filename)
+
     for filename in volume_templates:
         basename = path.splitext(filename)[0]
-        assert basename + '.env' in env_files
+        if not basename + ".env" in env_files:
+            heat_template_missing_env.append(filename)
+
+    msg = (
+        "Mismatched template and environment file pairs detected. "
+        + "Environment files with no matching template: {} ".format(
+            env_files_missing_template
+        )
+        + "Heat templates with no matching environment file: {}".format(
+            heat_template_missing_env
+        )
+    )
+
+    assert not (env_files_missing_template or heat_template_missing_env), msg

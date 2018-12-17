@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -37,6 +37,7 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
+from collections import defaultdict
 
 import pytest
 from tests import cached_yaml as yaml
@@ -44,13 +45,13 @@ from tests import cached_yaml as yaml
 from .helpers import validates
 
 
-@validates('R-36772', 'R-44001')
+@validates("R-36772", "R-44001")
 def test_heat_template_parameters_contain_required_fields(yaml_file):
-    '''
+    """
     Check that all parameters in the environment
     file have the required fields
-    '''
-    required_keys = ["type", "description"]
+    """
+    required_keys = {"type", "description"}
 
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
@@ -59,11 +60,17 @@ def test_heat_template_parameters_contain_required_fields(yaml_file):
     if "parameters" not in yml:
         pytest.skip("No parameters specified in the heat template")
 
-    invalid_parameters = []
-    for k1, v1 in yml["parameters"].items():
-        if not isinstance(v1, dict):
+    invalid_params = defaultdict(list)
+    for param, param_attrs in yml["parameters"].items():
+        if not isinstance(param_attrs, dict):
             continue
-        if not all(map(lambda v: v in v1, required_keys)):
-            invalid_parameters.append(k1)
+        for key in required_keys:
+            if key not in param_attrs:
+                invalid_params[param].append(key)
 
-    assert not set(invalid_parameters)
+    msg = [
+        "Parameter {} is missing required attribute(s): {}".format(k, ", ".join(v))
+        for k, v in invalid_params.items()
+    ]
+    msg = ". ".join(msg)
+    assert not invalid_params, msg

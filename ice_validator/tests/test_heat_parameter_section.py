@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -48,17 +48,17 @@ from tests import cached_yaml as yaml
 
 from .helpers import validates
 
-VERSION = '1.0.0'
+VERSION = "1.0.0"
 
 # one or more (alphanumeric or underscore)
-RE_VALID_PARAMETER_NAME = re.compile(r'[\w_]+$')
+RE_VALID_PARAMETER_NAME = re.compile(r"[\w_]+$")
 
 
-@validates('R-90526')
+@validates("R-90526")
 def test_default_values(yaml_file):
-    '''
+    """
     Make sure no default values are set for any parameter.
-    '''
+    """
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
@@ -66,23 +66,26 @@ def test_default_values(yaml_file):
     if "parameters" not in yml:
         pytest.skip("No parameters specified in the heat template")
 
-    invalid_params = []
-    for v1 in yml["parameters"].values():
+    invalid_params = set()
+    for param, v1 in yml["parameters"].items():
         if not isinstance(v1, dict):
             continue
-        if any(k == 'default' for k in v1):
-            invalid_params.append(str(v1))
+        if any(k == "default" for k in v1):
+            invalid_params.add(param)
 
-    assert not set(invalid_params)
+    msg = "The following parameters specify a default: {}".format(
+        ", ".join(invalid_params)
+    )
+    assert not invalid_params, msg
 
 
-@validates('R-25877')
+@validates("R-25877")
 def test_parameter_names(yaml_file):
-    '''
+    """
     A VNF's Heat Orchestration Template's parameter name
     (i.e., <param name>) **MUST** contain only alphanumeric
     characters and underscores ('_').
-    '''
+    """
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
@@ -90,9 +93,7 @@ def test_parameter_names(yaml_file):
     if "parameters" not in yml:
         pytest.skip("No parameters specified in the heat template")
 
-    for key in yml['parameters']:
-        assert RE_VALID_PARAMETER_NAME.match(key), (
-            '%s parameter "%s" not alphanumeric or underscore' % (
-                yaml_file,
-                key))
-
+    for key in yml["parameters"]:
+        assert RE_VALID_PARAMETER_NAME.match(
+            key
+        ), '%s parameter "%s" not alphanumeric or underscore' % (yaml_file, key)

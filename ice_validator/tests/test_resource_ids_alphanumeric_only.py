@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -46,21 +46,21 @@ from tests import cached_yaml as yaml
 from .helpers import validates
 
 
-@validates('R-75141')
+@validates("R-75141")
 def test_alphanumeric_resource_ids_only(yaml_file):
-    '''
-    Check that all instance names are only using alphanumerics
-    '''
-    valid_format = re.compile(r'^[\w-]+$')
+    valid_format = re.compile(r"^[\w-]+$")
 
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
-    if 'resources' not in yml:
+    if "resources" not in yml:
         pytest.skip("No resources specified in the heat template")
 
-    invalid_resource_ids = [k
-                            for k in yml['resources'].keys()
-                            if not valid_format.match(k)]
+    invalid_resource_ids = [
+        k for k in yml["resources"].keys() if not valid_format.match(k)
+    ]
 
-    assert not set(invalid_resource_ids)
+    msg = "Invalid character(s) detected in the following resource IDs: " + ", ".join(
+        invalid_resource_ids
+    )
+    assert not set(invalid_resource_ids), msg

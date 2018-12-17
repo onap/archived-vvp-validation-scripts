@@ -37,16 +37,21 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-
+import os
+from os import listdir
 from os import path
 
 import pytest
+from yaml.constructor import ConstructorError
+
 from tests import cached_yaml as yaml
+from tests.utils import yaml_custom_utils
 
 from .helpers import validates
 from yamllint.config import YamlLintConfig
 from yamllint import linter
 from .utils.nested_files import check_for_invalid_nesting
+from .utils.nested_files import get_list_of_nested_files
 from .utils.nested_iterables import find_all_get_resource_in_yml
 from .utils.nested_iterables import find_all_get_param_in_yml
 
@@ -56,31 +61,55 @@ Order tests by number so they execute in order for base tests
 
 
 @pytest.mark.base
-@validates('R-95303')
+@validates("R-95303")
 def test_00_valid_yaml(filename):
-    '''
+    """
     Read in each .yaml or .env file. If it is successfully parsed as yaml, save
     contents, else add filename to list of bad yaml files. Log the result of
     parse attempt.
-    '''
-    conf = YamlLintConfig('rules: {}')
+    """
+    conf = YamlLintConfig("rules: {}")
 
     if path.splitext(filename)[-1] in [".yml", ".yaml", ".env"]:
         gen = linter.run(open(filename), conf)
         errors = list(gen)
 
-        assert not errors, "Error parsing file {} with error {}".format(filename, errors)
+        assert not errors, "Error parsing file {} with error {}".format(
+            filename, errors
+        )
     else:
-        pytest.skip("The file does not have any of the extensions .yml,\
-            .yaml, or .env")
+        pytest.skip(
+            "The file does not have any of the extensions .yml,\
+            .yaml, or .env"
+        )
 
 
 @pytest.mark.base
-def test_02_all_referenced_resources_exists(yaml_file):
-    '''
+@validates("R-92635")
+def test_02_no_duplicate_keys_in_file(yaml_file):
+    """
+    Checks that no duplicate keys exist in a given YAML file.
+    """
+    import yaml as normal_yaml  # we can't use the caching version in this test
+
+    normal_yaml.add_constructor(
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+        yaml_custom_utils.raise_duplicates_keys,
+    )
+
+    try:
+        with open(yaml_file) as fh:
+            normal_yaml.load(fh)
+    except ConstructorError as e:
+        pytest.fail("{} {}".format(e.problem, e.problem_mark))
+
+
+@pytest.mark.base
+def test_03_all_referenced_resources_exists(yaml_file):
+    """
     Check that all resources referenced by get_resource
     actually exists in all yaml files
-    '''
+    """
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
@@ -88,55 +117,63 @@ def test_02_all_referenced_resources_exists(yaml_file):
     if "resources" not in yml:
         pytest.skip("No resources specified in the yaml file")
 
-    resource_ids = yml['resources'].keys()
-    referenced_resource_ids = find_all_get_resource_in_yml(yml)
+    resources = yml.get("resources")
+    if resources:
+        resource_ids = resources.keys()
+        referenced_resource_ids = find_all_get_resource_in_yml(yml)
 
-    missing_referenced_resources = set()
-    for referenced_resource_id in referenced_resource_ids:
-        if referenced_resource_id not in resource_ids:
-            missing_referenced_resources.add(referenced_resource_id)
+        missing_referenced_resources = set()
+        for referenced_resource_id in referenced_resource_ids:
+            if referenced_resource_id not in resource_ids:
+                missing_referenced_resources.add(referenced_resource_id)
 
-    assert not missing_referenced_resources, (
-        'missing referenced resources %s' % list(
-            missing_referenced_resources))
+        assert not missing_referenced_resources, (
+            "Unable to resolve get_resource for the following "
+            "resource IDS: {}. Please ensure the resource ID is defined and "
+            "nested under the resources section of the template".format(
+                ", ".join(missing_referenced_resources)
+            )
+        )
 
 
 @pytest.mark.base
-def test_01_valid_nesting(yaml_file):
-    '''
+def test_04_valid_nesting(yaml_file):
+    """
     Check that the nesting is following the proper format and
     that all nested files exists and are parsable
-    '''
+    """
     invalid_nesting = []
 
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
     if "resources" in yml:
         try:
-            invalid_nesting.extend(check_for_invalid_nesting(
-                yml["resources"],
-                yaml_file,
-                path.dirname(yaml_file)))
+            invalid_nesting.extend(
+                check_for_invalid_nesting(
+                    yml["resources"], yaml_file, path.dirname(yaml_file)
+                )
+            )
         except Exception:
             invalid_nesting.append(yaml_file)
 
-    assert not invalid_nesting, \
-        "invalid nested file detected in file {}\n\n".format(invalid_nesting)
+    assert not invalid_nesting, "invalid nested file detected in file {}\n\n".format(
+        invalid_nesting
+    )
 
 
 @pytest.mark.base
-def test_03_all_get_param_have_defined_parameter(yaml_file):
-    '''
+def test_05_all_get_param_have_defined_parameter(yaml_file):
+    """
     Check that all referenced parameters are actually defined
     as parameters
-    '''
+    """
     invalid_get_params = []
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
     resource_params = find_all_get_param_in_yml(yml)
 
-    parameters = set(yml.get('parameters', {}).keys())
+    parameters = set(yml.get("parameters", {}).keys())
     if not parameters:
         pytest.skip("no parameters detected")
 
@@ -144,6 +181,55 @@ def test_03_all_get_param_have_defined_parameter(yaml_file):
         if rp not in parameters:
             invalid_get_params.append(rp)
 
-    assert not invalid_get_params, (
-        "get_param reference detected without corresponding parameter defined {}"
-        .format(invalid_get_params))
+    assert (
+        not invalid_get_params
+    ), "get_param reference detected without corresponding parameter defined {}".format(
+        invalid_get_params
+    )
+
+
+@validates("R-90152")
+@pytest.mark.base
+def test_06_heat_template_resource_section_has_resources(heat_template):
+
+    found_resource = False
+
+    with open(heat_template) as fh:
+        yml = yaml.load(fh)
+
+    resources = yml.get("resources")
+    if resources:
+        for k1, v1 in yml["resources"].items():
+            if not isinstance(v1, dict):
+                continue
+
+            found_resource = True
+            break
+
+    assert found_resource, "Heat templates must contain at least one resource"
+
+
+@validates("R-52530")
+@pytest.mark.base
+def test_07_nested_template_in_same_directory(yaml_file):
+
+    missing_files = []
+
+    with open(yaml_file) as fh:
+        yml = yaml.load(fh)
+
+    # skip if resources are not defined
+    if "resources" not in yml:
+        pytest.skip("No resources specified in the heat template")
+
+    dirname = os.path.dirname(yaml_file)
+    list_of_files = get_list_of_nested_files(yml, dirname)
+    dir_files = listdir(dirname)
+    for file in list_of_files:
+        base_name = path.basename(file)
+        if base_name not in dir_files:
+            missing_files.append(base_name)
+
+    assert (
+        not missing_files
+    ), "Missing nested files in heat template directory {}".format(missing_files)

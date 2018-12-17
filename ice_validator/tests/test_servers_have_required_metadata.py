@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -44,12 +44,12 @@ from tests import cached_yaml as yaml
 from .helpers import validates
 
 
-@validates('R-37437', 'R-71493', 'R-72483')
+@validates("R-37437", "R-71493", "R-72483")
 def test_servers_have_required_metadata(yaml_file):
-    '''
+    """
     Check all defined nova server instances have the required metadata:
     vnf_id and vf_module_id
-    '''
+    """
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
@@ -57,20 +57,24 @@ def test_servers_have_required_metadata(yaml_file):
     if "resources" not in yml:
         pytest.skip("No resources specified in the heat template")
 
-    required_metadata = ["vnf_id", "vf_module_id", "vnf_name"]
+    required_metadata = {"vnf_id", "vf_module_id", "vnf_name"}
 
-    invalid_nova_servers = []
+    errors = []
     for k, v in yml["resources"].items():
         if v.get("type") != "OS::Nova::Server":
             continue
-        if 'properties' not in v:
+        if "properties" not in v:
             continue
-        if 'metadata' not in v['properties']:
+        if "metadata" not in v["properties"]:
             continue
 
-        # do not add the server if it has the required metadata
-        if set(required_metadata) <= set(v["properties"]["metadata"].keys()):
-            continue
-        invalid_nova_servers.append(k)
+        metadata = set(v.get("properties", {}).get("metadata", {}).keys())
+        missing_metadata = required_metadata.difference(metadata)
+        if missing_metadata:
+            msg_template = (
+                "OS::Nova::Server {} is missing the following "
+                + "metadata properties: {}"
+            )
+            errors.append(msg_template.format(k, missing_metadata))
 
-    assert not set(invalid_nova_servers)
+    assert not errors, "\n".join(errors)

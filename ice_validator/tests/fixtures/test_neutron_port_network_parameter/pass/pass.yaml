@@ -1,0 +1,16 @@
+heat_template_version: 2015-04-30
+
+description: fdsafsfsa
+
+parameters:
+
+  # network cloud
+  testnetwork:
+    type: string
+
+resources:
+
+  testport:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: testnetwork }
