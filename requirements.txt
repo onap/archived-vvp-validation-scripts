@@ -42,10 +42,10 @@ pytest==3.7.4
 PyYAML==3.13
 pytest-tap==2.3
 boltons==18.0.1
-pyinstaller==3.4
 xlsxwriter==1.1.2
 docutils==0.14
 requests==2.20.0
 appdirs==1.4.3
 jinja2==2.10
 yamllint==1.12.1
+six==1.12.0
