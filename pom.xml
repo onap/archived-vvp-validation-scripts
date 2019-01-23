@@ -10,7 +10,7 @@
   <groupId>org.onap.vvp.validation-scripts</groupId>
   <artifactId>validation-scripts</artifactId>
   <packaging>pom</packaging>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <name>vvp-validation-scripts</name>
 
   <properties>
@@ -20,6 +20,11 @@
         <!--maven-->
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyyMMdd'T'HHmmss'Z'</maven.build.timestamp.format>
+        <!--docker-->
+        <docker.tag>${project.version}-${timestamp}</docker.tag>
+        <docker.latest.tag>${project.version}-latest</docker.latest.tag>
+        <docker.pull.registry>nexus3.onap.org:10001</docker.pull.registry>
+        <docker.push.registry>nexus3.onap.org:10003</docker.push.registry>
         <!--sonar-->
         <sonar.sourceEncoding>UTF-8</sonar.sourceEncoding>
         <sonar.sources>.</sonar.sources>
@@ -53,6 +58,61 @@
                 <stagingProfileId>176c31dfe190a</stagingProfileId>
                 <serverId>ecomp-staging</serverId>
             </configuration>
+        </plugin>
+        <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <version>0.19.0</version>
+            <configuration>
+                <pullRegistry>${docker.pull.registry}</pullRegistry>
+                <pushRegistry>${docker.push.registry}</pushRegistry>
+                <images>
+                    <image>
+                        <name>onap/vvp/validation-scripts</name>
+                        <alias>validation-scripts</alias>
+                        <build>
+                            <cleanup>true</cleanup>
+                            <tags>
+                                <tag>${docker.tag}</tag>
+                                <tag>${docker.latest.tag}</tag>
+                            </tags>
+                            <dockerFileDir>${project.basedir}</dockerFileDir>
+                        </build>
+                    </image>
+                </images>
+            </configuration>
+            <executions>
+                <execution>
+                    <id>clean-images</id>
+                    <phase>pre-clean</phase>
+                    <goals>
+                        <goal>remove</goal>
+                    </goals>
+                    <configuration>
+                        <removeAll>true</removeAll>
+                    </configuration>
+                </execution>
+
+                <execution>
+                    <id>generate-images</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>build</goal>
+                    </goals>
+                </execution>
+
+                <execution>
+                    <id>push-images</id>
+                    <phase>deploy</phase>
+                    <goals>
+                        <goal>build</goal>
+                        <goal>push</goal>
+                    </goals>
+                    <configuration>
+                        <image>onap/vvp/validation-scripts</image>
+                    </configuration>
+                </execution>
+            </executions>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
