@@ -1,6 +1,4 @@
-target/docker/
 # Ignore generated files
 **/*.pyc
 **/__pycache__/
 **/__pycache__/**
-
