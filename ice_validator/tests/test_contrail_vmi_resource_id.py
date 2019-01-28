@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -37,25 +37,25 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-import pytest
-
-from .structures import Heat
-from .structures import ContrailV2VirtualMachineInterface
-from .helpers import validates
 
 """
 resources:
 {vm-type}_server_{vm-type_index}
 """
+import pytest
 
-VERSION = "1.0.0"
+from .structures import Heat
+from .structures import ContrailV2VirtualMachineInterfaceProcessor
+from .helpers import validates
+
+VERSION = "2.0.0"
 
 
 def run_test(heat_template, regex_name, network_flavor):
     """run test
     """
     heat = Heat(filepath=heat_template)
-    heat_object_class = ContrailV2VirtualMachineInterface
+    heat_object_class = ContrailV2VirtualMachineInterfaceProcessor
     resource_type = heat_object_class.resource_type
     resources = heat.get_resource_by_type(resource_type=resource_type)
     if not resources:
@@ -94,7 +94,7 @@ def test_contrail_instance_ip_resource_id_external(heat_template):
     run_test(
         heat_template,
         regex_name="vmi_external",
-        network_flavor=ContrailV2VirtualMachineInterface.network_flavor_external,
+        network_flavor=ContrailV2VirtualMachineInterfaceProcessor.network_flavor_external,
     )
 
 
@@ -111,7 +111,7 @@ def test_contrail_instance_ip_resource_id_internal(heat_template):
     run_test(
         heat_template,
         regex_name="vmi_internal",
-        network_flavor=ContrailV2VirtualMachineInterface.network_flavor_internal,
+        network_flavor=ContrailV2VirtualMachineInterfaceProcessor.network_flavor_internal,
     )
 
 
@@ -128,5 +128,5 @@ def test_contrail_instance_ip_resource_id_subint(heat_template):
     run_test(
         heat_template,
         regex_name="vmi_subint",
-        network_flavor=ContrailV2VirtualMachineInterface.network_flavor_subint,
+        network_flavor=ContrailV2VirtualMachineInterfaceProcessor.network_flavor_subint,
     )

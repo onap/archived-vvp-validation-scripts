@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -34,12 +34,12 @@
 # limitations under the License.
 #
 # ============LICENSE_END============================================
-#
-# ECOMP is a trademark and service mark of AT&T Intellectual Property.
-#
----
-parameters:
-    out: 2
-    res: 3
-    indexed: 4
-    indx: 1
+
+outputs:
+  oam_management_v4_address:
+    description: OAM management address
+    value: {get_param: oam_address}
+
+  oam_management_v6_address:
+    description: OAM management address
+    value: {get_param: oam_address}

@@ -1,7 +1,7 @@
 {## ============LICENSE_START=======================================================#}
 {## org.onap.vvp/validation-scripts#}
 {## ===================================================================#}
-{## Copyright © 2018 AT&T Intellectual Property. All rights reserved.#}
+{## Copyright © 2019 AT&T Intellectual Property. All rights reserved.#}
 {## ===================================================================#}
 {###}
 {## Unless otherwise specified, all software contained herein is licensed#}
@@ -96,7 +96,7 @@
     <div class="callout {{ "alert" if failures or collection_failures else "success" }}">
         <h1>Validation Report</h1>
         <ul>
-            <li><b>Profile:</b> {{ profile_name }}</li>
+            <li><b>Categories:</b> {{ categories }}</li>
             <li><b>Tool Version:</b> {{ version }}</li>
             <li><b>Directory Validated:</b> {{ template_dir }}</li>
             <li><b>Checksum:</b> {{ checksum }}</li>

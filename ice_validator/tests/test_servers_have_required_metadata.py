@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -35,8 +35,6 @@
 #
 # ============LICENSE_END============================================
 #
-# ECOMP is a trademark and service mark of AT&T Intellectual Property.
-#
 
 import pytest
 from tests import cached_yaml as yaml
@@ -48,12 +46,11 @@ from .helpers import validates
 def test_servers_have_required_metadata(yaml_file):
     """
     Check all defined nova server instances have the required metadata:
-    vnf_id and vf_module_id
+    vnf_id, vf_module_id, and vnf_name
     """
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
-    # Check if the param vm_role is defined
     if "resources" not in yml:
         pytest.skip("No resources specified in the heat template")
 

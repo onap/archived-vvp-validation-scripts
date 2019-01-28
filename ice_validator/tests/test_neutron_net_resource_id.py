@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -46,9 +46,9 @@ import pytest
 
 from .helpers import validates
 from .structures import Heat
-from .structures import NeutronNet
+from .structures import NeutronNetProcessor
 
-VERSION = "1.1.0"
+VERSION = "2.0.0"
 
 # pylint: disable=invalid-name
 
@@ -62,12 +62,11 @@ def test_neutron_net_resource_id(heat_template):
     * int_{network-role}_network
     """
     heat = Heat(filepath=heat_template)
-    neutron_nets = heat.get_resource_by_type(NeutronNet.resource_type)
+    neutron_nets = heat.get_resource_by_type(NeutronNetProcessor.resource_type)
     if not neutron_nets:
         pytest.skip("No neutron nets found")
-    neutron_net = NeutronNet()
     bad = []
     for rid in neutron_nets:
-        if not neutron_net.get_rid_match_tuple(rid)[0]:
+        if not NeutronNetProcessor.get_rid_match_tuple(rid)[0]:
             bad.append("Neutron Net %s does not match any known format" % rid)
     assert not bad, "; ".join(bad)
