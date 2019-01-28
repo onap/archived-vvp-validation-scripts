@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -53,7 +53,7 @@ resources:
     server_0:
         type: nested_template_1.yaml
         properties:
-            name: { get_param: server_name_0 }
+            name: { get_param: name }
     my_resource_group_1:
         type: OS::Heat::ResourceGroup
         properties:

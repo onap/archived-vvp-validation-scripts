@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -46,9 +46,9 @@ import pytest
 
 from .helpers import validates
 from .structures import Heat
-from .structures import ContrailV2VirtualNetwork
+from .structures import ContrailV2VirtualNetworkProcessor
 
-VERSION = "1.0.0"
+VERSION = "2.0.0"
 
 # pylint: disable=invalid-name
 
@@ -65,7 +65,7 @@ def test_neutron_net_resource_id(heat_template):
     2) int_{network-role}_RVN`` where RVN represents Resource Virtual
     """
     heat = Heat(filepath=heat_template)
-    heat_object_class = ContrailV2VirtualNetwork
+    heat_object_class = ContrailV2VirtualNetworkProcessor
     resource_type = heat_object_class.resource_type
     resources = heat.get_resource_by_type(resource_type)
     if not resources:
