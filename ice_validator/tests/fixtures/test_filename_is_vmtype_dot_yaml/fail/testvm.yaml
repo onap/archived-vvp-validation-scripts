@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -42,10 +42,9 @@
 
 ---
 resources:
-  testvm_server_0:
+  testvm_server_1:
         type: OS::Nova::Server
         properties:
           name: { get_param:  testvm_name_0 }
           flavor: { get_param: testvm_flavor_name}
           image: { get_param: testvm_image_name}
-

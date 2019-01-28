@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -43,17 +43,17 @@ contrail
 """
 
 import pytest
-from .structures import ContrailV2InterfaceRouteTable
-from .structures import ContrailV2NetworkIpam
-from .structures import ContrailV2PortTuple
-from .structures import ContrailV2ServiceHealthCheck
-from .structures import ContrailV2ServiceTemplate
+from .structures import ContrailV2InterfaceRouteTableProcessor
+from .structures import ContrailV2NetworkIpamProcessor
+from .structures import ContrailV2PortTupleProcessor
+from .structures import ContrailV2ServiceHealthCheckProcessor
+from .structures import ContrailV2ServiceTemplateProcessor
 from .utils.network_roles import get_network_roles
 from .utils.vm_types import get_vm_types
 from .structures import Heat
 from .helpers import validates
 
-VERSION = "1.0.1"
+VERSION = "2.0.0"
 
 
 def run_test(heat_template, contrail_class, get_parts, part_name):
@@ -98,7 +98,10 @@ def test_contrail_interfaceroutetable_resource_id(heat_template):
     contain the ``{network-role}``.
     """
     run_test(
-        heat_template, ContrailV2InterfaceRouteTable, get_network_roles, "network_role"
+        heat_template,
+        ContrailV2InterfaceRouteTableProcessor,
+        get_network_roles,
+        "network_role",
     )
 
 
@@ -111,7 +114,9 @@ def test_contrail_networkipam_resource_id(heat_template):
     **MUST**
     contain the ``{network-role}``.
     """
-    run_test(heat_template, ContrailV2NetworkIpam, get_network_roles, "network_role")
+    run_test(
+        heat_template, ContrailV2NetworkIpamProcessor, get_network_roles, "network_role"
+    )
 
 
 @validates("R-20065")
@@ -123,7 +128,7 @@ def test_contrail_porttuple_resource_id(heat_template):
     **MUST**
     contain the ``{vm-type}``.
     """
-    run_test(heat_template, ContrailV2PortTuple, get_vm_types, "vm_type")
+    run_test(heat_template, ContrailV2PortTupleProcessor, get_vm_types, "vm_type")
 
 
 @validates("R-76014")
@@ -135,7 +140,9 @@ def test_contrail_servicehealthcheck_resource_id(heat_template):
     **MUST**
     contain the ``{vm-type}``.
     """
-    run_test(heat_template, ContrailV2ServiceHealthCheck, get_vm_types, "vm_type")
+    run_test(
+        heat_template, ContrailV2ServiceHealthCheckProcessor, get_vm_types, "vm_type"
+    )
 
 
 @validates("R-16437")
@@ -147,4 +154,4 @@ def test_contrail_servicetemplate_resource_id(heat_template):
     **MUST**
     contain the ``{vm-type}``.
     """
-    run_test(heat_template, ContrailV2ServiceTemplate, get_vm_types, "vm_type")
+    run_test(heat_template, ContrailV2ServiceTemplateProcessor, get_vm_types, "vm_type")

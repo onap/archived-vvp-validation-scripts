@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -113,6 +113,19 @@ def validates(*requirement_ids):
     return decorator
 
 
+def categories(*categories):
+    def decorator(func):
+        @funcutils.wraps(func)
+        def wrapper(*args, **kw):
+            return func(*args, **kw)
+
+        wrapper.categories = categories
+        return wrapper
+
+    decorator.categories = categories
+    return decorator
+
+
 def get_environment_pair(heat_template):
     """Returns a yaml/env pair given a yaml file"""
     base_dir, filename = os.path.split(heat_template)
@@ -128,6 +141,47 @@ def get_environment_pair(heat_template):
         return environment_pair
 
     return None
+
+
+def find_environment_file(yaml_files):
+    """
+    Pass file and recursively step backwards until environment file is found
+
+    :param yaml_files: list or string, start at size 1 and grows recursively
+    :return: corresponding environment file for a file, or None
+    """
+    # sanitize
+    if isinstance(yaml_files, str):
+        yaml_files = [yaml_files]
+
+    yaml_file = yaml_files[-1]
+    filepath, filename = os.path.split(yaml_file)
+
+    environment_pair = get_environment_pair(yaml_file)
+    if environment_pair:
+        return environment_pair
+
+    for file in os.listdir(filepath):
+        fq_name = "{}/{}".format(filepath, file)
+        if fq_name.endswith("yaml") or fq_name.endswith("yml"):
+            if fq_name not in yaml_files:
+                with open(fq_name) as f:
+                    yml = yaml.load(f)
+                resources = yml.get("resources", {})
+                for resource_id, resource in resources.items():
+                    resource_type = resource.get("type", "")
+                    if resource_type == "OS::Heat::ResourceGroup":
+                        resource_type = (
+                            resource.get("properties", {})
+                            .get("resource_def", {})
+                            .get("type", "")
+                        )
+                    # found called nested file
+                    if resource_type == filename:
+                        yaml_files.append(fq_name)
+                        environment_pair = find_environment_file(yaml_files)
+
+    return environment_pair
 
 
 def load_yaml(yaml_file):

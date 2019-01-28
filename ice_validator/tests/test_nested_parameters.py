@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -40,17 +40,15 @@
 
 """heat parameters
 """
-
 import pytest
 from tests import cached_yaml as yaml
 from tests.structures import Resource
-
 from .helpers import validates
 
 VERSION = "1.0.0"
 
 
-def check_nested_parameter_doesnt_change(yaml_file, parameter):
+def check_nested_parameter_doesnt_change(yaml_file):
 
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
@@ -62,37 +60,51 @@ def check_nested_parameter_doesnt_change(yaml_file, parameter):
     invalid_parameters = []
 
     """
-    checking if property: { get_param: <parameter> }, then property == <parameter>
+    checking if property: { get_param: parameter }, then property == parameter
 
     resource_id:
         type: nested.yaml
         properties:
-            property: { get_param: <parameter> }
+            property: { get_param: parameter }
 
     resource_id:
         type: OS::Heat::ResourceGroup
         properties:
             resource_def:
                 properties:
-                    property: { get_param: <parameter> }
+                    property: { get_param: parameter }
     """
     for resource_id, resource in yml.get("resources", {}).items():
-        r = Resource(resource_id=resource_id, resource=resource)
-        properties = r.get_nested_properties()
-        for k1, v1 in properties.items():
-            if (
-                isinstance(v1, dict)
-                and "get_param" in v1
-                and parameter == v1.get("get_param")
-            ):
-                if k1 != parameter:
-                    invalid_parameters.append(
-                        {
-                            "resource": r.resource_id,
-                            "nested parameter": k1,
-                            "parameter": parameter,
-                        }
-                    )
+        resource_type = resource.get("type")
+        if resource_type and (
+            resource_type.endswith("yaml")
+            or resource_type.endswith("yml")
+            or resource_type == "OS::Heat::ResourceGroup"
+        ):
+            # workaround for subinterfaces
+            metadata = resource.get("metadata")
+            if metadata:
+                subinterface_type = metadata.get("subinterface_type")
+                if subinterface_type and subinterface_type == "network_collection":
+                    continue
+
+            r = Resource(resource_id=resource_id, resource=resource)
+            properties = r.get_nested_properties()
+            for k1, v1 in properties.items():
+                if isinstance(v1, dict) and "get_param" in v1:
+                    parameter = v1.get("get_param")
+                    if isinstance(parameter, list):
+                        parameter = parameter[0]
+
+                    if k1 != parameter:
+                        invalid_parameters.append(
+                            {
+                                "resource": r.resource_id,
+                                "nested parameter": k1,
+                                "parameter": parameter,
+                                "file": yaml_file,
+                            }
+                        )
 
     assert (
         not invalid_parameters
@@ -101,41 +113,6 @@ def check_nested_parameter_doesnt_change(yaml_file, parameter):
     )
 
 
-@validates("R-70757")
-def test_vm_role_doesnt_change_in_nested_template(yaml_file):
-    check_nested_parameter_doesnt_change(yaml_file, "vm_role")
-
-
-@validates("R-44491")
-def test_vnf_id_doesnt_change_in_nested_template(yaml_file):
-    check_nested_parameter_doesnt_change(yaml_file, "vnf_id")
-
-
-@validates("R-86237")
-def test_vf_module_id_doesnt_change_in_nested_template(yaml_file):
-    check_nested_parameter_doesnt_change(yaml_file, "vf_module_id")
-
-
-@validates("R-16576")
-def test_vnf_name_doesnt_change_in_nested_template(yaml_file):
-    check_nested_parameter_doesnt_change(yaml_file, "vnf_name")
-
-
-@validates("R-49177")
-def test_vf_module_name_doesnt_change_in_nested_template(yaml_file):
-    check_nested_parameter_doesnt_change(yaml_file, "vf_module_name")
-
-
-@validates("R-22441")
-def test_vf_module_index_name_doesnt_change_in_nested_template(yaml_file):
-    check_nested_parameter_doesnt_change(yaml_file, "vf_module_index")
-
-
-@validates("R-62954")
-def test_environment_context_name_doesnt_change_in_nested_template(yaml_file):
-    check_nested_parameter_doesnt_change(yaml_file, "environment_context")
-
-
-@validates("R-75202")
-def test_workload_context_name_doesnt_change_in_nested_template(yaml_file):
-    check_nested_parameter_doesnt_change(yaml_file, "workload_context")
+@validates("R-708564")
+def test_parameter_name_doesnt_change_in_nested_template(yaml_file):
+    check_nested_parameter_doesnt_change(yaml_file)

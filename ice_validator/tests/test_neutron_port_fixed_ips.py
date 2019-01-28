@@ -286,8 +286,7 @@ def test_neutron_port_external_fixed_ips(heat_template):
     """
     When the VNF's Heat Orchestration Template's
     resource ``OS::Neutron::Port`` is attaching
-    to an external network (per the ECOMP definition, see
-    Requirement R-57424),
+    to an external network,
     and an IPv4 address is being cloud assigned by OpenStack's DHCP Service
     and the external network IPv4 subnet is to be specified
     using the property ``fixed_ips``
@@ -308,8 +307,7 @@ def test_neutron_port_internal_fixed_ips(heat_template):
 
       * the VNF's Heat Orchestration Template's
         resource ``OS::Neutron::Port`` in an Incremental Module is attaching
-        to an internal network (per the ECOMP definition, see
-        Requirements R-52425 and R-46461)
+        to an internal network
         that is created in the Base Module, AND
       * an IPv4 address is being cloud assigned by OpenStack's DHCP Service AND
       * the internal network IPv4 subnet is to be specified

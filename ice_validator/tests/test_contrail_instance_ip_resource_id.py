@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -37,7 +37,6 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-
 """
 resources:
 {vm-type}_server_{vm-type_index}
@@ -45,29 +44,28 @@ resources:
 import pytest
 
 from .structures import Heat
-from .structures import ContrailV2InstanceIp
+from .structures import ContrailV2InstanceIpProcessor
 from .helpers import validates
 
-VERSION = "1.1.0"
+VERSION = "2.0.0"
 
 
 def run_test(heat_template, regex_names, network_flavor):
     """run test
     """
     heat = Heat(filepath=heat_template)
-    heat_object_class = ContrailV2InstanceIp
-    resource_type = heat_object_class.resource_type
+    processor = ContrailV2InstanceIpProcessor
+    resource_type = processor.resource_type
     resources = heat.get_resource_by_type(resource_type=resource_type)
     if not resources:
         pytest.skip("No %s resources found" % resource_type)
     bad = []
-    heat_object = heat_object_class()
-    rid_patterns = heat_object.get_rid_patterns()
+    rid_patterns = processor.get_rid_patterns()
     for rid, resource in resources.items():
-        flavor = heat_object.get_network_flavor(resource)
+        flavor = processor.get_network_flavor(resource)
         if flavor != network_flavor:
             continue
-        regex_name = heat_object.get_rid_match_tuple(rid)[0]
+        regex_name = processor.get_rid_match_tuple(rid)[0]
         if regex_name in regex_names:
             continue
         bad.append(rid)
@@ -105,7 +103,7 @@ def test_contrail_instance_ip_resource_id_external(heat_template):
     run_test(
         heat_template,
         regex_names=("ip", "v6_ip"),
-        network_flavor=ContrailV2InstanceIp.network_flavor_external,
+        network_flavor=ContrailV2InstanceIpProcessor.network_flavor_external,
     )
 
 
@@ -121,7 +119,7 @@ def test_contrail_instance_ip_resource_id_internal(heat_template):
     run_test(
         heat_template,
         regex_names=("int_ip", "int_v6_ip"),
-        network_flavor=ContrailV2InstanceIp.network_flavor_internal,
+        network_flavor=ContrailV2InstanceIpProcessor.network_flavor_internal,
     )
 
 
@@ -137,5 +135,5 @@ def test_contrail_instance_ip_resource_id_subint(heat_template):
     run_test(
         heat_template,
         regex_names=("subint_ip", "subint_v6_ip"),
-        network_flavor=ContrailV2InstanceIp.network_flavor_subint,
+        network_flavor=ContrailV2InstanceIpProcessor.network_flavor_subint,
     )

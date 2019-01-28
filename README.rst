@@ -1,6 +1,6 @@
 .. This work is licensed under a Creative Commons Attribution 4.0 International License.
 .. http://creativecommons.org/licenses/by/4.0
-.. Copyright 2018 AT&T Intellectual Property.  All rights reserved.
+.. Copyright 2019 AT&T Intellectual Property.  All rights reserved.
 
 Manual Heat Template Validation
 ===============================
@@ -239,8 +239,8 @@ such as the ``yaml_file``, the parameter the test was checking, etc...
 If the assert statement fails, the failure is collected by ``pytest``, and the
 associated requirements and error_message are included in the final report.
 
-Optional: Pytest Markers and Validation Profiles
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Optional: Pytest Markers and Validation Categories
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The VVP test suite has the concept of a ``base`` test. These are used as
 sanity tests and are executed before the other tests, and if they fail the
@@ -255,14 +255,14 @@ test like this:
   @validates("R-123456")
   def test_my_new_requirement():
 
-The VVP test suite also has the concept of a ``validation profile`` to
-define what set of tests to execute. The way it works is by using ``pytest``
-markers.
+The VVP test suite also has the concept of a ``category`` to
+define what additional set of optional tests to execute. The way it works
+is by using ``categories`` decorator.
 
-By default, all ``base`` tests and non-marked tests are executed. If you want
-an additional profile to run, pass the command line argument:
+By default, all ``base`` tests and tests with no category are executed.
+If you want an additional category to run, pass the command line argument:
 
-``--validation-profile=<my_validation_profile>``
+``--category=<category>``
 
 This will execute all ``base`` tests, non-marked tests,
 and tests marked like the following:
@@ -271,12 +271,12 @@ and tests marked like the following:
 
   import pytest
 
-  @pytest.mark.<my_validation_profile> # this is an additional pytest marker
+  @categories("<category>") # substitue <category> with the category name
   @validates("R-123456")
   def test_my_new_requirement():
 
 This should be used sparingly, and in practice consider reviewing a requirement
-with the VNF Requirements team before adding a test to a validation profile.
+with the VNF Requirements team before adding a test to a category.
 
 Self-Test Suite
 ~~~~~~~~~~~~~~~

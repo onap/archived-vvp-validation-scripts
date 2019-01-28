@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -36,12 +36,10 @@
 # ============LICENSE_END============================================
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
-
 import os
-from tests import cached_yaml as yaml
-
 from .helpers import validates
-from .utils.vm_types import get_vm_types
+from .utils.vm_types import get_all_vm_types
+from .parametrizers import get_nested_files
 
 VERSION = "1.0.0"
 
@@ -53,23 +51,17 @@ def test_filename_is_vmtype_dot_yaml(yaml_files):
 
     vm_types = []
     invalid_files = []
+    nested_files = []
 
-    for yaml_file in yaml_files:
-        with open(yaml_file, "r") as f:
-            yml = yaml.load(f)
-
-        if "resources" not in yml:
-            continue
-
-        vm_types.extend(get_vm_types(yml["resources"]))
-
-    for yaml_file in yaml_files:
-        basename, filename = os.path.split(yaml_file)
-        file, ext = os.path.splitext(os.path.basename(filename))
-        for vt in vm_types:
-            if vt == file:
-                invalid_files.append({"vm_type": vt, "file": yaml_file})
-
-    assert not invalid_files, "filenames must not be in format vm_type.yaml: {}".format(
-        invalid_files
+    nested_files.extend(
+        os.path.splitext(os.path.basename(filename))[0]
+        for filename in get_nested_files(yaml_files)
     )
+
+    vm_types = get_all_vm_types(yaml_files)
+
+    invalid_files.extend(vm_type for vm_type in vm_types if vm_type in nested_files)
+
+    assert (
+        not invalid_files
+    ), "Nested filenames must not be in format vm_type.yaml: {}".format(invalid_files)

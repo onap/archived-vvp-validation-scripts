@@ -37,10 +37,8 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-
 import pytest
 from tests import cached_yaml as yaml
-
 from .helpers import validates
 from .utils.vm_types import get_vm_type_for_nova_server
 
@@ -102,9 +100,9 @@ def test_nova_servers_valid_resource_ids(yaml_file):
                     )
 
     assert not invalid_nova_servers, (
-        "Invalid OS::Nova::Server resource ids detected {}\n"
+        "Invalid OS::Nova::Server resource ids detected {}. "
         "OS::Nova::Server resource ids must be in the form "
-        "<vm_type>_server_<vm_type_index> \n"
-        "<vm_type> is derived from flavor, image and name properties "
+        "{{vm_type}}_server_{{vm_type_index}} where "
+        "{{vm_type}} is derived from flavor, image and name properties."
         "".format(invalid_nova_servers)
     )

@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -56,7 +56,11 @@ resources:
   vm_typeX_0_bialy_port_2:
     type: OS::Neutron::Port
     properties:
-      name: mynameistrouble
+      name:
+        str_replace: 
+          template: mynameisstilltrouble
+          param:
+            still: safnlk
       network: { get_param: int_intranet_net_name }
       fixed_ips:
         - ip_address: { get_param: lb_1_int_intranet_floating_ip }
@@ -75,7 +79,10 @@ resources:
     type: OS::Neutron::Port
     properties:
       name:
-        str_replace: mynameisstilltrouble
+        str_replace: 
+          template: mynameisstilltrouble
+          param:
+            still: safnlk
       network: { get_param: int_intranet_net_id }
       fixed_ips:
         - ip_address: { get_param: lb_2_int_intranet_floating_v6_ip }
@@ -93,6 +100,7 @@ resources:
   vm_typeX_2_bialy_port_2:
     type: OS::Neutron::Port
     properties:
+      name: ansdjlf
       network: { get_param: extnet_net_name }
       fixed_ips:
         - ip_address: { get_param: lb_1_extnet_floating_ip }
