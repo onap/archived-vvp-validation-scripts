@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -42,12 +42,15 @@
 resource property name
 """
 
+import collections
+
 import pytest
 
 from .structures import Heat
+from .structures import HeatProcessor
 from .helpers import validates
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 
 
 def get_non_servers(heat):
@@ -67,7 +70,7 @@ def test_non_server_name(heat_template):
     """
     If a VNF's Heat Orchestration Template contains the property ``name``
     for a non ``OS::Nova::Server`` resource, the intrinsic function
-    ``str_replace`` **MUST** be used in conjunction with the ECOMP
+    ``str_replace`` **MUST** be used in conjunction with the ONAP
     supplied metadata parameter ``vnf_name`` to generate a unique value.
 
     """
@@ -138,6 +141,29 @@ def test_non_server_name(heat_template):
                     + "template ({})"
                 ).format(rid, vnf_name_param, template)
             )
-    msg = "Improper name property for non-OS::Nova::Server resources. " + ". ".join(bad)
+    msg = (
+        "Improper name property for" " non-OS::Nova::Server resources. "
+    ) + ". ".join(bad)
 
     assert not bad, msg
+
+
+@validates("R-85734")
+def test_non_server_name_unique(yaml_files):
+    """Test name has unique value
+    """
+    non_servers = {}
+    for yaml_file in yaml_files:
+        h = Heat(filepath=yaml_file)
+        non_servers.update(get_non_servers(h))
+    names = collections.defaultdict(set)
+    for rid, resource in non_servers.items():
+        name = HeatProcessor.get_str_replace_name(resource)
+        if name:
+            names[name].add(rid)
+    bad = {key: value for key, value in names.items() if len(value) > 1}
+    delim = "\n" + 4 * " "
+    assert not bad, "Names must be unique," " not shared across resource ids.%s%s" % (
+        delim,
+        delim.join("%s: %s" % (name, list(value)) for name, value in bad.items()),
+    )
