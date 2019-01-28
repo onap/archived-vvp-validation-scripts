@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -39,6 +39,7 @@
 #
 
 import re
+from tests import cached_yaml as yaml
 
 
 def get_vm_types_for_resource(resource):
@@ -109,5 +110,22 @@ def get_vm_types(resources):
     vm_types = []
     for v in resources.values():
         vm_types.extend(list(get_vm_types_for_resource(v)))
+
+    return set(vm_types)
+
+
+def get_all_vm_types(yaml_files):
+    """
+    Get all vm_types for a list of yaml files
+    """
+    vm_types = []
+    for yaml_file in yaml_files:
+        with open(yaml_file, "r") as f:
+            yml = yaml.load(f)
+
+        if "resources" not in yml:
+            continue
+
+        vm_types.extend(get_vm_types(yml["resources"]))
 
     return set(vm_types)

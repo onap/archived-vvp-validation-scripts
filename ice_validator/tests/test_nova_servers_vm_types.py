@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -118,23 +118,17 @@ def test_vm_type_network_role_collision(yaml_file):
 
 @validates("R-50436", "R-45188", "R-40499")
 def test_nova_server_flavor_parameter(yaml_file):
-
-    prop = "flavor"
-    check_nova_parameter_format(prop, yaml_file)
+    check_nova_parameter_format("flavor", yaml_file)
 
 
 @validates("R-51430", "R-54171", "R-87817")
 def test_nova_server_name_parameter(yaml_file):
-
-    prop = "name"
-    check_nova_parameter_format(prop, yaml_file)
+    check_nova_parameter_format("name", yaml_file)
 
 
 @validates("R-71152", "R-57282", "R-58670")
 def test_nova_server_image_parameter(yaml_file):
-
-    prop = "image"
-    check_nova_parameter_format(prop, yaml_file)
+    check_nova_parameter_format("image", yaml_file)
 
 
 def check_nova_parameter_format(prop, yaml_file):

@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -37,18 +37,16 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-
 """
 resources:
 {vm-type}_server_{vm-type_index}
 """
 import pytest
-
 from .structures import Heat
-from .structures import NovaServer
+from .structures import NovaServerProcessor
 from .helpers import validates
 
-VERSION = "1.0.0"
+VERSION = "2.0.0"
 
 # pylint: disable=invalid-name
 
@@ -67,12 +65,11 @@ def test_nova_server_resource_id(heat_template):
     resources = heat.nova_server_resources
     if not resources:
         pytest.skip("No Nova Server resources found")
-    nova_server = NovaServer()
     bad = []
     for rid in resources:
-        if not nova_server.get_rid_match_tuple(rid)[0]:
+        if not NovaServerProcessor.get_rid_match_tuple(rid)[0]:
             bad.append(rid)
     assert not bad, "Resource ids %s must match %s" % (
         bad,
-        nova_server.get_rid_patterns(),
+        NovaServerProcessor.get_rid_patterns(),
     )

@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -34,34 +34,10 @@
 # limitations under the License.
 #
 # ============LICENSE_END============================================
-#
-# ECOMP is a trademark and service mark of AT&T Intellectual Property.
-#
----
-parameters:
-  out:
-    type: string
-    description: test for output
-  res:
-    type: string
-    description: test for resources
-  indexed:
-    type: comma_delimited_list
-    description: test for indexed param
-  indx:
-    type: number
-    description: Index of the current instance
-  unused_yaml:
-    type: number
-    description: unused param in yaml file
-resources:
-  test:
-    type: abc
-    properties:
-      test_res: {get_param: res}
-      test_ind_param: { get_param: [ indexed, { get_param: indx } ] }
 
-outputs:
-  test_out:
-    description: test getting output param
-    value: {get_param: out}
+resources:
+  dns_server_0:
+    type: OS::Nova::Server
+    properties:
+      metadata:
+        vm_role: dns

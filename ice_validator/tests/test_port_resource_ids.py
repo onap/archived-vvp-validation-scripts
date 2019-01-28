@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -52,7 +52,7 @@ from .utils.network_roles import (
 from .utils.vm_types import get_vm_type_for_nova_server
 
 
-@validates("R-20453", "R-26351", "R-26506" "R-681859")
+@validates("R-20453", "R-26351", "R-26506", "R-681859")
 def test_port_resource_ids(heat_template):
     """
     Check that all resource ids for ports follow the right

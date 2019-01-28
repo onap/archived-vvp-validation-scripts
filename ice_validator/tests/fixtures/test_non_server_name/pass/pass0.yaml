@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -37,7 +37,7 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-# VERSION: '1.0.0'
+# VERSION: '1.2.0'
 
 ---
 parameters:
@@ -58,10 +58,12 @@ resources:
     properties:
       name:
         str_replace:
-          template: mynameisok_port2
+          template: mynameisok_myindex
           params:
             mynameisok:
               get_param: vnf_name
+            myindex:
+              get_param: 0
       network: { get_param: int_intranet_net_name }
       fixed_ips:
         - ip_address: { get_param: lb_1_int_intranet_floating_ip }
@@ -81,10 +83,12 @@ resources:
     properties:
       name:
         str_replace:
-          template: mynameisok_port2
+          template: mynameisok_myindex
           params:
             mynameisok:
               get_param: vnf_name
+            myindex:
+              get_param: 1
       network: { get_param: int_intranet_net_id }
       fixed_ips:
         - ip_address: { get_param: lb_2_int_intranet_floating_v6_ip }

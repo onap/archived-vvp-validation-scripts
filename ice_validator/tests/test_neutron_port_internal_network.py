@@ -132,8 +132,7 @@ def get_neutron_ports(heat):
 def test_neutron_port_internal_network(yaml_files):
     """
     When the VNF's Heat Orchestration Template's Resource
-    ``OS::Neutron::Port`` is attaching to an internal network (per the
-    ECOMP definition, see Requirements R-52425 and R-46461),
+    ``OS::Neutron::Port`` is attaching to an internal network,
     and the internal network is created in a
     different Heat Orchestration Template than the ``OS::Neutron::Port``,
     the ``network`` parameter name **MUST**

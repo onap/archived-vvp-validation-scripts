@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-# ============LICENSE_START=======================================================
+# ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
 # Copyright © 2017 AT&T Intellectual Property. All rights reserved.
@@ -37,10 +37,15 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
----
-parameters:
-    out: 2
-    res: 3
-    indexed: 4
-    unused_env: 4
-    indx: 1
+
+ui:
+  app-name: VNF Validation Tool
+categories:
+  - name: Environment File Compliance. (Required to Onboard)
+    category: environment_file
+    description:
+      Checks certain parameters are excluded from the .env file, per HOT Requirements.
+      Required for ASDC onboarding, not needed for manual Openstack testing.
+settings:
+  polling-freqency: 1000
+  default-verbosity: Standard

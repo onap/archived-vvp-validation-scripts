@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -35,46 +35,21 @@
 #
 # ============LICENSE_END============================================
 #
-# ECOMP is a trademark and service mark of AT&T Intellectual Property.
-#
+import re
 
-import pytest
-from tests import cached_yaml as yaml
+from tests.helpers import validates, load_yaml
+from tests.utils.nested_iterables import find_all_get_param_in_yml
 
-from .helpers import validates
-from .utils.nested_iterables import find_all_get_param_in_yml
-
-VERSION = "1.0.0"
-
-# pylint: disable=invalid-name
+AVAILABILITY_ZONE = re.compile(r"availability_zone_?\d*")
 
 
 @validates("R-90279")
 def test_all_parameters_used_in_template(yaml_file):
+    yml = load_yaml(yaml_file)
+    params = (yml.get("parameters") or {}).keys()
+    expected_params = {p for p in params if not AVAILABILITY_ZONE.match(p)}
+    used_params = set(find_all_get_param_in_yml(yml))
+    unused_params = expected_params.difference(used_params)
 
-    invalid_params = []
-    get_params = []
-    skip_params = ["availability_zone"]
-
-    with open(yaml_file, "r") as f:
-        yml = yaml.load(f)
-
-        template_parameters = yml.get("parameters")
-        if not template_parameters:
-            pytest.skip("no parameters found in template")
-
-        get_params = find_all_get_param_in_yml(yml)
-        if not get_params:
-            pytest.skip("no get_params found in template")
-
-    template_parameters = list(template_parameters.keys())
-    for param in template_parameters:
-        for sparam in skip_params:
-            if param.find(sparam) != -1:
-                template_parameters.remove(param)
-
-    invalid_params = set(template_parameters) - set(get_params)
-
-    assert not invalid_params, "Unused parameters detected in template {}".format(
-        invalid_params
-    )
+    msg = "Unused parameters detected in template {}".format(unused_params)
+    assert not unused_params, msg

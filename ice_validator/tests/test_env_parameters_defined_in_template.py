@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -43,12 +43,12 @@ from .helpers import validates, get_environment_pair
 
 
 @validates("R-599443")
-def test_env_params_are_defined_in_template(heat_template):
+def test_env_params_are_defined_in_template(yaml_file):
     """Test that each paraemter defined in an environment file
     is also defined in the paired heat template"""
 
     bad = []
-    template_pair = get_environment_pair(heat_template)
+    template_pair = get_environment_pair(yaml_file)
 
     if not template_pair:
         pytest.skip("No yaml/env pair could be determined")

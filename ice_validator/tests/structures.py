@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -35,23 +35,21 @@
 #
 # ============LICENSE_END============================================
 #
-
+# ECOMP is a trademark and service mark of AT&T Intellectual Property.
+#
 """structures
 """
-import sys
-
-
 import collections
 import inspect
 import os
 import re
+import sys
 
 from tests import cached_yaml as yaml
 from tests.helpers import load_yaml
-
 from .utils import nested_dict
 
-VERSION = "3.5.0"
+VERSION = "4.2.0"
 
 # key = pattern, value = regex compiled from pattern
 _REGEX_CACHE = {}
@@ -68,34 +66,61 @@ def _get_regex(pattern):
     return regex
 
 
-class HeatObject(object):
-    """base class for xxxx::xxxx::xxxx objects
+class Hashabledict(dict):
+    """A hashable dict.
+    dicts with the same keys and whose keys have the same values
+    are assigned the same hash.
     """
 
-    resource_type = None
+    def __hash__(self):
+        return hash((frozenset(self), frozenset(self.values())))
 
-    def __init__(self):
-        self.re_rids = self.get_re_rids()
+
+class HeatProcessor(object):
+    """base class for xxxx::xxxx::xxxx processors
+    """
+
+    resource_type = None  # string 'xxxx::xxxx::xxxx'
+    re_rids = collections.OrderedDict()  # OrderedDict of name: regex
+    # name is a string to name the regex.
+    # regex parses the proper resource id format.
 
     @staticmethod
-    def get_re_rids():
-        """Return OrderedDict of name: regex
-        Each regex parses the proper format for a given rid
-        (resource id).
+    def get_param_value(value):
+        """Return get_param value of `value`
         """
-        return collections.OrderedDict()
+        if isinstance(value, dict) and len(value) == 1:
+            v = value.get("get_param")
+            if isinstance(v, list) and v:
+                v = v[0]
+        else:
+            v = None
+        return v
 
-    def get_rid_match_tuple(self, rid):
+    @classmethod
+    def get_resource_or_param_value(cls, value):
+        """Return the get_resource or get_param value of `value`
+        """
+        if isinstance(value, dict) and len(value) == 1:
+            v = value.get("get_resource") or cls.get_param_value(value)
+        else:
+            v = None
+        return v
+
+    @classmethod
+    def get_rid_match_tuple(cls, rid):
         """find the first regex matching `rid` and return the tuple
         (name, match object) or ('', None) if no match.
         """
-        for name, regex in self.re_rids.items():
+        rid = "" if rid is None else rid
+        for name, regex in cls.re_rids.items():
             match = regex.match(rid)
             if match:
                 return name, match
         return "", None
 
-    def get_rid_patterns(self):
+    @classmethod
+    def get_rid_patterns(cls):
         """Return OrderedDict of name: friendly regex.pattern
         "friendly" means the group notation is replaced with
         braces, and the trailing "$" is removed.
@@ -106,7 +131,7 @@ class HeatObject(object):
         """
         friendly_pattern = _get_regex(r"\(\?P<(.*?)>.*?\)")
         rid_patterns = collections.OrderedDict()
-        for name, regex in self.re_rids.items():
+        for name, regex in cls.re_rids.items():
             rid_patterns[name] = friendly_pattern.sub(
                 r"{\1}", regex.pattern  # replace groups with braces
             )[
@@ -114,8 +139,86 @@ class HeatObject(object):
             ]  # remove trailing $
         return rid_patterns
 
+    @classmethod
+    def get_str_replace_name(cls, resource_dict):
+        """Return the name modified by str_replace of `resource_dict`,
+        a resource (i.e. a value in some template's resources).
+        Return None, if there is no name, str_replace, its template,
+        or any missing parameters.
+        """
+        str_replace = Heat.nested_get(
+            resource_dict, "properties", "name", "str_replace"
+        )
+        if not str_replace:
+            return None
+        template = Heat.nested_get(str_replace, "template")
+        if not isinstance(template, str):
+            return None
+        params = Heat.nested_get(str_replace, "params", default={})
+        if not isinstance(params, dict):
+            return None
+        # WARNING
+        # The user must choose non-overlapping keys for params since they
+        # are replaced in the template in arbitrary order.
+        name = template
+        for key, value in params.items():
+            param = cls.get_param_value(value)
+            if param is None:
+                return None
+            name = name.replace(key, str(param))
+        return name
 
-class ContrailV2NetworkHeatObject(HeatObject):
+
+class CinderVolumeAttachmentProcessor(HeatProcessor):
+    """ Cinder VolumeAttachment
+    """
+
+    resource_type = "OS::Cinder::VolumeAttachment"
+
+    @classmethod
+    def get_config(cls, resources):
+        """Return a tuple (va_config, va_count)
+        va_config - Hashabledict of Cinder Volume Attachment config
+                    indexed by rid.
+        va_count - dict of attachment counts indexed by rid.
+        """
+        va_count = collections.defaultdict(int)
+        va_config = Hashabledict()
+        for resource in resources.values():
+            resource_type = nested_dict.get(resource, "type")
+            if resource_type == cls.resource_type:
+                config, rids = cls.get_volume_attachment_config(resource)
+                for rid in rids:
+                    va_config[rid] = config
+                    va_count[rid] += 1
+        return va_config, va_count
+
+    @classmethod
+    def get_volume_attachment_config(cls, resource):
+        """Returns the cinder volume attachment configuration
+        of `resource` as a tuple (config, rids)
+        where:
+        - config is a Hashabledict whose keys are the keys of the
+            properties of resource, and whose values are the
+            corresponding property values (nova server resource ids)
+            replaced with the vm-type they reference.
+        - rids is the set of nova server resource ids referenced by
+            the property values.
+        """
+        config = Hashabledict()
+        rids = set()
+        for key, value in (resource.get("properties") or {}).items():
+            rid = cls.get_resource_or_param_value(value)
+            if rid:
+                name, match = NovaServerProcessor.get_rid_match_tuple(rid)
+                if name == "server":
+                    vm_type = match.groupdict()["vm_type"]
+                    config[key] = vm_type
+                    rids.add(rid)
+        return config, rids
+
+
+class ContrailV2NetworkFlavorBaseProcessor(HeatProcessor):
     """ContrailV2 objects which have network_flavor
     """
 
@@ -123,7 +226,8 @@ class ContrailV2NetworkHeatObject(HeatObject):
     network_flavor_internal = "internal"
     network_flavor_subint = "subint"
 
-    def get_network_flavor(self, resource):
+    @classmethod
+    def get_network_flavor(cls, resource):
         """Return the network flavor of resource, one of
         "internal" - get_resource, or get_param contains _int_
         "subint" - get_param contains _subint_
@@ -140,324 +244,376 @@ class ContrailV2NetworkHeatObject(HeatObject):
             param = network_refs[0]
             if isinstance(param, dict):
                 if "get_resource" in param:
-                    network_flavor = self.network_flavor_internal
+                    network_flavor = cls.network_flavor_internal
                 else:
                     p = param.get("get_param")
                     if isinstance(p, str):
                         if "_int_" in p or p.startswith("int_"):
-                            network_flavor = self.network_flavor_internal
+                            network_flavor = cls.network_flavor_internal
                         elif "_subint_" in p:
-                            network_flavor = self.network_flavor_subint
+                            network_flavor = cls.network_flavor_subint
                         else:
-                            network_flavor = self.network_flavor_external
+                            network_flavor = cls.network_flavor_external
         return network_flavor
 
 
-class ContrailV2InstanceIp(ContrailV2NetworkHeatObject):
+class ContrailV2InstanceIpProcessor(ContrailV2NetworkFlavorBaseProcessor):
     """ ContrailV2 InstanceIp
     """
 
     resource_type = "OS::ContrailV2::InstanceIp"
-
-    def get_re_rids(self):
-        """Return OrderedDict of name: regex
-        """
-        return collections.OrderedDict(
-            [
-                (
-                    "int_ip",
-                    _get_regex(
-                        r"(?P<vm_type>.+)"
-                        r"_(?P<vm_type_index>\d+)"
-                        r"_int"
-                        r"_(?P<network_role>.+)"
-                        r"_vmi"
-                        r"_(?P<vmi_index>\d+)"
-                        r"_IP"
-                        r"_(?P<index>\d+)"
-                        r"$"
-                    ),
+    re_rids = collections.OrderedDict(
+        [
+            (
+                "int_ip",
+                _get_regex(
+                    r"(?P<vm_type>.+)"
+                    r"_(?P<vm_type_index>\d+)"
+                    r"_int"
+                    r"_(?P<network_role>.+)"
+                    r"_vmi"
+                    r"_(?P<vmi_index>\d+)"
+                    r"_IP"
+                    r"_(?P<index>\d+)"
+                    r"$"
                 ),
-                (
-                    "int_v6_ip",
-                    _get_regex(
-                        r"(?P<vm_type>.+)"
-                        r"_(?P<vm_type_index>\d+)"
-                        r"_int"
-                        r"_(?P<network_role>.+)"
-                        r"_vmi"
-                        r"_(?P<vmi_index>\d+)"
-                        r"_v6_IP"
-                        r"_(?P<index>\d+)"
-                        r"$"
-                    ),
+            ),
+            (
+                "int_v6_ip",
+                _get_regex(
+                    r"(?P<vm_type>.+)"
+                    r"_(?P<vm_type_index>\d+)"
+                    r"_int"
+                    r"_(?P<network_role>.+)"
+                    r"_vmi"
+                    r"_(?P<vmi_index>\d+)"
+                    r"_v6_IP"
+                    r"_(?P<index>\d+)"
+                    r"$"
                 ),
-                (
-                    "subint_ip",
-                    _get_regex(
-                        r"(?P<vm_type>.+)"
-                        r"_(?P<vm_type_index>\d+)"
-                        r"_subint"
-                        r"_(?P<network_role>.+)"
-                        r"_vmi"
-                        r"_(?P<vmi_index>\d+)"
-                        r"_IP"
-                        r"_(?P<index>\d+)"
-                        r"$"
-                    ),
+            ),
+            (
+                "subint_ip",
+                _get_regex(
+                    r"(?P<vm_type>.+)"
+                    r"_(?P<vm_type_index>\d+)"
+                    r"_subint"
+                    r"_(?P<network_role>.+)"
+                    r"_vmi"
+                    r"_(?P<vmi_index>\d+)"
+                    r"_IP"
+                    r"_(?P<index>\d+)"
+                    r"$"
                 ),
-                (
-                    "subint_v6_ip",
-                    _get_regex(
-                        r"(?P<vm_type>.+)"
-                        r"_(?P<vm_type_index>\d+)"
-                        r"_subint"
-                        r"_(?P<network_role>.+)"
-                        r"_vmi"
-                        r"_(?P<vmi_index>\d+)"
-                        r"_v6_IP"
-                        r"_(?P<index>\d+)"
-                        r"$"
-                    ),
+            ),
+            (
+                "subint_v6_ip",
+                _get_regex(
+                    r"(?P<vm_type>.+)"
+                    r"_(?P<vm_type_index>\d+)"
+                    r"_subint"
+                    r"_(?P<network_role>.+)"
+                    r"_vmi"
+                    r"_(?P<vmi_index>\d+)"
+                    r"_v6_IP"
+                    r"_(?P<index>\d+)"
+                    r"$"
                 ),
-                (
-                    "ip",
-                    _get_regex(
-                        r"(?P<vm_type>.+)"
-                        r"_(?P<vm_type_index>\d+)"
-                        r"_(?P<network_role>.+)"
-                        r"_vmi"
-                        r"_(?P<vmi_index>\d+)"
-                        r"_IP"
-                        r"_(?P<index>\d+)"
-                        r"$"
-                    ),
+            ),
+            (
+                "ip",
+                _get_regex(
+                    r"(?P<vm_type>.+)"
+                    r"_(?P<vm_type_index>\d+)"
+                    r"_(?P<network_role>.+)"
+                    r"_vmi"
+                    r"_(?P<vmi_index>\d+)"
+                    r"_IP"
+                    r"_(?P<index>\d+)"
+                    r"$"
                 ),
-                (
-                    "v6_ip",
-                    _get_regex(
-                        r"(?P<vm_type>.+)"
-                        r"_(?P<vm_type_index>\d+)"
-                        r"_(?P<network_role>.+)"
-                        r"_vmi"
-                        r"_(?P<vmi_index>\d+)"
-                        r"_v6_IP"
-                        r"_(?P<index>\d+)"
-                        r"$"
-                    ),
+            ),
+            (
+                "v6_ip",
+                _get_regex(
+                    r"(?P<vm_type>.+)"
+                    r"_(?P<vm_type_index>\d+)"
+                    r"_(?P<network_role>.+)"
+                    r"_vmi"
+                    r"_(?P<vmi_index>\d+)"
+                    r"_v6_IP"
+                    r"_(?P<index>\d+)"
+                    r"$"
                 ),
-            ]
-        )
+            ),
+        ]
+    )
 
 
-class ContrailV2InterfaceRouteTable(HeatObject):
+class ContrailV2InterfaceRouteTableProcessor(HeatProcessor):
     """ ContrailV2 InterfaceRouteTable
     """
 
     resource_type = "OS::ContrailV2::InterfaceRouteTable"
 
 
-class ContrailV2NetworkIpam(HeatObject):
+class ContrailV2NetworkIpamProcessor(HeatProcessor):
     """ ContrailV2 NetworkIpam
     """
 
     resource_type = "OS::ContrailV2::NetworkIpam"
 
 
-class ContrailV2PortTuple(HeatObject):
+class ContrailV2PortTupleProcessor(HeatProcessor):
     """ ContrailV2 PortTuple
     """
 
     resource_type = "OS::ContrailV2::PortTuple"
 
 
-class ContrailV2ServiceHealthCheck(HeatObject):
+class ContrailV2ServiceHealthCheckProcessor(HeatProcessor):
     """ ContrailV2 ServiceHealthCheck
     """
 
     resource_type = "OS::ContrailV2::ServiceHealthCheck"
 
 
-class ContrailV2ServiceInstance(HeatObject):
+class ContrailV2ServiceInstanceProcessor(HeatProcessor):
     """ ContrailV2 ServiceInstance
     """
 
     resource_type = "OS::ContrailV2::ServiceInstance"
 
 
-class ContrailV2ServiceInstanceIp(HeatObject):
+class ContrailV2ServiceInstanceIpProcessor(HeatProcessor):
     """ ContrailV2 ServiceInstanceIp
     """
 
     resource_type = "OS::ContrailV2::ServiceInstanceIp"
 
 
-class ContrailV2ServiceTemplate(HeatObject):
+class ContrailV2ServiceTemplateProcessor(HeatProcessor):
     """ ContrailV2 ServiceTemplate
     """
 
     resource_type = "OS::ContrailV2::ServiceTemplate"
 
 
-class ContrailV2VirtualMachineInterface(ContrailV2NetworkHeatObject):
+class ContrailV2VirtualMachineInterfaceProcessor(ContrailV2NetworkFlavorBaseProcessor):
     """ ContrailV2 Virtual Machine Interface resource
     """
 
     resource_type = "OS::ContrailV2::VirtualMachineInterface"
-
-    def get_re_rids(self):
-        """Return OrderedDict of name: regex
-        """
-        return collections.OrderedDict(
-            [
-                (
-                    "vmi_internal",
-                    _get_regex(
-                        r"(?P<vm_type>.+)"
-                        r"_(?P<vm_type_index>\d+)"
-                        r"_int"
-                        r"_(?P<network_role>.+)"
-                        r"_vmi"
-                        r"_(?P<vmi_index>\d+)"
-                        r"$"
-                    ),
+    re_rids = collections.OrderedDict(
+        [
+            (
+                "vmi_internal",
+                _get_regex(
+                    r"(?P<vm_type>.+)"
+                    r"_(?P<vm_type_index>\d+)"
+                    r"_int"
+                    r"_(?P<network_role>.+)"
+                    r"_vmi"
+                    r"_(?P<vmi_index>\d+)"
+                    r"$"
                 ),
-                (
-                    "vmi_subint",
-                    _get_regex(
-                        r"(?P<vm_type>.+)"
-                        r"_(?P<vm_type_index>\d+)"
-                        r"_subint"
-                        r"_(?P<network_role>.+)"
-                        r"_vmi"
-                        r"_(?P<vmi_index>\d+)"
-                        r"$"
-                    ),
+            ),
+            (
+                "vmi_subint",
+                _get_regex(
+                    r"(?P<vm_type>.+)"
+                    r"_(?P<vm_type_index>\d+)"
+                    r"_subint"
+                    r"_(?P<network_role>.+)"
+                    r"_vmi"
+                    r"_(?P<vmi_index>\d+)"
+                    r"$"
                 ),
-                (
-                    "vmi_external",
-                    _get_regex(
-                        r"(?P<vm_type>.+)"
-                        r"_(?P<vm_type_index>\d+)"
-                        r"_(?P<network_role>.+)"
-                        r"_vmi"
-                        r"_(?P<vmi_index>\d+)"
-                        r"$"
-                    ),
+            ),
+            (
+                "vmi_external",
+                _get_regex(
+                    r"(?P<vm_type>.+)"
+                    r"_(?P<vm_type_index>\d+)"
+                    r"_(?P<network_role>.+)"
+                    r"_vmi"
+                    r"_(?P<vmi_index>\d+)"
+                    r"$"
                 ),
-            ]
-        )
+            ),
+        ]
+    )
 
 
-class ContrailV2VirtualNetwork(HeatObject):
+class ContrailV2VirtualNetworkProcessor(HeatProcessor):
     """ ContrailV2 VirtualNetwork
     """
 
     resource_type = "OS::ContrailV2::VirtualNetwork"
+    re_rids = collections.OrderedDict(
+        [
+            ("network", _get_regex(r"int" r"_(?P<network_role>.+)" r"_network" r"$")),
+            ("rvn", _get_regex(r"int" r"_(?P<network_role>.+)" r"_RVN" r"$")),
+        ]
+    )
 
-    def get_re_rids(self):
-        """Return OrderedDict of name: regex
-        """
-        return collections.OrderedDict(
-            [
-                (
-                    "network",
-                    _get_regex(r"int" r"_(?P<network_role>.+)" r"_network" r"$"),
+
+class HeatResourceGroupProcessor(HeatProcessor):
+    """ Heat ResourceGroup
+    """
+
+    resource_type = "OS::Heat::ResourceGroup"
+    re_rids = collections.OrderedDict(
+        [
+            (
+                "subint",
+                _get_regex(
+                    r"(?P<vm_type>.+)"
+                    r"_(?P<vm_type_index>\d+)"
+                    r"_subint"
+                    r"_(?P<network_role>.+)"
+                    r"_port_(?P<port_index>\d+)"
+                    r"_subinterfaces"
+                    r"$"
                 ),
-                ("rvn", _get_regex(r"int" r"_(?P<network_role>.+)" r"_RVN" r"$")),
-            ]
-        )
+            )
+        ]
+    )
 
 
-class NeutronNet(HeatObject):
+class NeutronNetProcessor(HeatProcessor):
     """ Neutron Net resource
     """
 
     resource_type = "OS::Neutron::Net"
-
-    def get_re_rids(self):
-        """Return OrderedDict of name: regex
-        """
-        return collections.OrderedDict(
-            [("network", _get_regex(r"int" r"_(?P<network_role>.+)" r"_network" r"$"))]
-        )
+    re_rids = collections.OrderedDict(
+        [("network", _get_regex(r"int" r"_(?P<network_role>.+)" r"_network" r"$"))]
+    )
 
 
-class NeutronPort(HeatObject):
+class NeutronPortProcessor(HeatProcessor):
     """ Neutron Port resource
     """
 
     resource_type = "OS::Neutron::Port"
+    re_rids = collections.OrderedDict(
+        [
+            (
+                "internal_port",
+                _get_regex(
+                    r"(?P<vm_type>.+)"
+                    r"_(?P<vm_type_index>\d+)"
+                    r"_int"
+                    r"_(?P<network_role>.+)"
+                    r"_port_(?P<port_index>\d+)"
+                    r"$"
+                ),
+            ),
+            (
+                "port",
+                _get_regex(
+                    r"(?P<vm_type>.+)"
+                    r"_(?P<vm_type_index>\d+)"
+                    r"_(?P<network_role>.+)"
+                    r"_port_(?P<port_index>\d+)"
+                    r"$"
+                ),
+            ),
+            (
+                "floating_ip",
+                _get_regex(
+                    r"reserve_port"
+                    r"_(?P<vm_type>.+)"
+                    r"_(?P<network_role>.+)"
+                    r"_floating_ip_(?P<index>\d+)"
+                    r"$"
+                ),
+            ),
+            (
+                "floating_v6_ip",
+                _get_regex(
+                    r"reserve_port"
+                    r"_(?P<vm_type>.+)"
+                    r"_(?P<network_role>.+)"
+                    r"_floating_v6_ip_(?P<index>\d+)"
+                    r"$"
+                ),
+            ),
+        ]
+    )
 
-    def get_re_rids(self):
-        """Return OrderedDict of name: regex
+    @classmethod
+    def uses_sr_iov(cls, resource):
+        """Returns True/False as `resource` is/not
+        An OS::Nova:Port with the property binding:vnic_type
         """
-        return collections.OrderedDict(
-            [
-                (
-                    "internal_port",
-                    _get_regex(
-                        r"(?P<vm_type>.+)"
-                        r"_(?P<vm_type_index>\d+)"
-                        r"_int"
-                        r"_(?P<network_role>.+)"
-                        r"_port_(?P<port_index>\d+)"
-                        r"$"
-                    ),
-                ),
-                (
-                    "port",
-                    _get_regex(
-                        r"(?P<vm_type>.+)"
-                        r"_(?P<vm_type_index>\d+)"
-                        r"_(?P<network_role>.+)"
-                        r"_port_(?P<port_index>\d+)"
-                        r"$"
-                    ),
-                ),
-                (
-                    "floating_ip",
-                    _get_regex(
-                        r"reserve_port"
-                        r"_(?P<vm_type>.+)"
-                        r"_(?P<network_role>.+)"
-                        r"_floating_ip_(?P<index>\d+)"
-                        r"$"
-                    ),
-                ),
-                (
-                    "floating_v6_ip",
-                    _get_regex(
-                        r"reserve_port"
-                        r"_(?P<vm_type>.+)"
-                        r"_(?P<network_role>.+)"
-                        r"_floating_v6_ip_(?P<index>\d+)"
-                        r"$"
-                    ),
-                ),
-            ]
+        return nested_dict.get(
+            resource, "type"
+        ) == cls.resource_type and "binding:vnic_type" in nested_dict.get(
+            resource, "properties", default={}
         )
 
 
-class NovaServer(HeatObject):
+class NovaServerProcessor(HeatProcessor):
     """ Nova Server resource
     """
 
     resource_type = "OS::Nova::Server"
+    re_rids = collections.OrderedDict(
+        [
+            (
+                "server",
+                _get_regex(r"(?P<vm_type>.+)" r"_server_(?P<vm_type_index>\d+)" r"$"),
+            )
+        ]
+    )
 
-    def get_re_rids(self):
-        """Return OrderedDict of name: regex
+    @classmethod
+    def get_flavor(cls, resource):
+        """Return the flavor property of `resource`
         """
-        return collections.OrderedDict(
-            [
-                (
-                    "server",
-                    _get_regex(
-                        r"(?P<vm_type>.+)" r"_server_(?P<vm_type_index>\d+)" r"$"
-                    ),
-                )
-            ]
-        )
+        return cls.get_param_value(nested_dict.get(resource, "properties", "flavor"))
+
+    @classmethod
+    def get_image(cls, resource):
+        """Return the image property of `resource`
+        """
+        return cls.get_param_value(nested_dict.get(resource, "properties", "image"))
+
+    @classmethod
+    def get_network(cls, resource):
+        """Return the network configuration of `resource` as a
+        frozenset of network-roles.
+        """
+        network = set()
+        networks = nested_dict.get(resource, "properties", "networks")
+        if isinstance(networks, list):
+            for port in networks:
+                value = cls.get_resource_or_param_value(nested_dict.get(port, "port"))
+                name, match = NeutronPortProcessor.get_rid_match_tuple(value)
+                if name:
+                    network_role = match.groupdict().get("network_role")
+                    if network_role:
+                        network.add(network_role)
+        return frozenset(network)
+
+    @classmethod
+    def get_vm_class(cls, resource):
+        """Return the vm_class of `resource`, a Hashabledict (of
+        hashable values) whose keys are only the required keys.
+        Return empty Hashabledict if `resource` is not a NovaServer.
+        """
+        vm_class = Hashabledict()
+        resource_type = nested_dict.get(resource, "type")
+        if resource_type == cls.resource_type:
+            d = dict(
+                flavor=cls.get_flavor(resource),
+                image=cls.get_image(resource),
+                networks=cls.get_network(resource),
+            )
+            if all(d.values()):
+                vm_class.update(d)
+        return vm_class
 
 
 class Heat(object):
@@ -466,9 +622,15 @@ class Heat(object):
     envpath - absolute path to environmnt file.
     """
 
+    type_bool = "boolean"
+    type_boolean = "boolean"
     type_cdl = "comma_delimited_list"
+    type_comma_delimited_list = "comma_delimited_list"
+    type_json = "json"
     type_num = "number"
+    type_number = "number"
     type_str = "string"
+    type_string = "string"
 
     def __init__(self, filepath=None, envpath=None):
         self.filepath = None
@@ -487,22 +649,37 @@ class Heat(object):
         self.env = None
         if envpath:
             self.load_env(envpath)
-        self.heat_objects = self.get_heat_objects()
+        self.heat_processors = self.get_heat_processors()
 
     @property
     def contrail_resources(self):
         """This attribute is a dict of Contrail resources.
         """
         return self.get_resource_by_type(
-            resource_type=ContrailV2VirtualMachineInterface.resource_type
+            resource_type=ContrailV2VirtualMachineInterfaceProcessor.resource_type
         )
 
-    @staticmethod
-    def get_heat_objects():
-        """Return a dict, key is resource_type, value is the
-        HeatObject subclass whose resource_type is the key.
+    def get_all_resources(self, base_dir):
         """
-        return _HEAT_OBJECTS
+        Like ``resources``,
+        but this returns all the resources definitions
+        defined in the template, resource groups, and nested YAML files.
+        """
+        resources = {}
+        for r_id, r_data in self.resources.items():
+            resources[r_id] = r_data
+            resource = Resource(r_id, r_data)
+            if resource.is_nested():
+                nested = Heat(os.path.join(base_dir, resource.get_nested_filename()))
+                resources.update(nested.get_all_resources(base_dir))
+        return resources
+
+    @staticmethod
+    def get_heat_processors():
+        """Return a dict, key is resource_type, value is the
+        HeatProcessor subclass whose resource_type is the key.
+        """
+        return _HEAT_PROCESSORS
 
     def get_resource_by_type(self, resource_type):
         """Return dict of resources whose type is `resource_type`.
@@ -518,8 +695,8 @@ class Heat(object):
         """return get_rid_match_tuple(rid) called on the class
         corresponding to the given resource_type.
         """
-        hoc = self.heat_objects.get(resource_type, HeatObject)
-        return hoc().get_rid_match_tuple(rid)
+        processor = self.heat_processors.get(resource_type, HeatProcessor)
+        return processor.get_rid_match_tuple(rid)
 
     def get_vm_type(self, rid, resource=None):
         """return the vm_type
@@ -541,29 +718,14 @@ class Heat(object):
             self.yml = yaml.load(fi)
         self.heat_template_version = self.yml.get("heat_template_version", None)
         self.description = self.yml.get("description", "")
-        self.parameter_groups = self.yml.get("parameter_groups", {})
+        self.parameter_groups = self.yml.get("parameter_groups") or {}
         self.parameters = self.yml.get("parameters") or {}
-        self.resources = self.yml.get("resources", {})
-        self.outputs = self.yml.get("outputs", {})
-        self.conditions = self.yml.get("conditions", {})
-
-    def get_all_resources(self, base_dir):
-        """
-        Like ``resources``, but this returns all the resources definitions
-        defined in the template, resource groups, and nested YAML files.
-        """
-        resources = {}
-        for r_id, r_data in self.resources.items():
-            resources[r_id] = r_data
-            resource = Resource(r_id, r_data)
-            if resource.is_nested():
-                nested = Heat(os.path.join(base_dir, resource.get_nested_filename()))
-                resources.update(nested.get_all_resources(base_dir))
-        return resources
+        self.resources = self.yml.get("resources") or {}
+        self.outputs = self.yml.get("outputs") or {}
+        self.conditions = self.yml.get("conditions") or {}
 
     def load_env(self, envpath):
-        """
-        Load the Environment template given a envpath.
+        """Load the Environment template given a envpath.
         """
         self.env = Env(filepath=envpath)
 
@@ -577,13 +739,17 @@ class Heat(object):
     def neutron_port_resources(self):
         """This attribute is a dict of Neutron Ports
         """
-        return self.get_resource_by_type(resource_type=NeutronPort.resource_type)
+        return self.get_resource_by_type(
+            resource_type=NeutronPortProcessor.resource_type
+        )
 
     @property
     def nova_server_resources(self):
         """This attribute is a dict of Nova Servers
         """
-        return self.get_resource_by_type(resource_type=NovaServer.resource_type)
+        return self.get_resource_by_type(
+            resource_type=NovaServerProcessor.resource_type
+        )
 
     @staticmethod
     def part_is_in_name(part, name):
@@ -614,7 +780,7 @@ class Resource(object):
         self.resource_id = resource_id or ""
         self.resource = resource or {}
         self.properties = self.resource.get("properties", {})
-        self.resource_type = resource.get("type", "")
+        self.resource_type = self.resource.get("type", "")
 
     @staticmethod
     def get_index_var(resource):
@@ -681,19 +847,30 @@ class Resource(object):
             return {}
 
 
-def _get_heat_objects():
+def get_all_resources(yaml_files):
+    """Return a dict, resource id: resource
+    of the union of resources across all files.
     """
-    Introspect this module and return a dict of all HeatObject sub-classes with
-    a (True) resource_type. Key is the resource_type, value is the
-    corresponding class.
+    resources = {}
+    for heat_template in yaml_files:
+        heat = Heat(filepath=heat_template)
+        dirname = os.path.dirname(heat_template)
+        resources.update(heat.get_all_resources(dirname))
+    return resources
+
+
+def _get_heat_processors():
+    """Introspect this module and return a
+    dict of all HeatProcessor sub-classes with a (True) resource_type.
+    Key is the resource_type, value is the corrresponding class.
     """
     mod_classes = inspect.getmembers(sys.modules[__name__], inspect.isclass)
-    heat_objects = {
+    heat_processors = {
         c.resource_type: c
         for _, c in mod_classes
-        if issubclass(c, HeatObject) and c.resource_type
+        if issubclass(c, HeatProcessor) and c.resource_type
     }
-    return heat_objects
+    return heat_processors
 
 
-_HEAT_OBJECTS = _get_heat_objects()
+_HEAT_PROCESSORS = _get_heat_processors()

@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -37,12 +37,9 @@
 #
 # ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
-
 import re
-
 import pytest
 from tests import cached_yaml as yaml
-
 from .utils.vm_types import get_vm_type_for_nova_server
 
 
