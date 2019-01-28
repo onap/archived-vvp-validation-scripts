@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2018 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -36,6 +36,7 @@
 # ============LICENSE_END============================================
 import os
 
+from tests.helpers import validates
 from tests.parametrizers import get_nested_files
 from tests.structures import Heat, Resource
 
@@ -45,7 +46,7 @@ def non_nested_files(filenames):
     return set(filenames).difference(set(nested_files))
 
 
-# No requirement ID yet available
+@validates("R-589037")
 def test_detected_volume_module_follows_naming_convention(template_dir):
     all_files = [os.path.join(template_dir, f) for f in os.listdir(template_dir)]
     yaml_files = [f for f in all_files if f.endswith(".yaml") or f.endswith(".yml")]

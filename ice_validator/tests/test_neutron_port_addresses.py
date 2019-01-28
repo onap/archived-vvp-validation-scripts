@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -35,7 +35,6 @@
 #
 # ============LICENSE_END============================================
 #
-# ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
 """
@@ -93,6 +92,8 @@ def get_port_addresses(filepath):
             param = heat.nested_get(aa_pair, field, "get_param")
             if param is None:
                 continue
+            else:
+                param = param[0] if isinstance(param, list) else param
             port_addresses[field][param][basename].add(rid)
     return port_addresses
 
@@ -166,6 +167,7 @@ def validate_field(heat, allowed_address_pairs, field, v6=False):
                 break
             else:
                 # if v6 and testing v6, or inverse
+                param = param[0] if isinstance(param, list) else param
                 if v6 == is_v6_ip(param):
                     ports.add(param)
     if error is None and len(ports) > 1:
@@ -197,7 +199,7 @@ def validate_external_ipaddress_v6(heat, allowed_address_pairs):
 @validates("R-91810")
 def test_neutron_port_external_ipaddress(heat_template):
     """
-    If a VNF requires ECOMP to assign a Virtual IP (VIP) Address to
+    If a VNF requires ONAP to assign a Virtual IP (VIP) Address to
     ports connected an external network, the port
     **MUST NOT** have more than one IPv4 VIP address.
     """
@@ -207,7 +209,7 @@ def test_neutron_port_external_ipaddress(heat_template):
 @validates("R-41956")
 def test_neutron_port_external_ipaddress_v6(heat_template):
     """
-    If a VNF requires ECOMP to assign a Virtual IP (VIP) Address to
+    If a VNF requires ONAP to assign a Virtual IP (VIP) Address to
     ports connected an external network, the port
     **MUST NOT** have more than one IPv6 VIP address.
     """
@@ -219,7 +221,7 @@ def test_neutron_port_floating(yaml_files):
     """
     If a VNF has two or more ports that
     attach to an external network that require a Virtual IP Address (VIP),
-    and the VNF requires ECOMP automation to assign the IP address,
+    and the VNF requires ONAP automation to assign the IP address,
     all the Virtual Machines using the VIP address **MUST**
     be instantiated in the same Base Module Heat Orchestration Template
     or in the same Incremental Module Heat Orchestration Template.
@@ -231,12 +233,12 @@ def test_neutron_port_floating(yaml_files):
     for field, params in fields.items():
         for param, files in params.items():
             if len(files) > 1:
-                bad.append(
-                    '"%s" "%s" in multiple templates: %s'
-                    % (
-                        field,
-                        param,
-                        ", ".join("%s: %s" % (k, list(v)) for k, v in files.items()),
+                error = ["{} {} assigned in multiple templates: ".format(field, param)]
+                for file_name, r_ids in files.items():
+                    error.append(
+                        "In {} it's assigned to {}. ".format(
+                            file_name, ", ".join(r_ids)
+                        )
                     )
-                )
+                bad.append("".join(error))
     assert not bad, "; ".join(bad)

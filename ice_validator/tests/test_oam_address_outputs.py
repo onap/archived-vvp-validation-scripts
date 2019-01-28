@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -35,31 +35,31 @@
 #
 # ============LICENSE_END============================================
 #
-# ECOMP is a trademark and service mark of AT&T Intellectual Property.
-#
----
-parameters:
-  out:
-    type: string
-    description: test for output
-  res:
-    type: string
-    description: test for resources
-  indexed:
-    type: comma_delimited_list
-    description: test for indexed param
-  indx:
-    type: number
-    description: Index of the current instance
+import os
 
-resources:
-  test:
-    type: abc
-    properties:
-      test_res: {get_param: res}
-      test_ind_param: { get_param: [ indexed, { get_param: indx } ] }
+from tests.helpers import validates
+from tests.structures import Heat
 
-outputs:
-  test_out:
-    description: test getting output param
-    value: {get_param: out}
+MSG = (
+    "OAM management address can be declared as output in at most 1 template. "
+    + "Output parameter {} found in multiple templates: {}"
+)
+
+
+def find_output_param(param, templates):
+    templates = (t for t in templates if param in Heat(t).outputs)
+    return [os.path.basename(t) for t in templates]
+
+
+@validates("R-18683")
+def test_oam_address_v4_zero_or_one(heat_templates):
+    param = "oam_management_v4_address"
+    templates = find_output_param(param, heat_templates)
+    assert len(templates) <= 1, MSG.format(param, ", ".join(templates))
+
+
+@validates("R-94669")
+def test_oam_address_v6_zero_or_one(heat_templates):
+    param = "oam_management_v6_address"
+    templates = find_output_param(param, heat_templates)
+    assert len(templates) <= 1, MSG.format(param, ", ".join(templates))

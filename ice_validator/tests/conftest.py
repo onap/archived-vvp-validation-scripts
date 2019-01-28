@@ -58,6 +58,8 @@ from more_itertools import partition
 import xlsxwriter
 from six import string_types
 
+import version
+
 __path__ = [os.path.dirname(os.path.abspath(__file__))]
 
 DEFAULT_OUTPUT_DIR = "{}/../output".format(__path__[0])
@@ -312,9 +314,7 @@ def pytest_runtest_makereport(item, call):
         msg = "!!Base Test Failure!! Halting test suite execution...\n{}".format(
             result.error_message
         )
-        pytest.exit(
-            "{}\n{}\n{}".format(msg, result.files, result.test_case)
-        )
+        pytest.exit("{}\n{}\n{}".format(msg, result.files, result.test_case))
 
 
 def make_timestamp():
@@ -339,12 +339,17 @@ def pytest_sessionfinish(session, exitstatus):
     """
     if not session.config.option.template_dir:
         return
-    template_path = os.path.abspath(session.config.option.template_dir[0])
-    profile_name = session.config.option.validation_profile_name or ""
+
+    if session.config.option.template_source:
+        template_source = session.config.option.template_source[0]
+    else:
+        template_source = os.path.abspath(session.config.option.template_dir[0])
+
+    categories_selected = session.config.option.test_categories or ""
     generate_report(
         get_output_dir(session.config),
-        template_path,
-        profile_name,
+        template_source,
+        categories_selected,
         session.config.option.report_format,
     )
 
@@ -352,33 +357,33 @@ def pytest_sessionfinish(session, exitstatus):
 # noinspection PyUnusedLocal
 def pytest_collection_modifyitems(session, config, items):
     """
-    Selects tests based on the validation profile requested.  Tests without
-    pytest markers will always be executed.
+    Selects tests based on the categories requested.  Tests without
+    categories will always be executed.
     """
-    allowed_marks = ["xfail", "base"]
-    profile = config.option.validation_profile
-
-    for item in items:
-        markers = set(m.name for m in item.iter_markers())
-        if not profile and markers and set(markers).isdisjoint(allowed_marks):
-            item.add_marker(
-                pytest.mark.skip(
-                    reason="No validation profile selected. "
-                    "Skipping tests with marks."
-                )
-            )
-        if (
-            profile
-            and markers
-            and profile not in markers
-            and set(markers).isdisjoint(allowed_marks)
-        ):
-            item.add_marker(
-                pytest.mark.skip(reason="Doesn't match selection " "validation profile")
-            )
-
+    config.traceability_items = list(items)  # save all items for traceability
+    if not config.option.self_test:
+        for item in items:
+            # checking if test belongs to a category
+            if hasattr(item.function, "categories"):
+                if config.option.test_categories:
+                    test_categories = getattr(item.function, "categories")
+                    passed_categories = config.option.test_categories
+                    if not all(
+                        category in passed_categories for category in test_categories
+                    ):
+                        item.add_marker(
+                            pytest.mark.skip(
+                                reason="Test categories do not match all the passed categories"
+                            )
+                        )
+                else:
+                    item.add_marker(
+                        pytest.mark.skip(
+                            reason="Test belongs to a category but no categories were passed"
+                        )
+                    )
     items.sort(
-        key=lambda i: 0 if "base" in set(m.name for m in i.iter_markers()) else 1
+        key=lambda item: 0 if "base" in set(m.name for m in item.iter_markers()) else 1
     )
 
 
@@ -412,13 +417,13 @@ def load_resolutions_file():
             return json.loads(f.read())
 
 
-def generate_report(outpath, template_path, profile_name, output_format="html"):
+def generate_report(outpath, template_path, categories, output_format="html"):
     """
     Generates the various output reports.
 
     :param outpath: destination directory for all reports
     :param template_path: directory containing the Heat templates validated
-    :param profile_name: Optional validation profile selected
+    :param categories: Optional categories selected
     :param output_format: One of "html", "excel", or "csv". Default is "html"
     :raises: ValueError if requested output format is unknown
     """
@@ -426,13 +431,13 @@ def generate_report(outpath, template_path, profile_name, output_format="html"):
     generate_failure_file(outpath)
     output_format = output_format.lower().strip() if output_format else "html"
     if output_format == "html":
-        generate_html_report(outpath, profile_name, template_path, failures)
+        generate_html_report(outpath, categories, template_path, failures)
     elif output_format == "excel":
-        generate_excel_report(outpath, profile_name, template_path, failures)
+        generate_excel_report(outpath, categories, template_path, failures)
     elif output_format == "json":
-        generate_json(outpath, template_path, profile_name)
+        generate_json(outpath, template_path, categories)
     elif output_format == "csv":
-        generate_csv_report(outpath, profile_name, template_path, failures)
+        generate_csv_report(outpath, categories, template_path, failures)
     else:
         raise ValueError("Unsupported output format: " + output_format)
 
@@ -469,10 +474,11 @@ def generate_failure_file(outpath):
     write_json(data, failure_path)
 
 
-def generate_csv_report(output_dir, profile_name, template_path, failures):
+def generate_csv_report(output_dir, categories, template_path, failures):
     rows = [["Validation Failures"]]
     headers = [
-        ("Profile Selected:", profile_name),
+        ("Categories Selected:", categories),
+        ("Tool Version:", version.VERSION),
         ("Report Generated At:", make_timestamp()),
         ("Directory Validated:", template_path),
         ("Checksum:", hash_directory(template_path)),
@@ -523,7 +529,7 @@ def generate_csv_report(output_dir, profile_name, template_path, failures):
             writer.writerow(row)
 
 
-def generate_excel_report(output_dir, profile_name, template_path, failures):
+def generate_excel_report(output_dir, categories, template_path, failures):
     output_path = os.path.join(output_dir, "report.xlsx")
     workbook = xlsxwriter.Workbook(output_path)
     bold = workbook.add_format({"bold": True})
@@ -534,7 +540,8 @@ def generate_excel_report(output_dir, profile_name, template_path, failures):
     worksheet.write(0, 0, "Validation Failures", heading)
 
     headers = [
-        ("Profile Selected:", profile_name),
+        ("Categories Selected:", ",".join(categories)),
+        ("Tool Version:", version.VERSION),
         ("Report Generated At:", make_timestamp()),
         ("Directory Validated:", template_path),
         ("Checksum:", hash_directory(template_path)),
@@ -636,7 +643,8 @@ def aggregate_results(has_errors, outcomes, r_id=None):
     else:
         pytest.warns(
             "Unexpected error aggregating outcomes ({}) for requirement {}".format(
-                outcomes, r_id)
+                outcomes, r_id
+            )
         )
         return "ERROR"
 
@@ -693,18 +701,18 @@ def collect_errors(r_id, collection_failures, test_result):
     r_id is None, then it collects all errors that occur on failures and
     results that are not mapped to requirements
     """
+
     def selector(item):
         if r_id:
             return r_id in req_ids(item)
         else:
             return not req_ids(item)
 
-    errors = (error(x) for x in chain(collection_failures, test_result)
-              if selector(x))
+    errors = (error(x) for x in chain(collection_failures, test_result) if selector(x))
     return [e for e in errors if e]
 
 
-def generate_json(outpath, template_path, profile_name):
+def generate_json(outpath, template_path, categories):
     """
     Creates a JSON summary of the entire test run.
     """
@@ -714,7 +722,7 @@ def generate_json(outpath, template_path, profile_name):
         "template_directory": template_path,
         "timestamp": make_iso_timestamp(),
         "checksum": hash_directory(template_path),
-        "profile": profile_name,
+        "categories": categories,
         "outcome": aggregate_run_results(COLLECTION_FAILURES, ALL_RESULTS),
         "tests": [],
         "requirements": [],
@@ -754,7 +762,7 @@ def generate_json(outpath, template_path, profile_name):
                     "text": r_data["description"],
                     "keyword": r_data["keyword"],
                     "result": result,
-                    "errors": collect_errors(r_id, COLLECTION_FAILURES, ALL_RESULTS)
+                    "errors": collect_errors(r_id, COLLECTION_FAILURES, ALL_RESULTS),
                 }
             )
     # If there are tests that aren't mapped to a requirement, then we'll
@@ -767,7 +775,7 @@ def generate_json(outpath, template_path, profile_name):
                 "id": "Unmapped",
                 "text": "Tests not mapped to requirements (see tests)",
                 "result": aggregate_results(has_errors, unmapped_outcomes),
-                "errors": collect_errors(None, COLLECTION_FAILURES, ALL_RESULTS)
+                "errors": collect_errors(None, COLLECTION_FAILURES, ALL_RESULTS),
             }
         )
 
@@ -775,7 +783,7 @@ def generate_json(outpath, template_path, profile_name):
     write_json(data, report_path)
 
 
-def generate_html_report(outpath, profile_name, template_path, failures):
+def generate_html_report(outpath, categories, template_path, failures):
     reqs = load_current_requirements()
     resolutions = load_resolutions_file()
     fail_data = []
@@ -797,8 +805,9 @@ def generate_html_report(outpath, profile_name, template_path, failures):
     with open(j2_template_path, "r") as f:
         report_template = jinja2.Template(f.read())
         contents = report_template.render(
+            version=version.VERSION,
             num_failures=len(failures) + len(COLLECTION_FAILURES),
-            profile_name=profile_name,
+            categories=categories,
             template_dir=make_href(template_path),
             checksum=hash_directory(template_path),
             timestamp=make_timestamp(),
@@ -821,24 +830,17 @@ def pytest_addoption(parser):
     )
 
     parser.addoption(
+        "--template-source",
+        dest="template_source",
+        action="append",
+        help="Source Directory which holds the templates for validation",
+    )
+
+    parser.addoption(
         "--self-test",
         dest="self_test",
         action="store_true",
         help="Test the unit tests against their fixtured data",
-    )
-
-    parser.addoption(
-        "--validation-profile",
-        dest="validation_profile",
-        action="store",
-        help="Runs all unmarked tests plus test with a matching marker",
-    )
-
-    parser.addoption(
-        "--validation-profile-name",
-        dest="validation_profile_name",
-        action="store",
-        help="Friendly name of the validation profile used in reports",
     )
 
     parser.addoption(
@@ -860,7 +862,14 @@ def pytest_addoption(parser):
         dest="output_dir",
         action="store",
         default=None,
-        help="Alternate "
+        help="Alternate ",
+    )
+
+    parser.addoption(
+        "--category",
+        dest="test_categories",
+        action="append",
+        help="optional category of test to execute",
     )
 
 
@@ -1040,6 +1049,21 @@ def unicode_writerow(writer, row):
     writer.writerow(row)
 
 
+def parse_heat_requirements(reqs):
+    """Takes requirements and returns list of only Heat requirements"""
+    data = json.loads(reqs)
+    for key, values in list(data.items()):
+        if "Heat" in (values["docname"]):
+            if "MUST" not in (values["keyword"]):
+                del data[key]
+            else:
+                if "none" in (values["validation_mode"]):
+                    del data[key]
+        else:
+            del data[key]
+    return data
+
+
 # noinspection PyUnusedLocal
 def pytest_report_collectionfinish(config, startdir, items):
     """Generates a simple traceability report to output/traceability.csv"""
@@ -1047,7 +1071,9 @@ def pytest_report_collectionfinish(config, startdir, items):
     output_dir = os.path.split(traceability_path)[0]
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    requirements = load_current_requirements()
+    reqs = load_current_requirements()
+    reqs = json.dumps(reqs)
+    requirements = parse_heat_requirements(reqs)
     unmapped, mapped = partition(
         lambda i: hasattr(i.function, "requirement_ids"), items
     )
