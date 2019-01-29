@@ -89,7 +89,7 @@ def test_get_category_when_other(config):
 
 
 def test_default_verbosity(config):
-    assert config.default_verbosity(vvp.ValidatorApp.VERBOSITY_LEVELS) == "More (-vv)"
+    assert config.default_verbosity(vvp.ValidatorApp.VERBOSITY_LEVELS) == "Standard (-v)"
 
 
 def test_queues(config):
