@@ -47,9 +47,7 @@ import time
 from collections import defaultdict
 from itertools import chain
 
-import requests
 import traceback
-import warnings
 
 import docutils.core
 import jinja2
@@ -65,10 +63,7 @@ __path__ = [os.path.dirname(os.path.abspath(__file__))]
 DEFAULT_OUTPUT_DIR = "{}/../output".format(__path__[0])
 
 RESOLUTION_STEPS_FILE = "resolution_steps.json"
-HEAT_REQUIREMENTS_FILE = "heat_requirements.json"
-
-# noinspection PyPep8
-NEEDS_JSON_URL = "https://onap.readthedocs.io/en/latest/_downloads/789ac64d223325488fb3f120f959d985/needs.json"
+HEAT_REQUIREMENTS_FILE = os.path.join(__path__[0], "..", "heat_requirements.json")
 
 REPORT_COLUMNS = [
     ("Input File", "file"),
@@ -1012,23 +1007,6 @@ def hash_directory(path):
 
 def load_current_requirements():
     """Loads dict of current requirements or empty dict if file doesn't exist"""
-    try:
-        r = requests.get(NEEDS_JSON_URL)
-        if r.headers.get("content-type") == "application/json":
-            with open(HEAT_REQUIREMENTS_FILE, "wb") as needs:
-                needs.write(r.content)
-        else:
-            warnings.warn(
-                (
-                    "Unexpected content-type ({}) encountered downloading "
-                    + "requirements.json, using last saved copy"
-                ).format(r.headers.get("content-type"))
-            )
-    except requests.exceptions.RequestException as e:
-        warnings.warn("Error downloading latest JSON, using last saved copy.")
-        warnings.warn(UserWarning(e))
-    if not os.path.exists(HEAT_REQUIREMENTS_FILE):
-        return {}
     with io.open(HEAT_REQUIREMENTS_FILE, encoding="utf8", mode="r") as f:
         data = json.load(f)
         version = data["current_version"]
