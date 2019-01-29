@@ -185,7 +185,7 @@ class QueueWriter:
 
 
 def get_plugins() -> Optional[List]:
-    """When running in a frozen bundle, plugins need to be registered
+    """When running in a frozen bundle, plugins to be registered
     explicitly. This method will return the required plugins to register
     based on the run mode"""
     if hasattr(sys, "frozen"):
@@ -682,7 +682,7 @@ class ValidatorApp:
         try:
             os.remove(self.report_file_path)
             return True
-        except OSError as e:
+        except OSError:
             messagebox.showerror(
                 "Error",
                 "Please close or rename the open report file before re-validating",
