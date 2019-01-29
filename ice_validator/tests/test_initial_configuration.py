@@ -35,10 +35,6 @@
 #
 # ============LICENSE_END============================================
 #
-# ECOMP is a trademark and service mark of AT&T Intellectual Property.
-#
-import os
-from os import listdir
 from os import path
 
 import pytest
@@ -51,13 +47,8 @@ from .helpers import validates
 from yamllint.config import YamlLintConfig
 from yamllint import linter
 from .utils.nested_files import check_for_invalid_nesting
-from .utils.nested_files import get_list_of_nested_files
 from .utils.nested_iterables import find_all_get_resource_in_yml
 from .utils.nested_iterables import find_all_get_param_in_yml
-
-"""
-Order tests by number so they execute in order for base tests
-"""
 
 
 @pytest.mark.base
@@ -105,6 +96,7 @@ def test_02_no_duplicate_keys_in_file(yaml_file):
 
 
 @pytest.mark.base
+@validates("R-92635")
 def test_03_all_referenced_resources_exists(yaml_file):
     """
     Check that all resources referenced by get_resource
@@ -137,6 +129,7 @@ def test_03_all_referenced_resources_exists(yaml_file):
 
 
 @pytest.mark.base
+@validates("R-92635")
 def test_04_valid_nesting(yaml_file):
     """
     Check that the nesting is following the proper format and
@@ -162,6 +155,7 @@ def test_04_valid_nesting(yaml_file):
 
 
 @pytest.mark.base
+@validates("R-92635")
 def test_05_all_get_param_have_defined_parameter(yaml_file):
     """
     Check that all referenced parameters are actually defined
@@ -207,29 +201,3 @@ def test_06_heat_template_resource_section_has_resources(heat_template):
             break
 
     assert found_resource, "Heat templates must contain at least one resource"
-
-
-@validates("R-52530")
-@pytest.mark.base
-def test_07_nested_template_in_same_directory(yaml_file):
-
-    missing_files = []
-
-    with open(yaml_file) as fh:
-        yml = yaml.load(fh)
-
-    # skip if resources are not defined
-    if "resources" not in yml:
-        pytest.skip("No resources specified in the heat template")
-
-    dirname = os.path.dirname(yaml_file)
-    list_of_files = get_list_of_nested_files(yml, dirname)
-    dir_files = listdir(dirname)
-    for file in list_of_files:
-        base_name = path.basename(file)
-        if base_name not in dir_files:
-            missing_files.append(base_name)
-
-    assert (
-        not missing_files
-    ), "Missing nested files in heat template directory {}".format(missing_files)
