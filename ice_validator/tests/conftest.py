@@ -64,6 +64,8 @@ DEFAULT_OUTPUT_DIR = "{}/../output".format(__path__[0])
 
 RESOLUTION_STEPS_FILE = "resolution_steps.json"
 HEAT_REQUIREMENTS_FILE = os.path.join(__path__[0], "..", "heat_requirements.json")
+TEST_SCRIPT_SITE = "https://github.com/onap/vvp-validation-scripts/blob/master/ice_validator/tests/"
+VNFRQTS_ID_URL = "https://docs.onap.org/en/latest/submodules/vnfrqts/requirements.git/docs/"
 
 REPORT_COLUMNS = [
     ("Input File", "file"),
@@ -1036,7 +1038,9 @@ def parse_heat_requirements(reqs):
                 del data[key]
             else:
                 if "none" in (values["validation_mode"]):
-                    del data[key]
+                    values["validation_mode"] =  "None"
+                title = "`" + values["id"] + " <" + VNFRQTS_ID_URL + values["docname"].replace(" ", "%20") + ".html#" + values["id"] + ">`_"
+                data[key].update({'full_title': title})
         else:
             del data[key]
     return data
@@ -1062,10 +1066,18 @@ def pytest_report_collectionfinish(config, startdir, items):
         for req_id in item.function.requirement_ids:
             if req_id not in req_to_test:
                 req_to_test[req_id].add(item)
+                if req_id in requirements:
+                    requirements[req_id].update({'test_case': item.function.__module__})
             if req_id not in requirements:
                 mapping_errors.add(
                     (req_id, item.function.__module__, item.function.__name__)
                 )
+    for key, value in requirements.items():
+        if value["test_case"]:
+            val_list = re.findall('(?<=\.).*', value["test_case"])
+            val = TEST_SCRIPT_SITE + val_list[0] + ".py"
+            rst_value = ("`" + val_list[0] + " <" + val + ">`_")
+            requirements[key].update({'test_case': rst_value})
 
     mapping_error_path = os.path.join(__path__[0], "../output/mapping_errors.csv")
     with compat_open(mapping_error_path) as f:
@@ -1077,7 +1089,7 @@ def pytest_report_collectionfinish(config, startdir, items):
         out = csv.writer(f)
         unicode_writerow(
             out,
-            ("Requirement ID", "Requirement", "Section", "Test Module", "Test Name"),
+            ("Requirement ID", "Requirement", "Section", "Test Module", "Test Name", "Validation Mode"),
         )
         for req_id, metadata in requirements.items():
             if req_to_test[req_id]:
@@ -1085,17 +1097,18 @@ def pytest_report_collectionfinish(config, startdir, items):
                     unicode_writerow(
                         out,
                         (
-                            req_id,
+                            metadata["full_title"],
                             metadata["description"],
                             metadata["section_name"],
-                            item.function.__module__,
+                            metadata["test_case"],
                             item.function.__name__,
+                            metadata["validation_mode"],
                         ),
                     )
             else:
                 unicode_writerow(
                     out,
-                    (req_id, metadata["description"], metadata["section_name"], "", ""),
+                    (metadata["full_title"], metadata["description"], metadata["section_name"], "", "", metadata["validation_mode"]),
                 )
         # now write out any test methods that weren't mapped to requirements
         for item in unmapped:
