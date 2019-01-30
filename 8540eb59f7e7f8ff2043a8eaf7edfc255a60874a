@@ -1,0 +1,8 @@
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+2: Steven Wright <sw3588@att.com>
+Code-Review+2: steven stark <steven.stark@att.com>
+Submitted-by: steven stark <steven.stark@att.com>
+Submitted-at: Wed, 30 Jan 2019 22:29:54 +0000
+Reviewed-on: https://gerrit.onap.org/r/77611
+Project: vvp/validation-scripts
+Branch: refs/heads/master
