@@ -56,7 +56,7 @@
             <configuration>
                 <nexusUrl>${onap.nexus.url}</nexusUrl>
                 <stagingProfileId>176c31dfe190a</stagingProfileId>
-                <serverId>ecomp-staging</serverId>
+                <serverId>onap-staging</serverId>
             </configuration>
         </plugin>
         <plugin>
@@ -138,24 +138,24 @@
   </build>
   <distributionManagement>
       <site>
-          <id>ecomp-site</id>
+          <id>onap-site</id>
           <url>dav:${onap.nexus.url}${sitePath}</url>
       </site>
   </distributionManagement>
   <repositories>
     <repository>
-        <id>ecomp-releases</id>
-          <name>ECOMP Release Repository</name>
+        <id>onap-releases</id>
+          <name>Release Repository</name>
           <url>${onap.nexus.url}/content/repositories/releases/</url>
     </repository>
     <repository>
-          <id>ecomp-snapshots</id>
-          <name>ECOMP Snapshot Repository</name>
+          <id>onap-snapshots</id>
+          <name>Snapshot Repository</name>
           <url>${onap.nexus.url}/content/repositories/snapshots/</url>
     </repository>
     <repository>
-        <id>ecomp-staging</id>
-        <name>ECOMP Staging Repository</name>
+        <id>onap-staging</id>
+        <name>Staging Repository</name>
         <url>${onap.nexus.url}/content/repositories/staging/</url>
     </repository>
   </repositories>

@@ -35,7 +35,6 @@
 #
 # ============LICENSE_END============================================
 #
-# ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
 """test env file has no resource_registry

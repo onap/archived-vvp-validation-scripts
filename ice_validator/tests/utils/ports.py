@@ -35,7 +35,6 @@
 #
 # ============LICENSE_END============================================
 #
-# ECOMP is a trademark and service mark of AT&T Intellectual Property.
 #
 
 from .network_roles import get_network_role_from_port
