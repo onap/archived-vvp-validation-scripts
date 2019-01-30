@@ -86,6 +86,11 @@ ALL_RESULTS = []
 
 
 def get_output_dir(config):
+    """
+    Retrieve the output directory for the reports and create it if necessary
+    :param config: pytest configuration
+    :return: output directory as string
+    """
     output_dir = config.option.output_dir or DEFAULT_OUTPUT_DIR
     if not os.path.exists(output_dir):
         os.makedirs(output_dir, exist_ok=True)
@@ -996,6 +1001,11 @@ def pytest_generate_tests(metafunc):
 
 
 def hash_directory(path):
+    """
+    Create md5 hash using the contents of all files under ``path``
+    :param path: string directory containing files
+    :return: string MD5 hash code (hex)
+    """
     md5 = hashlib.md5()
     for dir_path, sub_dirs, filenames in os.walk(path):
         for filename in filenames:
@@ -1027,31 +1037,20 @@ def unicode_writerow(writer, row):
     writer.writerow(row)
 
 
-def parse_heat_requirements(reqs):
-    """Takes requirements and returns list of only Heat requirements"""
-    data = json.loads(reqs)
-    for key, values in list(data.items()):
-        if "Heat" in (values["docname"]):
-            if "MUST" not in (values["keyword"]):
-                del data[key]
-            else:
-                if "none" in (values["validation_mode"]):
-                    del data[key]
-        else:
-            del data[key]
-    return data
+def select_heat_requirements(reqs):
+    """Filters dict requirements to only those requirements pertaining to Heat"""
+    return {k: v for k, v in reqs.items() if "Heat" in v["docname"]}
 
 
 # noinspection PyUnusedLocal
 def pytest_report_collectionfinish(config, startdir, items):
     """Generates a simple traceability report to output/traceability.csv"""
-    traceability_path = os.path.join(__path__[0], "../output/traceability.csv")
+    traceability_path = os.path.join(get_output_dir(config), "traceability.csv")
     output_dir = os.path.split(traceability_path)[0]
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     reqs = load_current_requirements()
-    reqs = json.dumps(reqs)
-    requirements = parse_heat_requirements(reqs)
+    requirements = select_heat_requirements(reqs)
     unmapped, mapped = partition(
         lambda i: hasattr(i.function, "requirement_ids"), items
     )
@@ -1067,7 +1066,7 @@ def pytest_report_collectionfinish(config, startdir, items):
                     (req_id, item.function.__module__, item.function.__name__)
                 )
 
-    mapping_error_path = os.path.join(__path__[0], "../output/mapping_errors.csv")
+    mapping_error_path = os.path.join(get_output_dir(config), "mapping_errors.csv")
     with compat_open(mapping_error_path) as f:
         writer = csv.writer(f)
         for err in mapping_errors:
@@ -1077,9 +1076,14 @@ def pytest_report_collectionfinish(config, startdir, items):
         out = csv.writer(f)
         unicode_writerow(
             out,
-            ("Requirement ID", "Requirement", "Section", "Test Module", "Test Name"),
+            ("Requirement ID", "Requirement", "Section",
+             "Keyword", "Validation Mode", "Is Testable",
+             "Test Module", "Test Name"),
         )
         for req_id, metadata in requirements.items():
+            keyword = metadata["keyword"].upper()
+            mode = metadata["validation_mode"].lower()
+            testable = keyword in {"MUST", "MUST NOT"} and mode != "none"
             if req_to_test[req_id]:
                 for item in req_to_test[req_id]:
                     unicode_writerow(
@@ -1088,6 +1092,9 @@ def pytest_report_collectionfinish(config, startdir, items):
                             req_id,
                             metadata["description"],
                             metadata["section_name"],
+                            keyword,
+                            mode,
+                            "TRUE" if testable else "FALSE",
                             item.function.__module__,
                             item.function.__name__,
                         ),
@@ -1095,10 +1102,27 @@ def pytest_report_collectionfinish(config, startdir, items):
             else:
                 unicode_writerow(
                     out,
-                    (req_id, metadata["description"], metadata["section_name"], "", ""),
+                    (req_id,
+                     metadata["description"],
+                     metadata["section_name"],
+                     keyword,
+                     mode,
+                     "TRUE" if testable else "FALSE",
+                     "",   # test module
+                     ""),  # test function
                 )
         # now write out any test methods that weren't mapped to requirements
-        for item in unmapped:
+        unmapped_tests = {(item.function.__module__, item.function.__name__)
+                          for item in unmapped}
+        for test_module, test_name in unmapped_tests:
             unicode_writerow(
-                out, ("", "", "", item.function.__module__, item.function.__name__)
+                out,
+                ("",        # req ID
+                 "",        # description
+                 "",        # section name
+                 "",        # keyword
+                 "static",  # validation mode
+                 "TRUE",    # testable
+                 test_module,
+                 test_name)
             )
