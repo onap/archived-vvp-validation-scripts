@@ -63,6 +63,8 @@ DEFAULT_OUTPUT_DIR = "{}/../output".format(__path__[0])
 
 RESOLUTION_STEPS_FILE = "resolution_steps.json"
 HEAT_REQUIREMENTS_FILE = os.path.join(__path__[0], "..", "heat_requirements.json")
+TEST_SCRIPT_SITE = "https://github.com/onap/vvp-validation-scripts/blob/master/ice_validator/tests/"
+VNFRQTS_ID_URL = "https://docs.onap.org/en/latest/submodules/vnfrqts/requirements.git/docs/"
 
 REPORT_COLUMNS = [
     ("Input File", "file"),
@@ -1026,6 +1028,45 @@ def select_heat_requirements(reqs):
     """Filters dict requirements to only those requirements pertaining to Heat"""
     return {k: v for k, v in reqs.items() if "Heat" in v["docname"]}
 
+def build_rst_json(reqs):
+    """Takes requirements and returns list of only Heat requirements"""
+    data = json.loads(reqs)
+    for key, values in list(data.items()):
+        if "Heat" in (values["docname"]):
+            if "MUST" in (values["keyword"]):
+                if "none" in (values["validation_mode"]):
+                    del data[key]
+                else:
+                    if values["test_case"]:
+                        val_list = re.findall('(?<=\.).*', values["test_case"])
+                        val = TEST_SCRIPT_SITE + val_list[0] + ".py"
+                        rst_value = ("`" + val_list[0] + " <" + val + ">`_")
+                        title = "`" + values["id"] + " <" + VNFRQTS_ID_URL + values["docname"].replace(" ", "%20") + ".html#" + values["id"] + ">`_"
+                        data[key].update({'full_title': title, 'test_case': rst_value})
+                    else:
+                        del data[key]
+            else:
+                del data[key]
+        else:
+            del data[key]
+    return data
+
+def generate_rst_table(data):
+    rst_path = os.path.join(__path__[0], "../output/rst.csv")
+    with open(rst_path, "w", newline="") as f:
+        out = csv.writer(f)
+        out.writerow(
+            ("Requirement ID", "Requirement", "Test Module", "Test Name"),
+        )
+        for req_id, metadata in data.items():
+            out.writerow(
+                (
+                    metadata["full_title"],
+                    metadata["description"],
+                    metadata["test_case"],
+                    metadata["validated_by"],
+                )
+            )
 
 # noinspection PyUnusedLocal
 def pytest_report_collectionfinish(config, startdir, items):
@@ -1046,6 +1087,8 @@ def pytest_report_collectionfinish(config, startdir, items):
         for req_id in item.function.requirement_ids:
             if req_id not in req_to_test:
                 req_to_test[req_id].add(item)
+                if req_id in requirements:
+                    reqs[req_id].update({'test_case': item.function.__module__, 'validated_by': item.function.__name__})
             if req_id not in requirements:
                 mapping_errors.add(
                     (req_id, item.function.__module__, item.function.__name__)
@@ -1107,3 +1150,5 @@ def pytest_report_collectionfinish(config, startdir, items):
                  test_module,
                  test_name)
             )
+
+    generate_rst_table(build_rst_json(json.dumps(reqs)))
