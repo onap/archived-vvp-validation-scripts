@@ -43,6 +43,7 @@ import pytest
 from tests import cached_yaml as yaml
 from tests.structures import Resource
 from .helpers import validates
+from .utils.nested_iterables import is_pseudo_param
 
 VERSION = "1.0.0"
 
@@ -57,7 +58,6 @@ def check_nested_parameter_doesnt_change(yaml_file):
         pytest.skip("No resources specified in the heat template")
 
     invalid_parameters = []
-
     """
     checking if property: { get_param: parameter }, then property == parameter
 
@@ -94,6 +94,9 @@ def check_nested_parameter_doesnt_change(yaml_file):
                     parameter = v1.get("get_param")
                     if isinstance(parameter, list):
                         parameter = parameter[0]
+
+                    if is_pseudo_param(parameter):
+                        continue
 
                     if k1 != parameter:
                         invalid_parameters.append(

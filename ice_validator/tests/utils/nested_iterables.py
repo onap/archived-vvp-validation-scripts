@@ -37,6 +37,10 @@
 #
 #
 
+def is_pseudo_param(parameter):
+    pseudo_parameters = ["OS::stack_name", "OS::stack_id", "OS::project_id"]
+    return parameter in pseudo_parameters
+
 
 def parse_nested_dict(d, key=""):
     """
@@ -63,13 +67,12 @@ def find_all_get_param_in_yml(yml):
     Recursively find all referenced parameters in a parsed yaml body
     and return a list of parameters
     """
-    os_pseudo_parameters = ["OS::stack_name", "OS::stack_id", "OS::project_id"]
 
     if not hasattr(yml, "items"):
         return []
     params = []
     for k, v in yml.items():
-        if k == "get_param" and v not in os_pseudo_parameters:
+        if k == "get_param" and not is_pseudo_param(v):
             if isinstance(v, list) and not isinstance(v[0], dict):
                 params.append(v[0])
             elif not isinstance(v, dict) and isinstance(v, str):
