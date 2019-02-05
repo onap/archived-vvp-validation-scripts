@@ -184,11 +184,11 @@ def test_05_all_get_param_have_defined_parameter(yaml_file):
 
 @validates("R-90152")
 @pytest.mark.base
-def test_06_heat_template_resource_section_has_resources(yaml_file):
+def test_06_heat_template_resource_section_has_resources(heat_template):
 
     found_resource = False
 
-    with open(yaml_file) as fh:
+    with open(heat_template) as fh:
         yml = yaml.load(fh)
 
     resources = yml.get("resources")
