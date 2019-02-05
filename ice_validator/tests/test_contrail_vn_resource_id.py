@@ -53,7 +53,7 @@ VERSION = "2.0.0"
 
 
 @validates("R-99110")
-def test_neutron_net_resource_id(heat_template):
+def test_neutron_net_resource_id(yaml_file):
     """
     A VNF's Heat Orchestration Template's Resource
     OS::ContrailV2::VirtualNetwork Resource ID
@@ -63,7 +63,7 @@ def test_neutron_net_resource_id(heat_template):
     or
     2) int_{network-role}_RVN`` where RVN represents Resource Virtual
     """
-    heat = Heat(filepath=heat_template)
+    heat = Heat(filepath=yaml_file)
     heat_object_class = ContrailV2VirtualNetworkProcessor
     resource_type = heat_object_class.resource_type
     resources = heat.get_resource_by_type(resource_type)

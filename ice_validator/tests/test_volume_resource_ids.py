@@ -42,13 +42,13 @@ from tests import cached_yaml as yaml
 from .utils.vm_types import get_vm_type_for_nova_server
 
 
-def test_volume_resource_ids(heat_template):
+def test_volume_resource_ids(yaml_file):
     """
     Check that all resource ids for cinder volumes follow the right
     naming convention to include the {vm_type} of the
     nova server it is associated to
     """
-    with open(heat_template) as fh:
+    with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
     # skip if resources are not defined

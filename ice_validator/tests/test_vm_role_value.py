@@ -74,11 +74,11 @@ def test_vm_role_hardcoded(yaml_file):
 
 
 @validates("R-86476")
-def test_vm_role_from_env_file(heat_template):
+def test_vm_role_from_env_file(yaml_file):
     """
     Validate vm_role when using parameters and env file
     """
-    pair = get_environment_pair(heat_template)
+    pair = get_environment_pair(yaml_file)
     if not pair:
         pytest.skip("Unable to resolve environment pair")
     template_params = pair["yyml"].get("parameters") or {}

@@ -124,7 +124,7 @@ def validate_virtual_network_refs(heat, virtual_network_refs, network_role):
 
 
 @validates("R-02164")
-def test_contrail_fqdn(heat_template):
+def test_contrail_fqdn(yaml_file):
     """
     When a VNF's Heat Orchestration Template's Contrail resource
     has a property that
@@ -134,4 +134,4 @@ def test_contrail_fqdn(heat_template):
     * **MUST** follow the format ``{network-role}_net_fqdn``
     * **MUST** be declared as type ``string``
     """
-    run_test(heat_template, validate_virtual_network_refs)
+    run_test(yaml_file, validate_virtual_network_refs)

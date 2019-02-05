@@ -44,13 +44,13 @@ from .helpers import validates
 
 
 @validates("R-93177")
-def test_network_format_use_get_param_or_get_resource(heat_template):
+def test_network_format_use_get_param_or_get_resource(yaml_file):
     """
     Make sure all network properties only use get_param
     or get_resource of an internal network
     """
 
-    with open(heat_template) as fh:
+    with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
     # skip if resources are not defined

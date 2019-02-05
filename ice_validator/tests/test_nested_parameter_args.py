@@ -51,7 +51,7 @@ VERSION = "1.0.0"
 
 
 @validates("R-10834")
-def test_nested_parameter_args(heat_template):
+def test_nested_parameter_args(yaml_file):
     """
     If a VNF’s Heat Orchestration Template resource attribute
     property metadata uses a nested get_param, then the "outer"
@@ -75,7 +75,7 @@ def test_nested_parameter_args(heat_template):
                     vf_module_id:
                         get_param: [ cdl, { get_param: num }]
     """
-    heat = Heat(filepath=heat_template)
+    heat = Heat(filepath=yaml_file)
     if not heat.resources:
         pytest.skip("No resources found")
     has_nested_parameters = False

@@ -44,7 +44,7 @@ AZ_PATTERN = re.compile(r"^(availability_zone_)(\d+)$")
 
 
 @validates("R-98450")
-def test_availability_zones_start_at_0(heat_template):
-    params = Heat(heat_template).parameters
+def test_availability_zones_start_at_0(yaml_file):
+    params = Heat(yaml_file).parameters
     invalid_params = check_indices(AZ_PATTERN, params, "Availability Zone Parameters")
     assert not invalid_params, ". ".join(invalid_params)

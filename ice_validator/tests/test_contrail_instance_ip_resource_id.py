@@ -79,7 +79,7 @@ def run_test(heat_template, regex_names, network_flavor):
 
 
 @validates("R-53310", "R-46128")
-def test_contrail_instance_ip_resource_id_external(heat_template):
+def test_contrail_instance_ip_resource_id_external(yaml_file):
     """
     A VNF's Heat Orchestration Template's Resource OS::ContrailV2::InstanceIp
     that is configuring an IPv4 Address on a port attached to an external
@@ -100,14 +100,14 @@ def test_contrail_instance_ip_resource_id_external(heat_template):
     """
 
     run_test(
-        heat_template,
+        yaml_file,
         regex_names=("ip", "v6_ip"),
         network_flavor=ContrailV2InstanceIpProcessor.network_flavor_external,
     )
 
 
 @validates("R-62187", "R-87563")
-def test_contrail_instance_ip_resource_id_internal(heat_template):
+def test_contrail_instance_ip_resource_id_internal(yaml_file):
     """
     internal
     {vm-type}_{vm-type_index}_int_{network-role}_vmi_{vmi_index}
@@ -116,14 +116,14 @@ def test_contrail_instance_ip_resource_id_internal(heat_template):
             _v6_IP_{index}
     """
     run_test(
-        heat_template,
+        yaml_file,
         regex_names=("int_ip", "int_v6_ip"),
         network_flavor=ContrailV2InstanceIpProcessor.network_flavor_internal,
     )
 
 
 @validates("R-20947", "R-88540")
-def test_contrail_instance_ip_resource_id_subint(heat_template):
+def test_contrail_instance_ip_resource_id_subint(yaml_file):
     """
     subint
     {vm-type}_{vm-type_index}_subint_{network-role}_vmi_{vmi_index}
@@ -132,7 +132,7 @@ def test_contrail_instance_ip_resource_id_subint(heat_template):
             _v6_IP_{index}
     """
     run_test(
-        heat_template,
+        yaml_file,
         regex_names=("subint_ip", "subint_v6_ip"),
         network_flavor=ContrailV2InstanceIpProcessor.network_flavor_subint,
     )

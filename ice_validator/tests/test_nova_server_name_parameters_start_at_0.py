@@ -44,8 +44,8 @@ SERVER_NAME_PARAM = re.compile(r"(.*_name_)(\d+)")
 
 
 @validates("R-54171")
-def test_nova_server_name_parameter_starts_at(heat_template):
-    params = Heat(heat_template).parameters
+def test_nova_server_name_parameter_starts_at(yaml_file):
+    params = Heat(yaml_file).parameters
     invalid_params = check_indices(
         SERVER_NAME_PARAM, params, "OS::Nova::Server Name Parameters"
     )

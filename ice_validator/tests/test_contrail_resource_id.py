@@ -88,7 +88,7 @@ def run_test(heat_template, contrail_class, get_parts, part_name):
 
 
 @validates("R-81214")
-def test_contrail_interfaceroutetable_resource_id(heat_template):
+def test_contrail_interfaceroutetable_resource_id(yaml_file):
     """
     A VNF's Heat Orchestration Template's Resource
     ``OS::ContrailV2::InterfaceRouteTable``
@@ -97,7 +97,7 @@ def test_contrail_interfaceroutetable_resource_id(heat_template):
     contain the ``{network-role}``.
     """
     run_test(
-        heat_template,
+        yaml_file,
         ContrailV2InterfaceRouteTableProcessor,
         get_network_roles,
         "network_role",
@@ -105,7 +105,7 @@ def test_contrail_interfaceroutetable_resource_id(heat_template):
 
 
 @validates("R-30753")
-def test_contrail_networkipam_resource_id(heat_template):
+def test_contrail_networkipam_resource_id(yaml_file):
     """
     A VNF's Heat Orchestration Template's Resource
     ``OS::ContrailV2::NetworkIpam``
@@ -114,12 +114,12 @@ def test_contrail_networkipam_resource_id(heat_template):
     contain the ``{network-role}``.
     """
     run_test(
-        heat_template, ContrailV2NetworkIpamProcessor, get_network_roles, "network_role"
+        yaml_file, ContrailV2NetworkIpamProcessor, get_network_roles, "network_role"
     )
 
 
 @validates("R-20065")
-def test_contrail_porttuple_resource_id(heat_template):
+def test_contrail_porttuple_resource_id(yaml_file):
     """
     A VNF's Heat Orchestration Template's Resource
     ``OS::ContrailV2::PortTuple``
@@ -127,11 +127,11 @@ def test_contrail_porttuple_resource_id(heat_template):
     **MUST**
     contain the ``{vm-type}``.
     """
-    run_test(heat_template, ContrailV2PortTupleProcessor, get_vm_types, "vm_type")
+    run_test(yaml_file, ContrailV2PortTupleProcessor, get_vm_types, "vm_type")
 
 
 @validates("R-76014")
-def test_contrail_servicehealthcheck_resource_id(heat_template):
+def test_contrail_servicehealthcheck_resource_id(yaml_file):
     """
     A VNF's Heat Orchestration Template's Resource
     ``OS::ContrailV2::ServiceHealthCheck``
@@ -140,12 +140,12 @@ def test_contrail_servicehealthcheck_resource_id(heat_template):
     contain the ``{vm-type}``.
     """
     run_test(
-        heat_template, ContrailV2ServiceHealthCheckProcessor, get_vm_types, "vm_type"
+        yaml_file, ContrailV2ServiceHealthCheckProcessor, get_vm_types, "vm_type"
     )
 
 
 @validates("R-16437")
-def test_contrail_servicetemplate_resource_id(heat_template):
+def test_contrail_servicetemplate_resource_id(yaml_file):
     """
     A VNF's Heat Orchestration Template's Resource
     ``OS::ContrailV2::ServiceTemplate``
@@ -153,4 +153,4 @@ def test_contrail_servicetemplate_resource_id(heat_template):
     **MUST**
     contain the ``{vm-type}``.
     """
-    run_test(heat_template, ContrailV2ServiceTemplateProcessor, get_vm_types, "vm_type")
+    run_test(yaml_file, ContrailV2ServiceTemplateProcessor, get_vm_types, "vm_type")

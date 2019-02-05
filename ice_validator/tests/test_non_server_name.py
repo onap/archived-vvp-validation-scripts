@@ -65,7 +65,7 @@ def get_non_servers(heat):
 
 
 @validates("R-85734")
-def test_non_server_name(heat_template):
+def test_non_server_name(yaml_file):
     """
     If a VNF's Heat Orchestration Template contains the property ``name``
     for a non ``OS::Nova::Server`` resource, the intrinsic function
@@ -73,7 +73,7 @@ def test_non_server_name(heat_template):
     supplied metadata parameter ``vnf_name`` to generate a unique value.
 
     """
-    h = Heat(filepath=heat_template)
+    h = Heat(filepath=yaml_file)
     if not h.resources:
         pytest.skip("No resources in this template")
 

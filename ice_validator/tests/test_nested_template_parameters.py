@@ -71,14 +71,14 @@ def validate_parms(dirname, basename, nested, nested_props, prop_type):
 
 
 @validates("R-11041")
-def test_nested_template_parameters(heat_template):
+def test_nested_template_parameters(yaml_file):
     """
     All parameters defined in a VNFs Nested YAML file
     **MUST** be passed in as properties of the resource calling
     the nested yaml file.
     """
-    dirname, basename = os.path.split(heat_template)
-    heat = Heat(filepath=heat_template)
+    dirname, basename = os.path.split(yaml_file)
+    heat = Heat(filepath=yaml_file)
     if not heat.resources:
         pytest.skip("No resources found")
     nested_type = nested_files.get_type_nested_files(heat.yml, dirname)

@@ -53,13 +53,13 @@ VERSION = "1.0.0"
 
 
 @validates("R-41492", "R-35735", "R-98748")
-def test_allowed_address_pairs_include_vm_type_network_role(heat_template):
+def test_allowed_address_pairs_include_vm_type_network_role(yaml_file):
     """
     Check that all allowed_address_pairs include the {vm_type} of the
     nova server it is associated to and also contains the
     {network_role} of the network it is associated with
     """
-    with open(heat_template) as fh:
+    with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
     # skip if resources are not defined

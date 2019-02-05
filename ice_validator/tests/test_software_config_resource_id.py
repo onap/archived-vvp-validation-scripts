@@ -53,12 +53,12 @@ VERSION = "1.1.0"
 
 
 @validates("R-08975")
-def test_software_config_vm_type(heat_template):
+def test_software_config_vm_type(yaml_file):
     """
     A VNF's Heat Orchestration Template's Resource OS::Heat::SoftwareConfig
     Resource ID **MUST** contain the {vm-type}.
     """
-    heat = Heat(filepath=heat_template)
+    heat = Heat(filepath=yaml_file)
     software_configs = heat.get_resource_by_type("OS::Heat::SoftwareConfig")
     if not software_configs:
         pytest.skip("No SoftwareConfig resources found")

@@ -63,18 +63,18 @@ def run_test(heat_template, forbidden):
 
 
 @validates("R-05257")
-def test_neutron_floating_ip_resource_type(heat_template):
+def test_neutron_floating_ip_resource_type(yaml_file):
     """
     A VNF's Heat Orchestration Template's **MUST NOT**
     contain the Resource ``OS::Neutron::FloatingIP``.
     """
-    run_test(heat_template, "OS::Neutron::FloatingIP")
+    run_test(yaml_file, "OS::Neutron::FloatingIP")
 
 
 @validates("R-76449")
-def test_neutron_floating_ip_association_resource_type(heat_template):
+def test_neutron_floating_ip_association_resource_type(yaml_file):
     """
     A VNF's Heat Orchestration Template's **MUST NOT**
     contain the Resource ``OS::Neutron::FloatingIPAssociation``.
     """
-    run_test(heat_template, "OS::Neutron::FloatingIPAssociation")
+    run_test(yaml_file, "OS::Neutron::FloatingIPAssociation")

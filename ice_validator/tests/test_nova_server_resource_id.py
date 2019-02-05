@@ -51,7 +51,7 @@ VERSION = "2.0.0"
 
 
 @validates("R-29751")
-def test_nova_server_resource_id(heat_template):
+def test_nova_server_resource_id(yaml_file):
     """
     A VNF's Heat Orchestration Template's Resource
     OS::Nova::Server Resource ID
@@ -60,7 +60,7 @@ def test_nova_server_resource_id(heat_template):
     * ``{vm-type}_server_{index}``
 
     """
-    heat = Heat(filepath=heat_template)
+    heat = Heat(filepath=yaml_file)
     resources = heat.nova_server_resources
     if not resources:
         pytest.skip("No Nova Server resources found")

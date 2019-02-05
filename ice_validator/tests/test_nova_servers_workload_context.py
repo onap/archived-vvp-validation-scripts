@@ -49,7 +49,7 @@ VERSION = "1.0.0"
 
 
 @validates("R-74978")
-def test_workload_context(heat_template):
+def test_workload_context(yaml_file):
     """
     A VNF's Heat Orchestration Template's OS::Nova::Server Resource
     **MUST**
@@ -59,7 +59,7 @@ def test_workload_context(heat_template):
     metadata map value parameter 'workload_context' **MUST**
     be declared as type: 'string'.
     """
-    with open(heat_template) as fh:
+    with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
     if "parameters" not in yml:
@@ -79,7 +79,7 @@ def test_workload_context(heat_template):
             continue
         error = validate_metadata(metadata, yml["parameters"])
         if error:
-            assert False, '%s resource "%s" %s' % (heat_template, resource, error)
+            assert False, '%s resource "%s" %s' % (yaml_file, resource, error)
 
 
 def validate_metadata(metadata, parameters):

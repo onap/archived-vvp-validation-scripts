@@ -44,11 +44,11 @@ from .helpers import validates
 
 
 @validates("R-901331", "R-481670", "R-663631")
-def test_vm_type_assignments_on_nova_servers_only_use_get_param(heat_template):
+def test_vm_type_assignments_on_nova_servers_only_use_get_param(yaml_file):
     """
     Make sure all nova servers only use get_param for their properties
     """
-    with open(heat_template) as fh:
+    with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
     # skip if resources are not defined
