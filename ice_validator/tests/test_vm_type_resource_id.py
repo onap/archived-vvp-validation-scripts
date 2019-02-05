@@ -50,13 +50,13 @@ VERSION = "1.1.0"
 
 
 @validates("R-46839")
-def test_vm_type_resource_id(heat_template):
+def test_vm_type_resource_id(yaml_file):
     """
     A VNF's Heat Orchestration Template's use of ``{vm-type}``
     in all Resource IDs **MUST** be the same case.
     """
     bad = {}
-    h = Heat(filepath=heat_template)
+    h = Heat(filepath=yaml_file)
     if not h.resources:
         pytest.skip("No resources specified in the heat template")
     vm_types = {

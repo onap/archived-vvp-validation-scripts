@@ -55,7 +55,7 @@ RE_VM_TYPE_NG = re.compile(r".*_int|_?int_.*$")
 
 
 @validates("R-98407")
-def test_vm_type_syntax(heat_template):
+def test_vm_type_syntax(yaml_file):
     """
     A VNF's Heat Orchestration Template's ``{vm-type}``
     **MUST** contain only
@@ -63,7 +63,7 @@ def test_vm_type_syntax(heat_template):
     contain any of the following strings:
     ``_int`` or ``int_`` or ``_int_``.
     """
-    v = Heat(filepath=heat_template)
+    v = Heat(filepath=yaml_file)
     if not v.resources:
         pytest.skip("No resources")
     t = set()

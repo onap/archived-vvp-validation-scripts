@@ -146,7 +146,7 @@ def validate_irt_route_param_type(heat, routes_route):
 
 
 @validates("R-28222")
-def test_contrail_irt_route_param_format(heat_template):
+def test_contrail_irt_route_param_format(yaml_file):
     """
     If a VNF's Heat Orchestration Template
     ``OS::ContrailV2::InterfaceRouteTable`` resource
@@ -154,13 +154,13 @@ def test_contrail_irt_route_param_format(heat_template):
     ``interface_route_table_routes_route`` map property parameter name
     **MUST** follow the format
     """
-    run_test(heat_template, validate_irt_route_param_format)
+    run_test(yaml_file, validate_irt_route_param_format)
 
 
 @validates("R-19756")
-def test_contrail_irt_route_param_type(heat_template):
+def test_contrail_irt_route_param_type(yaml_file):
     """
     * ``{vm-type}_{network-role}_route_prefixes``
     **MUST** be defined as type ``json``.
     """
-    run_test(heat_template, validate_irt_route_param_type)
+    run_test(yaml_file, validate_irt_route_param_type)

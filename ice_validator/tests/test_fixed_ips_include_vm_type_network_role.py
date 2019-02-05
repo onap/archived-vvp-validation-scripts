@@ -55,13 +55,13 @@ from .utils.ports import get_invalid_ip_addresses
     "R-04697",
     "R-34037",
 )
-def test_fixed_ips_include_vm_type_network_role(heat_template):
+def test_fixed_ips_include_vm_type_network_role(yaml_file):
     """
     Check that all fixed_ips ip addresses include the {vm_type} of the
     nova server it is associated to and also contains the {network_role}
     of the network it is associated with
     """
-    with open(heat_template) as fh:
+    with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
     # skip if resources are not defined

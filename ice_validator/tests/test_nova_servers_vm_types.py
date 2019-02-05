@@ -50,12 +50,12 @@ from .utils.network_roles import get_network_roles
 
 
 @validates("R-57282")
-def test_vm_type_consistent_on_nova_servers(heat_template):
+def test_vm_type_consistent_on_nova_servers(yaml_file):
     """
     Make sure all nova servers have properly formatted properties
     for their name, image and flavor
     """
-    with open(heat_template) as fh:
+    with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
     # skip if resources are not defined

@@ -52,10 +52,10 @@ VERSION = "1.0.0"
 
 
 @validates("R-04747")
-def test_cloud_config(heat_template):
+def test_cloud_config(yaml_file):
     """validate resource ids
     """
-    h = Heat(filepath=heat_template)
+    h = Heat(filepath=yaml_file)
     if not h.resources:
         pytest.skip("No resources in this template")
 

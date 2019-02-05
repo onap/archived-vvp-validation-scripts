@@ -40,7 +40,7 @@ heat_template_version: 2015-04-30
 description: Simple template to deploy a single compute instance
 
 parameters:
-  availability_zone_9:
+  availability_zone_0:
     type: string
     label: Key Name
     description: Name of key-pair to be used for compute instance

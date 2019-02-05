@@ -137,41 +137,41 @@ def check_server_parameter_name(heat_template, parameter, parameter_name):
 
 
 @validates("R-23311")
-def test_availability_zone_parameter_type(heat_template):
-    check_parameter_type(heat_template, "availability_zone_", "string")
+def test_availability_zone_parameter_type(yaml_file):
+    check_parameter_type(yaml_file, "availability_zone_", "string")
 
 
 @validates("R-07507")
-def test_vnf_id_parameter_type_and_parameter_name(heat_template):
-    check_parameter_type(heat_template, "vnf_id", "string")
-    check_server_parameter_name(heat_template, "vnf_id", "vnf_id")
+def test_vnf_id_parameter_type_and_parameter_name(yaml_file):
+    check_parameter_type(yaml_file, "vnf_id", "string")
+    check_server_parameter_name(yaml_file, "vnf_id", "vnf_id")
 
 
 @validates("R-82134")
-def test_vf_module_id_parameter_type_and_parameter_name(heat_template):
-    check_parameter_type(heat_template, "vf_module_id", "string")
-    check_server_parameter_name(heat_template, "vf_module_id", "vf_module_id")
+def test_vf_module_id_parameter_type_and_parameter_name(yaml_file):
+    check_parameter_type(yaml_file, "vf_module_id", "string")
+    check_server_parameter_name(yaml_file, "vf_module_id", "vf_module_id")
 
 
 @validates("R-62428")
-def test_vnf_name_parameter_type_and_parameter_name(heat_template):
-    check_parameter_type(heat_template, "vnf_name", "string")
-    check_server_parameter_name(heat_template, "vnf_name", "vnf_name")
+def test_vnf_name_parameter_type_and_parameter_name(yaml_file):
+    check_parameter_type(yaml_file, "vnf_name", "string")
+    check_server_parameter_name(yaml_file, "vnf_name", "vnf_name")
 
 
 @validates("R-39067")
-def test_vf_module_name_parameter_type_and_parameter_name(heat_template):
-    check_parameter_type(heat_template, "vf_module_name", "string")
-    check_server_parameter_name(heat_template, "vf_module_name", "vf_module_name")
+def test_vf_module_name_parameter_type_and_parameter_name(yaml_file):
+    check_parameter_type(yaml_file, "vf_module_name", "string")
+    check_server_parameter_name(yaml_file, "vf_module_name", "vf_module_name")
 
 
 @validates("R-95430")
-def test_vm_role_parameter_type_and_parameter_name(heat_template):
-    check_parameter_type(heat_template, "vm_role", "string")
-    check_server_parameter_name(heat_template, "vm_role", "vm_role")
+def test_vm_role_parameter_type_and_parameter_name(yaml_file):
+    check_parameter_type(yaml_file, "vm_role", "string")
+    check_server_parameter_name(yaml_file, "vm_role", "vm_role")
 
 
 @validates("R-54340")
-def test_vf_module_index_parameter_type_and_parameter_name(heat_template):
-    check_parameter_type(heat_template, "vf_module_index", "number")
-    check_server_parameter_name(heat_template, "vf_module_index", "vf_module_index")
+def test_vf_module_index_parameter_type_and_parameter_name(yaml_file):
+    check_parameter_type(yaml_file, "vf_module_index", "number")
+    check_server_parameter_name(yaml_file, "vf_module_index", "vf_module_index")

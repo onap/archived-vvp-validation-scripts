@@ -52,14 +52,14 @@ from .utils.vm_types import get_vm_type_for_nova_server
 
 
 @validates("R-20453", "R-26351", "R-26506", "R-681859")
-def test_port_resource_ids(heat_template):
+def test_port_resource_ids(yaml_file):
     """
     Check that all resource ids for ports follow the right
     naming convention to include the {vm_type} of the
     nova server it is associated to and also contains the
     {network_role} of the network it is associated with
     """
-    with open(heat_template) as fh:
+    with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
     # skip if resources are not defined

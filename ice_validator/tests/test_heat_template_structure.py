@@ -97,18 +97,18 @@ def test_heat_template_structure_contains_parameters(yaml_file):
 
 
 @validates("R-23664")
-def test_heat_template_structure_contains_resources(heat_template):
+def test_heat_template_structure_contains_resources(yaml_file):
     """
     Check that all heat templates have the required sections
     """
     required_key_values = ["resources"]
 
-    with open(heat_template) as fh:
+    with open(yaml_file) as fh:
         yml = yaml.load(fh)
     assert all(
         [k in yml for k in required_key_values]
     ), "{} doesn't contain the {} section, but it is required".format(
-        heat_template, required_key_values[0]
+        yaml_file, required_key_values[0]
     )
 
 

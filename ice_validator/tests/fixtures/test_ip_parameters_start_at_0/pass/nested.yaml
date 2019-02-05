@@ -40,7 +40,7 @@ heat_template_version: 2015-04-30
 description: Simple template to deploy a single compute instance
 
 parameters:
-  vm1_nr1_ip_4:
+  vm1_nr1_ip_0:
     type: string
     label: Key Name
     description: Name of key-pair to be used for compute instance

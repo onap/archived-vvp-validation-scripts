@@ -45,12 +45,12 @@ from .utils.network_roles import property_uses_get_resource
 
 
 @validates("R-18008")
-def test_neutron_port_network_param_is_string(heat_template):
+def test_neutron_port_network_param_is_string(yaml_file):
     """
     Make sure all network properties use the allowed naming
     conventions
     """
-    with open(heat_template) as fh:
+    with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
     # skip if resources are not defined

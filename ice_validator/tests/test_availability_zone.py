@@ -50,12 +50,12 @@ VERSION = "1.1.0"
 
 
 @validates("R-98450")
-def test_availability_zone_naming(heat_template):
+def test_availability_zone_naming(yaml_file):
     """
     Make sure all availability zones are properly formatted
     """
 
-    with open(heat_template) as fh:
+    with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
     # skip if resources are not defined

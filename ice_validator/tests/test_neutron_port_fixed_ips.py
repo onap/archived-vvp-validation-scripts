@@ -270,18 +270,18 @@ def get_base_template(heat_template):
 
 
 @validates("R-38236")
-def test_neutron_port_fixed_ips(heat_template):
+def test_neutron_port_fixed_ips(yaml_file):
     """
     The VNF's Heat Orchestration Template's
     resource ``OS::Neutron::Port`` property ``fixed_ips``
     map property ``subnet``/``subnet_id`` parameter
     **MUST** be declared type ``string``.
     """
-    run_test(heat_template, validate_fixed_ip)
+    run_test(yaml_file, validate_fixed_ip)
 
 
 @validates("R-62802", "R-15287")
-def test_neutron_port_external_fixed_ips(heat_template):
+def test_neutron_port_external_fixed_ips(yaml_file):
     """
     When the VNF's Heat Orchestration Template's
     resource ``OS::Neutron::Port`` is attaching
@@ -296,11 +296,11 @@ def test_neutron_port_external_fixed_ips(heat_template):
     and the external network IPv6 subnet is to be specified
       * ``{network-role}_v6_subnet_id``
     """
-    run_test(heat_template, validate_external_fixed_ip)
+    run_test(yaml_file, validate_external_fixed_ip)
 
 
 @validates("R-84123", "R-76160")
-def test_neutron_port_internal_fixed_ips(heat_template):
+def test_neutron_port_internal_fixed_ips(yaml_file):
     """
     When
 
@@ -319,4 +319,4 @@ def test_neutron_port_internal_fixed_ips(heat_template):
       * ``int_{network-role}_v6_subnet_id``
 
     """
-    run_test(heat_template, validate_internal_fixed_ip)
+    run_test(yaml_file, validate_internal_fixed_ip)

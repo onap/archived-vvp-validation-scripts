@@ -44,7 +44,7 @@ IP_PARAM_PATTERN = re.compile(r"^(.*_ip_)(\d+)$")
 
 
 @validates("R-71577", "R-40971")
-def test_ips_start_at_0(heat_template):
-    params = Heat(heat_template).parameters
+def test_ips_start_at_0(yaml_file):
+    params = Heat(yaml_file).parameters
     invalid_params = check_indices(IP_PARAM_PATTERN, params, "IP Parameters")
     assert not invalid_params, ". ".join(invalid_params)

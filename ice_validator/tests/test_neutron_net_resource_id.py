@@ -53,14 +53,14 @@ VERSION = "2.0.0"
 
 
 @validates("R-25720")
-def test_neutron_net_resource_id(heat_template):
+def test_neutron_net_resource_id(yaml_file):
     """
     A VNF's Heat Orchestration Template's Resource OS::Neutron::Net
     Resource ID **MUST** use the naming convention
 
     * int_{network-role}_network
     """
-    heat = Heat(filepath=heat_template)
+    heat = Heat(filepath=yaml_file)
     neutron_nets = heat.get_resource_by_type(NeutronNetProcessor.resource_type)
     if not neutron_nets:
         pytest.skip("No neutron nets found")

@@ -52,12 +52,12 @@ NETWORK_RESOURCE_TYPES = ["OS::Neutron::Net", "OS::ContrailV2::VirtualNetwork"]
 
 
 @validates("R-62983", "R-86182")
-def test_network_format(heat_template):
+def test_network_format(yaml_file):
     """
     Make sure all network properties use the allowed naming
     conventions
     """
-    with open(heat_template) as fh:
+    with open(yaml_file) as fh:
         yml = yaml.load(fh)
 
     # skip if resources are not defined

@@ -52,10 +52,10 @@ VERSION = "1.0.1"
 
 
 @validates("R-30804")
-def test_multipart_mime(heat_template):
+def test_multipart_mime(yaml_file):
     """validate resource ids
     """
-    h = Heat(filepath=heat_template)
+    h = Heat(filepath=yaml_file)
     if not h.resources:
         pytest.skip("No resources in this template")
 

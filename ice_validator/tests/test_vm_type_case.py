@@ -94,12 +94,12 @@ def case_mismatch(vm_type, param):
 
 
 @validates("R-32394")
-def test_vm_type_case(heat_template):
+def test_vm_type_case(yaml_file):
     """
     A VNF's Heat Orchestration Template's use of ``{vm-type}`` in all Resource
     property parameter names **MUST** be the same case.
     """
-    heat = Heat(filepath=heat_template)
+    heat = Heat(filepath=yaml_file)
     resources = heat.resources
     if not resources:
         pytest.skip("No resources found")
