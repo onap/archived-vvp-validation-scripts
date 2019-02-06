@@ -283,7 +283,8 @@ class TestResult:
         elif "yaml_files" in self.item.fixturenames:
             return self.item.funcargs["yaml_files"]
         else:
-            return [self.result.nodeid.split("[")[1][:-1]]
+            parts = self.result.nodeid.split("[")
+            return "" if len(parts) == 1 else parts[1][:-1]
 
     def _get_error_message(self):
         """
@@ -1038,7 +1039,7 @@ def build_rst_json(reqs):
                 if "none" in (values["validation_mode"]):
                     del data[key]
                 else:
-                    """Creates links in RST format to requirements and test cases"""
+                    # Creates links in RST format to requirements and test cases
                     if values["test_case"]:
                         val_list = re.findall(r'(?<=\.).*', values["test_case"])
                         val = TEST_SCRIPT_SITE + val_list[0] + ".py"
@@ -1093,7 +1094,8 @@ def pytest_report_collectionfinish(config, startdir, items):
             if req_id not in req_to_test:
                 req_to_test[req_id].add(item)
                 if req_id in requirements:
-                    reqs[req_id].update({'test_case': item.function.__module__, 'validated_by': item.function.__name__})
+                    reqs[req_id].update({'test_case': item.function.__module__,
+                                         'validated_by': item.function.__name__})
             if req_id not in requirements:
                 mapping_errors.add(
                     (req_id, item.function.__module__, item.function.__name__)
@@ -1142,8 +1144,8 @@ def pytest_report_collectionfinish(config, startdir, items):
                      ""),  # test function
                 )
         # now write out any test methods that weren't mapped to requirements
-        unmapped_tests = {(item.function.__module__, item.function.__name__)
-                          for item in unmapped}
+        unmapped_tests = {(item.function.__module__, item.function.__name__) for item in
+                          unmapped}
         for test_module, test_name in unmapped_tests:
             out.writerow(
                 ("",        # req ID
