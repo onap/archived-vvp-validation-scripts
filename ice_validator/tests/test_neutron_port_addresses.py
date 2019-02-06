@@ -163,7 +163,7 @@ def validate_field(heat, allowed_address_pairs, field, v6=False):
         if field in allowed_address_pair:
             param = heat.nested_get(allowed_address_pair, field, "get_param")
             if param is None:
-                error = 'allowed_address_pair %s requires "get_param"' % field
+                # error = 'allowed_address_pair %s requires "get_param"' % field
                 break
             else:
                 # if v6 and testing v6, or inverse
