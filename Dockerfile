@@ -39,7 +39,8 @@ FROM python:3.6-alpine
 
 COPY requirements.txt /
 
-RUN pip install -r /requirements.txt
+RUN pip install --upgrade pip
+RUN pip install --no-use-pep517 -r /requirements.txt
 
 COPY ice_validator/ /vvp
 
