@@ -1,8 +1,8 @@
 # -*- coding: utf8 -*-
-# ============LICENSE_START====================================================
+# ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -36,52 +36,21 @@
 # ============LICENSE_END============================================
 #
 #
+---
+description:
+    base
+parameters:
+    vm_type_volume_name_0:
+        type: string
+    vm_type_volume_size_0:
+        type: number
 
-from os import listdir
-from os import path
-import re
+resources:
+    server_0:
+        type: OS::Nova::Server
+        properties:
+            name: {get_param: server_name_0}
 
-from .helpers import check_basename_ending
-from .helpers import validates
-
-
-RE_BASE = re.compile(r"(^base$)|(^base_)|(_base_)|(_base$)")
-
-
-@validates("R-37028", "R-87485", "R-81339", "R-87247", "R-76057")
-def test_base_template_names(template_dir):
-    """
-    Check all base templates have a filename that includes "_base_".
-    """
-    filenames = [
-        f
-        for f in listdir(template_dir)
-        if path.isfile(path.join(template_dir, f))
-        and path.splitext(f)[-1] in [".yaml", ".yml"]
-    ]
-
-    base_modules = []
-    for filename in filenames:
-        basename = path.splitext(filename)[0]
-
-        # volume templates are tied to their parent naming wise
-        if check_basename_ending("volume", basename):
-            continue
-
-        if RE_BASE.search(basename.lower()):
-            base_modules.append(filename)
-
-    if not base_modules:
-        msg = (
-            "No base module detected in the following files "
-            "from the template directory: {}"
-        ).format(", ".join(filenames))
-    elif len(base_modules) > 1:
-        msg = (
-            "Multiple base modules detected in the template "
-            "directory, but only one is allowed: {}"
-        ).format(", ".join(base_modules))
-    else:
-        msg = ""
-
-    assert len(base_modules) == 1, msg
+outputs:
+    vm_type_volume_id_0:
+        value: {get_resource: vm_type_volume_0}
