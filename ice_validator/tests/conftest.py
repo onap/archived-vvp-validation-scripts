@@ -284,7 +284,7 @@ class TestResult:
             return self.item.funcargs["yaml_files"]
         else:
             parts = self.result.nodeid.split("[")
-            return "" if len(parts) == 1 else parts[1][:-1]
+            return [""] if len(parts) == 1 else [parts[1][:-1]]
 
     def _get_error_message(self):
         """
@@ -1041,9 +1041,9 @@ def build_rst_json(reqs):
                 else:
                     # Creates links in RST format to requirements and test cases
                     if values["test_case"]:
-                        val_list = re.findall(r'(?<=\.).*', values["test_case"])
-                        val = TEST_SCRIPT_SITE + val_list[0] + ".py"
-                        rst_value = ("`" + val_list[0] + " <" + val + ">`_")
+                        mod = values["test_case"].split(".")[-1]
+                        val = TEST_SCRIPT_SITE + mod + ".py"
+                        rst_value = ("`" + mod + " <" + val + ">`_")
                         title = "`" + values["id"] + " <" + VNFRQTS_ID_URL + values["docname"].replace(" ", "%20") + ".html#" + values["id"] + ">`_"
                         data[key].update({'full_title': title, 'test_case': rst_value})
                     else:
