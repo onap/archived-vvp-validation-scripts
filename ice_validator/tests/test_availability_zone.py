@@ -80,7 +80,10 @@ def test_availability_zone_naming(yaml_file):
                     continue
                 if "get_param" not in v2:
                     invalid_availability_zones.add(k1)
-                elif not re.match(r"availability_zone_\d+", v2["get_param"]):
+                    continue
+                if not isinstance(v2["get_param"], str):
+                    continue
+                if not re.match(r"availability_zone_\d+", v2["get_param"]):
                     invalid_availability_zones.add(v2["get_param"])
 
     assert not invalid_availability_zones, "invalid availability zones %s" % list(
