@@ -37,13 +37,13 @@
 #
 #
 
-from .network_roles import get_network_role_from_port
+from .network_roles import get_network_role_and_type
 from .vm_types import get_vm_type_for_nova_server
 import re
 
 
 def is_valid_ip_address(
-    ip_address, vm_type, network_role, port_property, parameter_type
+    ip_address, vm_type, network_role, port_property, parameter_type, network_type
 ):
     """
     Check the ip_address to make sure it is properly formatted and
@@ -138,6 +138,8 @@ def is_valid_ip_address(
             continue
         if v3[0] != port_property:
             continue
+        if v3[2] != network_type:
+            continue
         # check if pattern matches
         m = v3[3].match(ip_address)
         if m:
@@ -190,8 +192,8 @@ def get_invalid_ip_addresses(resources, port_property, parameters):
                 else:
                     continue
 
-                network_role = get_network_role_from_port(port_resource)
-                if not network_role:
+                network_role, network_type = get_network_role_and_type(port_resource)
+                if not network_role or not network_type:
                     continue
 
                 for k1, v1 in port_resource["properties"].items():
@@ -220,6 +222,7 @@ def get_invalid_ip_addresses(resources, port_property, parameters):
                             network_role,
                             port_property,
                             parameter_type,
+                            network_type,
                         )
 
                         if not valid_ip_address:
