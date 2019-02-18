@@ -120,19 +120,3 @@ def test_contrail_instance_ip_resource_id_internal(yaml_file):
         regex_names=("int_ip", "int_v6_ip"),
         network_flavor=ContrailV2InstanceIpProcessor.network_flavor_internal,
     )
-
-
-@validates("R-20947", "R-88540")
-def test_contrail_instance_ip_resource_id_subint(yaml_file):
-    """
-    subint
-    {vm-type}_{vm-type_index}_subint_{network-role}_vmi_{vmi_index}
-            _IP_{index}
-    {vm-type}_{vm-type_index}_subint_{network-role}_vmi_{vmi_index}
-            _v6_IP_{index}
-    """
-    run_test(
-        yaml_file,
-        regex_names=("subint_ip", "subint_v6_ip"),
-        network_flavor=ContrailV2InstanceIpProcessor.network_flavor_subint,
-    )
