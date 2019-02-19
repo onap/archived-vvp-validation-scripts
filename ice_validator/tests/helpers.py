@@ -41,6 +41,7 @@
 """
 
 import os
+import re
 from collections import defaultdict
 
 from boltons import funcutils
@@ -259,3 +260,30 @@ def check_indices(pattern, values, value_type):
                 ).format(value_type, prefix, indices)
             )
     return invalid_params
+
+
+RE_BASE = re.compile(r"(^base$)|(^base_)|(_base_)|(_base$)")
+
+
+def get_base_template_from_yaml_files(yaml_files):
+    """Return first filepath to match RE_BASE
+    """
+    for filepath in yaml_files:
+        basename = get_base_template_from_yaml_file(filepath)
+        if basename:
+            return basename
+    return None
+
+
+def get_base_template_from_yaml_file(yaml_file):
+    (dirname, filename) = os.path.split(yaml_file)
+    files = os.listdir(dirname)
+    for file in files:
+        basename, __ = os.path.splitext(os.path.basename(file))
+        if (
+            (__ == ".yaml" or __ == ".yml")
+            and RE_BASE.search(basename)
+            and basename.find("volume") == -1
+        ):
+            return os.path.join(dirname, "{}{}".format(basename, __))
+    return None
