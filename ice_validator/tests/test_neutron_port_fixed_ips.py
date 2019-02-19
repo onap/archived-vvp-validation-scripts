@@ -300,7 +300,7 @@ def test_neutron_port_external_fixed_ips(yaml_file):
 
 
 @validates("R-84123", "R-76160")
-def test_neutron_port_internal_fixed_ips(yaml_file):
+def test_neutron_port_internal_fixed_ips(heat_template):
     """
     When
 
@@ -319,4 +319,4 @@ def test_neutron_port_internal_fixed_ips(yaml_file):
       * ``int_{network-role}_v6_subnet_id``
 
     """
-    run_test(yaml_file, validate_internal_fixed_ip)
+    run_test(heat_template, validate_internal_fixed_ip)
