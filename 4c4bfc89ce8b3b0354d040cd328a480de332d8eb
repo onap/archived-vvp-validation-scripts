@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cb952014_929e280e",
+        "filename": "ice_validator/tests/test_neutron_port_fixed_ips_subnet.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-02-20T20:37:01Z",
+      "side": 1,
+      "message": "need to support .yml too.  Safest would be to convert the extension to lower case too.\n\nSimilar method exists in test_neutron_port_internal_network.  Should we extract that to a single helper method and use both places?",
+      "revId": "4c4bfc89ce8b3b0354d040cd328a480de332d8eb",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6e633f0a_f2b5c97e",
+        "filename": "ice_validator/tests/test_neutron_port_fixed_ips_subnet.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-02-20T20:37:01Z",
+      "side": 1,
+      "message": "This is kind of a weird check. It\u0027s not really checking that fixed_ips uses get_param.  It just throws an error if the template has no parameters. I guess it\u0027s not inaccurate, but seems unnecessary since we already check that all get_params are valid in a separate test.",
+      "revId": "4c4bfc89ce8b3b0354d040cd328a480de332d8eb",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a1ee210_26ccdc61",
+        "filename": "ice_validator/tests/test_neutron_port_fixed_ips_subnet.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-02-20T20:37:01Z",
+      "side": 1,
+      "message": "I don\u0027t think subnet_id is supposed to be supported any longer.  See section 5.5.6.1. It says that subnet_id is removed although the example following the statement still has subnet_id in it.",
+      "revId": "4c4bfc89ce8b3b0354d040cd328a480de332d8eb",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7ffaefe2_b621c1f4",
+        "filename": "ice_validator/tests/test_neutron_port_fixed_ips_subnet.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-02-20T20:37:01Z",
+      "side": 1,
+      "message": "If we do wind up keeping this check, then it seems like it should get put up in run_test as it is duplicated between some of the validators.  It\u0027s not a rule that varies based on internal vs. external IPs I don\u0027t think...",
+      "revId": "4c4bfc89ce8b3b0354d040cd328a480de332d8eb",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cbc15660_4161323d",
+        "filename": "ice_validator/tests/test_neutron_port_fixed_ips_subnet.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-02-20T20:37:01Z",
+      "side": 1,
+      "message": "I don\u0027t know if it\u0027s a good idea to put the regex in the error message. I don\u0027t know if folks are going to be able to read that.  Can we have a more human readable version of it that matches what we put in the guidelines?  Just be careful about put {} in a string that you call .format on.  If you want {} to show up then you have to use {{field}}",
+      "revId": "4c4bfc89ce8b3b0354d040cd328a480de332d8eb",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b0e71ef_13ce3222",
+        "filename": "ice_validator/tests/test_neutron_port_fixed_ips_subnet.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-02-20T20:37:01Z",
+      "side": 1,
+      "message": "Maybe i\u0027m missing something, but what stops an external subnet from being passed into this?  It looks like it would throw an error if an external was passed to it.  Same scenario on the validate_external_subnet_parameter.",
+      "revId": "4c4bfc89ce8b3b0354d040cd328a480de332d8eb",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
