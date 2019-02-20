@@ -118,7 +118,7 @@ def test_network_resource_id_format(yaml_file):
 
     assert not set(invalid_networks), (
         "Heat templates must only create internal networks "
-        "and follow format int_{network-role}_network"
+        "and follow format int_{{network-role}}_network"
         "{}".format(", ".join(invalid_networks))
     )
 
