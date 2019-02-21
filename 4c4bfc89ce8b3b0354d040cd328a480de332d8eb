@@ -101,6 +101,24 @@
       "revId": "4c4bfc89ce8b3b0354d040cd328a480de332d8eb",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0b66eab7_505c2384",
+        "filename": "ice_validator/tests/test_neutron_port_fixed_ips_subnet.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-02-21T14:13:00Z",
+      "side": 1,
+      "message": "nvm.. you can disregard this comment.",
+      "parentUuid": "5b0e71ef_13ce3222",
+      "revId": "4c4bfc89ce8b3b0354d040cd328a480de332d8eb",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
     }
   ]
 }
