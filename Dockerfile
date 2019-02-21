@@ -42,8 +42,11 @@ COPY requirements.txt /
 RUN pip install --upgrade pip
 RUN pip install --no-use-pep517 -r /requirements.txt
 
-COPY ice_validator/ /vvp
+RUN adduser -D vvpuser
+USER vvpuser
+
+COPY --chown=vvpuser ice_validator/ /vvp
 
 WORKDIR /vvp
 
-ENTRYPOINT ["pytest"]
+ENTRYPOINT ["pytest", "tests"]
