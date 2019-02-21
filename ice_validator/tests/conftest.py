@@ -714,6 +714,10 @@ def collect_errors(r_id, collection_failures, test_result):
     return [e for e in errors if e]
 
 
+def relative_paths(base_dir, paths):
+    return [os.path.relpath(p, base_dir) for p in paths]
+
+
 def generate_json(outpath, template_path, categories):
     """
     Creates a JSON summary of the entire test run.
@@ -721,7 +725,9 @@ def generate_json(outpath, template_path, categories):
     reqs = load_current_requirements()
     data = {
         "version": "dublin",
-        "template_directory": template_path,
+        "template_directory": os.path.splitdrive(template_path)[1].replace(
+            os.path.sep, "/"
+        ),
         "timestamp": make_iso_timestamp(),
         "checksum": hash_directory(template_path),
         "categories": categories,
@@ -745,7 +751,7 @@ def generate_json(outpath, template_path, categories):
     for result in ALL_RESULTS:
         results.append(
             {
-                "files": result.files,
+                "files": relative_paths(template_path, result.files),
                 "test_module": result.test_module,
                 "test_case": result.test_case,
                 "result": result.outcome,
