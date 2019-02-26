@@ -165,12 +165,6 @@ def test_vf_module_name_parameter_type_and_parameter_name(yaml_file):
     check_server_parameter_name(yaml_file, "vf_module_name", "vf_module_name")
 
 
-@validates("R-95430")
-def test_vm_role_parameter_type_and_parameter_name(yaml_file):
-    check_parameter_type(yaml_file, "vm_role", "string")
-    check_server_parameter_name(yaml_file, "vm_role", "vm_role")
-
-
 @validates("R-54340")
 def test_vf_module_index_parameter_type_and_parameter_name(yaml_file):
     check_parameter_type(yaml_file, "vf_module_index", "number")
