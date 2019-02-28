@@ -36,39 +36,26 @@
 # ============LICENSE_END============================================
 #
 
-import os.path
-import re
-
 from tests.parametrizers import get_nested_files
 from tests.utils.network_roles import get_network_type_from_port
 from .structures import Heat
-from .helpers import validates, load_yaml
-
-
-RE_BASE = re.compile(r"(^base$)|(^base_)|(_base_)|(_base$)")
-
-
-def get_base_template_filepath(yaml_files):
-    """Return first filepath to match RE_BASE
-    """
-    for filepath in yaml_files:
-        basename, __ = os.path.splitext(os.path.basename(filepath))
-        if RE_BASE.search(basename) and basename.find("volume") == -1:
-            return filepath
-    return None
+from .helpers import validates, load_yaml, get_base_template_from_yaml_files
 
 
 @validates("R-22688")
 def test_neutron_port_internal_network_v2(yaml_files):
-    base_path = get_base_template_filepath(yaml_files)
+    base_path = get_base_template_from_yaml_files(yaml_files)
     nested_template_paths = get_nested_files(yaml_files)
     errors = []
     for yaml_file in yaml_files:
         if yaml_file == base_path or yaml_file in nested_template_paths:
             continue  # Only applies to incremental modules
         heat = Heat(filepath=yaml_file)
-        internal_ports = {r_id: p for r_id, p in heat.neutron_port_resources.items()
-                          if get_network_type_from_port(p) == "internal"}
+        internal_ports = {
+            r_id: p
+            for r_id, p in heat.neutron_port_resources.items()
+            if get_network_type_from_port(p) == "internal"
+        }
         for r_id, port in internal_ports.items():
             props = port.get("properties") or {}
             network_value = props.get("network") or {}
@@ -80,15 +67,19 @@ def test_neutron_port_internal_network_v2(yaml_files):
             base_heat = load_yaml(base_path)
             base_outputs = base_heat.get("outputs") or {}
             if not param.endswith("_net_id"):
-                errors.append((
-                    "Internal network {} is attached to port {}, but the "
-                    "network must be attached via UUID of the network not "
-                    "the name (ex: int_{{network-role}}_net_id)."
-                ).format(param, r_id))
+                errors.append(
+                    (
+                        "Internal network {} is attached to port {}, but the "
+                        "network must be attached via UUID of the network not "
+                        "the name (ex: int_{{network-role}}_net_id)."
+                    ).format(param, r_id)
+                )
             if param not in base_outputs:
-                errors.append((
-                    "Internal network {} is attached to port {}, but network "
-                    "is not defined as an output in the base module ({})."
-                ).format(param, r_id, base_path))
+                errors.append(
+                    (
+                        "Internal network {} is attached to port {}, but network "
+                        "is not defined as an output in the base module ({})."
+                    ).format(param, r_id, base_path)
+                )
 
     assert not errors, " ".join(errors)

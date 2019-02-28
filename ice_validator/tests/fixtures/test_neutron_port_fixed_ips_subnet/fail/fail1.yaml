@@ -49,8 +49,8 @@ parameters:
     type: comma_delimited_list
   vm_typeX_bialy_guest_vlans:
     type: comma_delimited_list
-  bialy_subnet:
-    type: string
+  bialy_susbnet:
+    type: comma_delimited_list
   bialy_subnet_id:
     type: string
 
@@ -62,8 +62,7 @@ resources:
       network: { get_param: int_intranet_net_name }
       fixed_ips:
         - ip_address: { get_param: lb_1_int_intranet_floating_ip }
-          subnet: { get_param: bialy_subnet }
-          subnet_id: { get_param: bialy_subnet_id }
+          subnet: { get_param: bialy_susbnet }
       binding:vnic_type: direct
       value_specs:
         vlan_filter: {get_param: vm_typeX_bialy_vlan_filter}
@@ -81,8 +80,7 @@ resources:
       network: { get_param: extnet_net_id }
       fixed_ips:
         - ip_address: { get_param: lb_2_extnet_floating_v6_ip }
-          subnet: { get_param: bialy_subnet }
-          subnet_id: { get_param: bialy_subnet_id }
+          subnet: { get_param: bialy_susbnet }
       binding:vnic_type: direct
       value_specs:
         vlan_filter: {get_param: vm_typeX_bialy_vlan_filter}
