@@ -209,7 +209,7 @@ class TestResult:
         """
         text = (
             "\n\n{}: \n{}".format(r_id, curr_reqs[r_id]["description"])
-            for r_id in self.requirement_ids
+            for r_id in self.requirement_ids if r_id in curr_reqs
         )
         return "".join(text)
 
@@ -1033,7 +1033,7 @@ def load_current_requirements():
 
 def select_heat_requirements(reqs):
     """Filters dict requirements to only those requirements pertaining to Heat"""
-    return {k: v for k, v in reqs.items() if "Heat" in v["docname"]}
+    return {k: v for k, v in reqs.items() if "heat" in v["docname"].lower()}
 
 
 def build_rst_json(reqs):
