@@ -40,6 +40,7 @@
 """
 import pytest
 from tests import cached_yaml as yaml
+from tests.parametrizers import file_is_a_nested_template
 
 from .helpers import validates
 
@@ -138,6 +139,8 @@ def check_server_parameter_name(heat_template, parameter, parameter_name):
 
 @validates("R-23311")
 def test_availability_zone_parameter_type(yaml_file):
+    if file_is_a_nested_template(yaml_file):
+        pytest.skip("Not applicable in nested templates")
     check_parameter_type(yaml_file, "availability_zone_", "string")
 
 
