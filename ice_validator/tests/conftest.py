@@ -432,12 +432,13 @@ def generate_report(outpath, template_path, categories, output_format="html"):
     failures = [r for r in ALL_RESULTS if r.is_failed]
     generate_failure_file(outpath)
     output_format = output_format.lower().strip() if output_format else "html"
+    generate_json(outpath, template_path, categories)
     if output_format == "html":
         generate_html_report(outpath, categories, template_path, failures)
     elif output_format == "excel":
         generate_excel_report(outpath, categories, template_path, failures)
     elif output_format == "json":
-        generate_json(outpath, template_path, categories)
+        return
     elif output_format == "csv":
         generate_csv_report(outpath, categories, template_path, failures)
     else:
@@ -1061,9 +1062,9 @@ def build_rst_json(reqs):
     return data
 
 
-def generate_rst_table(data):
+def generate_rst_table(output_dir, data):
     """Generate a formatted csv to be used in RST"""
-    rst_path = os.path.join(__path__[0], "../output/rst.csv")
+    rst_path = os.path.join(output_dir, "rst.csv")
     with open(rst_path, "w", newline="") as f:
         out = csv.writer(f)
         out.writerow(
@@ -1164,4 +1165,4 @@ def pytest_report_collectionfinish(config, startdir, items):
                  test_name)
             )
 
-    generate_rst_table(build_rst_json(json.dumps(reqs)))
+    generate_rst_table(get_output_dir(config), build_rst_json(json.dumps(reqs)))
