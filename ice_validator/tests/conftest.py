@@ -1045,7 +1045,7 @@ def build_rst_json(reqs):
             if "MUST" in (values["keyword"]):
                 if "none" in (values["validation_mode"]):
                     del data[key]
-                else:
+                elif "static" in (values["validation_mode"]):
                     # Creates links in RST format to requirements and test cases
                     if values["test_case"]:
                         mod = values["test_case"].split(".")[-1]
@@ -1054,7 +1054,10 @@ def build_rst_json(reqs):
                         title = "`" + values["id"] + " <" + VNFRQTS_ID_URL + values["docname"].replace(" ", "%20") + ".html#" + values["id"] + ">`_"
                         data[key].update({'full_title': title, 'test_case': rst_value})
                     else:
-                        del data[key]
+                        title = "`" + values["id"] + " <" + VNFRQTS_ID_URL + values["docname"].replace(" ", "%20") + ".html#" + values["id"] + ">`_"
+                        data[key].update({'full_title': title, 'test_case': "No test for requirement", 'validated_by': "static"})
+                else:
+                    del data[key]
             else:
                 del data[key]
         else:
