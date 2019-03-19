@@ -63,8 +63,12 @@ DEFAULT_OUTPUT_DIR = "{}/../output".format(__path__[0])
 
 RESOLUTION_STEPS_FILE = "resolution_steps.json"
 HEAT_REQUIREMENTS_FILE = os.path.join(__path__[0], "..", "heat_requirements.json")
-TEST_SCRIPT_SITE = "https://github.com/onap/vvp-validation-scripts/blob/master/ice_validator/tests/"
-VNFRQTS_ID_URL = "https://docs.onap.org/en/latest/submodules/vnfrqts/requirements.git/docs/"
+TEST_SCRIPT_SITE = (
+    "https://github.com/onap/vvp-validation-scripts/blob/master/ice_validator/tests/"
+)
+VNFRQTS_ID_URL = (
+    "https://docs.onap.org/en/latest/submodules/vnfrqts/requirements.git/docs/"
+)
 
 REPORT_COLUMNS = [
     ("Input File", "file"),
@@ -209,7 +213,8 @@ class TestResult:
         """
         text = (
             "\n\n{}: \n{}".format(r_id, curr_reqs[r_id]["description"])
-            for r_id in self.requirement_ids if r_id in curr_reqs
+            for r_id in self.requirement_ids
+            if r_id in curr_reqs
         )
         return "".join(text)
 
@@ -1037,29 +1042,59 @@ def select_heat_requirements(reqs):
     return {k: v for k, v in reqs.items() if "heat" in v["docname"].lower()}
 
 
+def is_testable(reqs):
+    """Filters dict requirements to only those which are testable"""
+    for key, values in reqs.items():
+        if ("MUST" in values["keyword"].upper()) and (
+            "none" not in values["validation_mode"].lower()
+        ):
+            reqs[key].update({"test": "TRUE"})
+        else:
+            reqs[key].update({"test": "FALSE"})
+    return reqs
+
+
 def build_rst_json(reqs):
     """Takes requirements and returns list of only Heat requirements"""
-    data = json.loads(reqs)
-    for key, values in list(data.items()):
-        if "Heat" in (values["docname"]):
-            if "MUST" in (values["keyword"]):
-                if "none" in (values["validation_mode"]):
-                    del data[key]
-                else:
-                    # Creates links in RST format to requirements and test cases
-                    if values["test_case"]:
-                        mod = values["test_case"].split(".")[-1]
-                        val = TEST_SCRIPT_SITE + mod + ".py"
-                        rst_value = ("`" + mod + " <" + val + ">`_")
-                        title = "`" + values["id"] + " <" + VNFRQTS_ID_URL + values["docname"].replace(" ", "%20") + ".html#" + values["id"] + ">`_"
-                        data[key].update({'full_title': title, 'test_case': rst_value})
-                    else:
-                        del data[key]
+    for key, values in list(reqs.items()):
+        if "TRUE" in values["test"]:
+            # Creates links in RST format to requirements and test cases
+            if values["test_case"]:
+                mod = values["test_case"].split(".")[-1]
+                val = TEST_SCRIPT_SITE + mod + ".py"
+                rst_value = "`" + mod + " <" + val + ">`_"
+                title = (
+                    "`"
+                    + values["id"]
+                    + " <"
+                    + VNFRQTS_ID_URL
+                    + values["docname"].replace(" ", "%20")
+                    + ".html#"
+                    + values["id"]
+                    + ">`_"
+                )
+                reqs[key].update({"full_title": title, "test_case": rst_value})
             else:
-                del data[key]
+                title = (
+                    "`"
+                    + values["id"]
+                    + " <"
+                    + VNFRQTS_ID_URL
+                    + values["docname"].replace(" ", "%20")
+                    + ".html#"
+                    + values["id"]
+                    + ">`_"
+                )
+                reqs[key].update(
+                    {
+                        "full_title": title,
+                        "test_case": "No test for requirement",
+                        "validated_by": "static",
+                    }
+                )
         else:
-            del data[key]
-    return data
+            del reqs[key]
+    return reqs
 
 
 def generate_rst_table(output_dir, data):
@@ -1067,9 +1102,7 @@ def generate_rst_table(output_dir, data):
     rst_path = os.path.join(output_dir, "rst.csv")
     with open(rst_path, "w", newline="") as f:
         out = csv.writer(f)
-        out.writerow(
-            ("Requirement ID", "Requirement", "Test Module", "Test Name"),
-        )
+        out.writerow(("Requirement ID", "Requirement", "Test Module", "Test Name"))
         for req_id, metadata in data.items():
             out.writerow(
                 (
@@ -1090,6 +1123,7 @@ def pytest_report_collectionfinish(config, startdir, items):
         os.makedirs(output_dir)
     reqs = load_current_requirements()
     requirements = select_heat_requirements(reqs)
+    testable_requirements = is_testable(requirements)
     unmapped, mapped = partition(
         lambda i: hasattr(i.function, "requirement_ids"), items
     )
@@ -1101,8 +1135,12 @@ def pytest_report_collectionfinish(config, startdir, items):
             if req_id not in req_to_test:
                 req_to_test[req_id].add(item)
                 if req_id in requirements:
-                    reqs[req_id].update({'test_case': item.function.__module__,
-                                         'validated_by': item.function.__name__})
+                    reqs[req_id].update(
+                        {
+                            "test_case": item.function.__module__,
+                            "validated_by": item.function.__name__,
+                        }
+                    )
             if req_id not in requirements:
                 mapping_errors.add(
                     (req_id, item.function.__module__, item.function.__name__)
@@ -1117,14 +1155,18 @@ def pytest_report_collectionfinish(config, startdir, items):
     with open(traceability_path, "w", newline="") as f:
         out = csv.writer(f)
         out.writerow(
-            ("Requirement ID", "Requirement", "Section",
-             "Keyword", "Validation Mode", "Is Testable",
-             "Test Module", "Test Name"),
+            (
+                "Requirement ID",
+                "Requirement",
+                "Section",
+                "Keyword",
+                "Validation Mode",
+                "Is Testable",
+                "Test Module",
+                "Test Name",
+            )
         )
-        for req_id, metadata in requirements.items():
-            keyword = metadata["keyword"].upper()
-            mode = metadata["validation_mode"].lower()
-            testable = keyword in {"MUST", "MUST NOT"} and mode != "none"
+        for req_id, metadata in testable_requirements.items():
             if req_to_test[req_id]:
                 for item in req_to_test[req_id]:
                     out.writerow(
@@ -1132,37 +1174,42 @@ def pytest_report_collectionfinish(config, startdir, items):
                             req_id,
                             metadata["description"],
                             metadata["section_name"],
-                            keyword,
-                            mode,
-                            "TRUE" if testable else "FALSE",
+                            metadata["keyword"],
+                            metadata["validation_mode"],
+                            metadata["test"],
                             item.function.__module__,
                             item.function.__name__,
-                        ),
+                        )
                     )
             else:
                 out.writerow(
-                    (req_id,
-                     metadata["description"],
-                     metadata["section_name"],
-                     keyword,
-                     mode,
-                     "TRUE" if testable else "FALSE",
-                     "",   # test module
-                     ""),  # test function
+                    (
+                        req_id,
+                        metadata["description"],
+                        metadata["section_name"],
+                        metadata["keyword"],
+                        metadata["validation_mode"],
+                        metadata["test"],
+                        "",  # test module
+                        "",
+                    )  # test function
                 )
         # now write out any test methods that weren't mapped to requirements
-        unmapped_tests = {(item.function.__module__, item.function.__name__) for item in
-                          unmapped}
+        unmapped_tests = {
+            (item.function.__module__, item.function.__name__) for item in unmapped
+        }
         for test_module, test_name in unmapped_tests:
             out.writerow(
-                ("",        # req ID
-                 "",        # description
-                 "",        # section name
-                 "",        # keyword
-                 "static",  # validation mode
-                 "TRUE",    # testable
-                 test_module,
-                 test_name)
+                (
+                    "",  # req ID
+                    "",  # description
+                    "",  # section name
+                    "",  # keyword
+                    "static",  # validation mode
+                    "TRUE",  # testable
+                    test_module,
+                    test_name,
+                )
             )
 
-    generate_rst_table(get_output_dir(config), build_rst_json(json.dumps(reqs)))
+    generate_rst_table(get_output_dir(config), build_rst_json(testable_requirements))
