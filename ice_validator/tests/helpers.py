@@ -46,6 +46,7 @@ from collections import defaultdict
 
 from boltons import funcutils
 from tests import cached_yaml as yaml
+from .utils import nested_dict
 
 VERSION = "1.1.0"
 
@@ -287,3 +288,24 @@ def get_base_template_from_yaml_file(yaml_file):
         ):
             return os.path.join(dirname, "{}{}".format(basename, __))
     return None
+
+
+def parameter_type_to_heat_type(parameter):
+    # getting parameter format
+    if isinstance(parameter, list):
+        parameter = parameter[0]
+        parameter_type = "comma_delimited_list"
+    elif isinstance(parameter, str):
+        parameter_type = "string"
+    elif isinstance(parameter, dict):
+        parameter_type = "json"
+    elif isinstance(parameter, int):
+        parameter_type = "number"
+    elif isinstance(parameter, float):
+        parameter_type = "number"
+    elif isinstance(parameter, bool):
+        parameter_type = "boolean"
+    else:
+        parameter_type = None
+
+    return parameter, parameter_type

@@ -364,13 +364,14 @@ def test_neutron_port_fixedips_subnet_parameter_doesnt_exist_in_environment_file
 
 @categories("environment_file")
 @validates("R-83412", "R-83418")
-def test_neutron_port_aap_ip_parameter_doesnt_exist_in_environment_file(yaml_file):
+def test_neutron_port_external_aap_ip_parameter_doesnt_exist_in_environment_file(yaml_file):
     run_check_resource_parameter(
         yaml_file,
         "allowed_address_pairs",
         False,
         "OS::Neutron::Port",
         nested_prop="ip_address",
+        exclude_parameter=re.compile(r"^(.+?)_int_(.+?)$"),
     )
 
 

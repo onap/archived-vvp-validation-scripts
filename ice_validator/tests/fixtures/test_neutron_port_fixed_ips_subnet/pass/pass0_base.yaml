@@ -46,3 +46,6 @@ resources:
   vm_typeX_0_bialy_port_2:
     type: OS::Neutron::Net
 
+outputs:
+  int_bialy_subnet_id:
+    value: sanfdkl
