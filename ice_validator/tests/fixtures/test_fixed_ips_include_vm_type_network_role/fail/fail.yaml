@@ -59,11 +59,11 @@ parameters:
     type: comma_delimited_list
     description: Names attribute for the VMs
 
-  lb_names:
+  lb1_names:
     type: comma_delimited_list
     description: Names attribute for the VMs
 
-  lb_flavor_name:
+  lb1_flavor_name:
     type: string
     description: flavor to be used to create this vm must be one of the following flavors
 
@@ -87,33 +87,29 @@ parameters:
     type: string
     description: network id for the internal network intranet 
 
-  db_int_intranet_ip_0:
+  db_int_intaranet_ip_0:
     type: string
-    description: db_int_intranet_ip_0
+    description: db_int_intaranet_ip_0 
 
   db_int_intranet_v6_ip_0:
     type: string
-    description: db_int_intranet_v6_ip_0
+    description: db_int_intranet_v6_ip_0 
 
   db_int_intranet_ips:
     type: string
-    description: db_int_intranet_ips
+    description: db_int_intranet_ips 
 
   db_int_intranet_v6_ips:
     type: string
-    description: db_int_intranet_v6_ips
+    description: db_int_intranet_v6_ips 
 
-  db_int_intranet_floating_ip:
+  my_ip:
     type: string
-    description: db_int_intranet_floating_ip
+    description: my_ip 
 
-  db_int_intranet_floating_v6_ip:
+  lb_extnet_ip_1:
     type: string
-    description: db_int_intranet_floating_v6_ip
-
-  lb_extnet_ip_0:
-    type: string
-    description: lb_extnet_ip_0
+    description: lb_extnet_ip_1 
 
   lb_extnet_v6_ip_0:
     type: string
@@ -121,19 +117,11 @@ parameters:
 
   lb_extnet_ips:
     type: string
-    description: lb_extnet_ips
+    description: lb_extnet_ips 
 
   lb_extnet_v6_ips:
     type: string
-    description: lb_extnet_v6_ips
-
-  lb_extnet_floating_ip:
-    type: string
-    description: lb_extnet_floating_ip
-
-  lb_extnet_floating_v6_ip:
-    type: string
-    description: lb_extnet_floating_v6_ip
+    description: lb_extnet_v6_ips 
 
 resources:
 
@@ -141,15 +129,10 @@ resources:
     type: OS::Nova::Server
     properties:
       availability_zone: { get_param: availability_zone_0 }
-      name: { get_param: [lb_names, 0]  }
-      flavor: { get_param: lb_flavor_name}
+      name: { get_param: [lb1_names, 0]  }
+      flavor: { get_param: lb1_flavor_name}
       networks:
-        - port: { get_resource: lb_0_extnet_0_port }
-        - port: { get_resource: lb_1_extnet_0_port }
-        - port: { get_resource: lb_2_extnet_0_port }
-        - port: { get_resource: lb_3_extnet_0_port }
-        - port: { get_resource: lb_4_extnet_0_port }
-        - port: { get_resource: lb_5_extnet_0_port }  
+        - port: { get_resource: lb_0_extnet_port_0 }
       metadata:
         vnf_name: { get_param: vnf_name }
         vnf_id: { get_param: vnf_id }
@@ -162,97 +145,24 @@ resources:
       name: { get_param: [db_names, 1]  }
       flavor: { get_param: db_flavor_name}
       networks:
-        - port: { get_resource: db_0_int_intranet_0_port }
-        - port: { get_resource: db_1_int_intranet_0_port }
-        - port: { get_resource: db_2_int_intranet_0_port }
-        - port: { get_resource: db_3_int_intranet_0_port }
-        - port: { get_resource: db_4_int_intranet_0_port }
-        - port: { get_resource: db_5_int_intranet_0_port }
+        - port: { get_resource: db_0_int_intranet_port_0 }
       metadata:
         vnf_name: { get_param: vnf_name }
         vnf_id: { get_param: vnf_id }
         vf_module_id: { get_param: vf_module_id }
 
-  db_0_int_intranet_0_port:
+  db_0_int_intranet_port_0:
         type: OS::Neutron::Port
         properties:
           network: { get_param: int_intranet_net_id }
-          allowed_address_pairs:
-            - ip_address: { get_param: db_int_intranet_ip_0 }
-
-  db_1_int_intranet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: int_intranet_net_id }
-          allowed_address_pairs:
+          fixed_ips:
+            - ip_address: { get_param: db_int_intaranet_ip_0 }
             - ip_address: { get_param: db_int_intranet_v6_ip_0 }
 
-  db_2_int_intranet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: int_intranet_net_id }
-          allowed_address_pairs:
-            - ip_address: { get_param: [db_int_intranet_ips, 0] }
-
-  db_3_int_intranet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: int_intranet_net_id }
-          allowed_address_pairs:
-            - ip_address: { get_param: [db_int_intranet_v6_ips, 0] }
-
-  db_4_int_intranet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: int_intranet_net_id }
-          allowed_address_pairs:
-            - ip_address: { get_param: db_int_intranet_floating_ip }
-
-  db_5_int_intranet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: int_intranet_net_id }
-          allowed_address_pairs:
-            - ip_address: { get_param: db_int_intranet_floating_v6_ip }
-
-  lb_0_extnet_0_port:
+  lb_0_extnet_port_0:
         type: OS::Neutron::Port
         properties:
           network: { get_param: extnet_net_name }
-          allowed_address_pairs:
-            - ip_address: { get_param: lb_extnet_ip_0 }
-
-  lb_1_extnet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: extnet_net_id }
-          allowed_address_pairs:
-            - ip_address: { get_param: lb1_extnet_v6_ip_0 }
-
-  lb_2_extnet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: extnet_net_name }
-          allowed_address_pairs:
-            - ip_address: { get_param: [lb_extnet_ips, 0] }
-
-  lb_3_extnet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: extnet_net_id }
-          allowed_address_pairs:
-            - ip_address: { get_param: [lb_extnet_v6_ips, 0] }
-
-  lb_4_extnet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: extnet_net_name }
-          allowed_address_pairs:
-            - ip_address: { get_param: lb_extnet_floating_ip }
-
-  lb_5_extnet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: extnet_net_id }
-          allowed_address_pairs:
-            - ip_address: { get_param: lb_extnet_floating_v6_ip }
+          fixed_ips:
+            - ip_address: { get_param: my_ip }
+            - ip_address: { get_param: lb_extnet_v6_ip_0 }
