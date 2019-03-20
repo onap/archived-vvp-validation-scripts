@@ -87,41 +87,13 @@ parameters:
     type: string
     description: network id for the internal network intranet 
 
-  db_int_intranet_ip_0:
+  db_int_intaranet_floating_ip:
     type: string
-    description: db_int_intranet_ip_0 
+    description: db_int_intaranet_ip_0
 
-  db_int_intranet_v6_ip_0:
+  lb_extanet_floating_ip:
     type: string
-    description: db_int_intranet_v6_ip_0 
-
-  db_int_intranet_ips:
-    type: string
-    description: db_int_intranet_ips 
-
-  db_int_intranet_v6_ips:
-    type: string
-    description: db_int_intranet_v6_ips 
-
-  lb_extnet_ip_0:
-    type: string
-    description: lb_extnet_ip_0 
-
-  lb_extnet_ip_1:
-    type: string
-    description: lb_extnet_ip_1 
-
-  lb_extnet_v6_ip_0:
-    type: string
-    description: lb_extnet_v6_ip_0
-
-  lb_extnet_ips:
-    type: string
-    description: lb_extnet_ips 
-
-  lb_extnet_v6_ips:
-    type: string
-    description: lb_extnet_v6_ips 
+    description: lb_extanet_floating_ip
 
 resources:
 
@@ -132,10 +104,8 @@ resources:
       name: { get_param: [lb_names, 0]  }
       flavor: { get_param: lb_flavor_name}
       networks:
-        - port: { get_resource: lb_0_extnet_0_port }
-        - port: { get_resource: lb_1_extnet_0_port }
-        - port: { get_resource: lb_2_extnet_0_port }
-        - port: { get_resource: lb_3_extnet_0_port }  
+        - port: { get_resource: db_0_int_intranet_port_0 }
+        - port: { get_resource: lb_0_extnet_port_0 }
       metadata:
         vnf_name: { get_param: vnf_name }
         vnf_id: { get_param: vnf_id }
@@ -149,64 +119,21 @@ resources:
       flavor: { get_param: db_flavor_name}
       networks:
         - port: { get_resource: db_0_int_intranet_0_port }
-        - port: { get_resource: db_1_int_intranet_0_port }
-        - port: { get_resource: db_2_int_intranet_0_port }
       metadata:
         vnf_name: { get_param: vnf_name }
         vnf_id: { get_param: vnf_id }
         vf_module_id: { get_param: vf_module_id }
 
-  db_0_int_intranet_0_port:
+  db_0_int_intranet_port_0:
         type: OS::Neutron::Port
         properties:
           network: { get_param: int_intranet_net_id }
-          fixed_ips:
-            - ip_address: { get_param: db_int_intranet_ip_0 }
-            - ip_address: { get_param: db_int_intranet_v6_ip_0 }
+          allowed_address_pairs:
+            - ip_address: { get_param: db_int_intaranet_floating_ip }
 
-  db_1_int_intranet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: int_intranet_net_id }
-          fixed_ips:
-            - ip_address: { get_param: [db_int_intranet_ips, 0] }
-            - ip_address: { get_param: [db_int_intranet_v6_ips, 0] }
-
-  db_2_int_intranet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: int_intranet_net_id }
-          fixed_ips:
-            - ip_address: { get_param: [db_int_intranet_ips, 1] }
-
-  lb_0_extnet_0_port:
+  lb_0_extnet_port_0:
         type: OS::Neutron::Port
         properties:
           network: { get_param: extnet_net_name }
-          fixed_ips:
-            - ip_address: { get_param: lb_extnet_ip_0 }
-            - ip_address: { get_param: lb_extnet_v6_ip_0 }
-
-  lb_1_extnet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: extnet_net_id }
-          fixed_ips:
-            - ip_address: { get_param: [lb_extnet_ips, 0] }
-            - ip_address: { get_param: [lb_extnet_v6_ips, 0] }
-
-  lb_2_extnet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: extnet_net_name }
-          fixed_ips:
-            - ip_address: { get_param: lb1_extnet_ip_1 }
-            - subnet_id: { get_param: extnet_subnet_id }
-
-  lb_3_extnet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: extnet_net_id }
-          fixed_ips:
-            - subnet_id: { get_param: extnet_subnet_id }
-            - subnet_id: { get_param: extnet_v6_subnet_id }
+          allowed_address_pairs:
+            - ip_address: { get_param: lb_extanet_floating_ip }
