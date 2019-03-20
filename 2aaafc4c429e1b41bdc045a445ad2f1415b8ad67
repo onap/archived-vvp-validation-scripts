@@ -1,0 +1,112 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1e393d2a_713d1ef2",
+        "filename": "ice_validator/tests/conftest.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 1048,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-03-20T18:41:47Z",
+      "side": 1,
+      "message": "This will blow up if keyword isn\u0027t in the metadata.  I\"d change this to values.get(\"keyword\", \"\").upper()",
+      "revId": "2aaafc4c429e1b41bdc045a445ad2f1415b8ad67",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "730ff1f2_a5c32f3a",
+        "filename": "ice_validator/tests/conftest.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 1049,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-03-20T18:41:47Z",
+      "side": 1,
+      "message": "This will blow up if \"validation_mode\" is not in values.  I would change this to values.get(\"validation_mode\", \"\").lower().\n\nThis shouldn\u0027t happen based on the behavior of sphinx-needs, but probably better safe than sorry.",
+      "revId": "2aaafc4c429e1b41bdc045a445ad2f1415b8ad67",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22e45dfa_9481031c",
+        "filename": "ice_validator/tests/conftest.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 1053,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-03-20T18:41:47Z",
+      "side": 1,
+      "message": "If you\u0027re going to track a Boolean, then I would suggest using a real boolean value instead of a string.  When using a boolean value, I think it also helps to ensure the value conveys its type ex:  testable or is_testable.  \n\nreqs[key][\"testable\"] \u003d True  (you don\u0027t need to use the update method if you\u0027re only setting one value.",
+      "range": {
+        "startLine": 1051,
+        "startChar": 0,
+        "endLine": 1053,
+        "endChar": 47
+      },
+      "revId": "2aaafc4c429e1b41bdc045a445ad2f1415b8ad67",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "964eb23e_030e7e67",
+        "filename": "ice_validator/tests/conftest.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 1060,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-03-20T18:41:47Z",
+      "side": 1,
+      "message": "If you take the advice above, then this would become:\n\nif values[\"testable\"]:",
+      "revId": "2aaafc4c429e1b41bdc045a445ad2f1415b8ad67",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df26bd32_2d1f5f3b",
+        "filename": "ice_validator/tests/conftest.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 1141,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-03-20T18:41:47Z",
+      "side": 1,
+      "message": "above you set validated_by to static, but here you set it to the function name.   I\u0027m not clear on what this field is supposed to control.  Can you explain?",
+      "revId": "2aaafc4c429e1b41bdc045a445ad2f1415b8ad67",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d396b435_13f5ecb1",
+        "filename": "ice_validator/tests/conftest.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 1179,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-03-20T18:41:47Z",
+      "side": 1,
+      "message": "metadata[\"testable\"] - if you use the advice above",
+      "revId": "2aaafc4c429e1b41bdc045a445ad2f1415b8ad67",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
