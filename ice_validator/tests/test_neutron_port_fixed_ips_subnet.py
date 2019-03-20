@@ -63,206 +63,52 @@ resources:
 """
 import re
 
-import pytest
+from tests.utils.network_roles import get_network_type_from_port
+from tests.parametrizers import get_nested_files
 
 from .structures import Heat
-from .helpers import validates, get_base_template_from_yaml_file
+from .helpers import validates, load_yaml, get_base_template_from_yaml_files
+from .utils.ports import check_ip_format
 
 VERSION = "1.3.0"
 
-RE_BASE = re.compile(r"(^base$)|(^base_)|(_base_)|(_base$)")  # search pattern
-
 RE_EXTERNAL_PARAM_SUBNET = re.compile(  # match pattern
-    r"(?P<network_role>.+)(_v6)?_subnet_id$"
+    r"(?P<network_role>.+[^(v6)])(_v6)?_subnet_id$"
 )
 
 RE_INTERNAL_PARAM_SUBNET = re.compile(  # match pattern
-    r"int_(?P<network_role>.+)(_v6)?_subnet_id$"
+    r"int_(?P<network_role>.+[^(v6)])(_v6)?_subnet_id$"
 )
 
-
-def get_base(base_template_filepath):
-    """Return the base template's Heat instance.
-    """
-    if base_template_filepath is None:
-        pytest.skip("No base template found")
-    base_template = Heat(filepath=base_template_filepath)
-    return base_template
-
-
-def run_test(heat_template, validate, validator=None):
-    """call validate for each fixed_ips
-    """
-    heat = Heat(filepath=heat_template)
-    base_template = get_base_template_from_yaml_file(heat_template)
-    if not heat.resources:
-        pytest.skip("No resources found")
-
-    neutron_ports = heat.neutron_port_resources
-    if not neutron_ports:
-        pytest.skip("No OS::Neutron::Port resources found")
-
-    bad = {}
-    for rid, resource in neutron_ports.items():
-        fixed_ips = heat.nested_get(resource, "properties", "fixed_ips")
-        if fixed_ips is None:
-            continue
-        if not isinstance(fixed_ips, list):
-            bad[rid] = "properties.fixed_ips must be a list."
-            continue
-        for fixed_ip in fixed_ips:
-            error = validate(heat, fixed_ip, base_template, validator)
-            if error:
-                bad[rid] = error
-                break
-    if bad:
-        # raise RuntimeError(
-        raise AssertionError(
-            "%s"
-            % (",   ".join("%s: %s" % (rid, error) for rid, error in bad.items()))
-        )
+fip_regx_dict = {
+    "external": {
+        "string": {
+            "readable": "{network-role}_subnet_id or {network-role}_v6_subnet_id",
+            "machine": RE_EXTERNAL_PARAM_SUBNET,
+        }
+    },
+    "internal": {
+        "string": {
+            "readable": "int_{network-role}_subnet_id or int_{network-role}_v6_subnet_id",
+            "machine": RE_INTERNAL_PARAM_SUBNET,
+        }
+    },
+    "parameter_to_resource_comparisons": ["network_role"],
+}
 
 
-def validate_external_fixed_ip_subnet(heat, fixed_ip, base_template, validator):
-    """ensure fixed_ip subnet for external network
-    match the pattern.
-    Returns error message string or None.
-    """
-    subnet = heat.nested_get(fixed_ip, "subnet", "get_param")
-    if subnet:
-        error = validator(subnet, RE_EXTERNAL_PARAM_SUBNET)
-    else:
-        error = None
-    return error
+@validates("R-38236", "R-84123", "R-76160")
+def test_internal_subnet_format(yaml_file):
+    check_ip_format(yaml_file, fip_regx_dict, "internal", "fixed_ips", "subnet")
 
 
-def validate_external_subnet_parameter_format(subnet, regx):
-    """ensure subnet matches template.
-    Returns error message string or None.
-    """
-    if subnet and not subnet.startswith("int_") and regx.match(subnet) is None:
-        return (
-            'fixed_ip subnet parameter "%s" does not match '
-            "{network-role}_subnet_id or {network-role}_v6_subnet_id" % (subnet)
-        )
-    return None
-
-
-def validate_internal_fixed_ip_subnet(heat, fixed_ip, base_template, validator):
-    """ensure fixed_ip subnet for internal network
-    match the pattern.
-    Returns error message string or None.
-    """
-    base_module = get_base(base_template)
-    subnet = heat.nested_get(fixed_ip, "subnet", "get_param")
-    if subnet:
-        error = validator(heat, base_module, subnet, RE_INTERNAL_PARAM_SUBNET)
-    else:
-        error = None
-    return error
-
-
-def validate_internal_subnet_parameter_format(heat, base_module, subnet, regx):
-    """ensure if subnet matches template then its parameter exists.
-    Returns error message string or None.
-    """
-    if subnet and subnet.startswith("int_") and regx.match(subnet) is None:
-        return (
-            'fixed_ip subnet parameter "%s" does not match '
-            "int_{network-role}_subnet_id or int_{network-role}_v6_subnet_id" % (subnet)
-        )
-    return None
-
-
-def validate_internal_subnet_exists_in_base_output(heat, base_module, subnet, regx):
-    """ensure if subnet matches template then its parameter exists.
-    Returns error message string or None.
-    """
-    if (
-        subnet
-        and subnet.startswith("int_")
-        and regx.match(subnet)
-        and heat.nested_get(base_module.outputs, subnet) is None
-    ):
-        return 'fixed_ip subnet(_id) parameter "%s" not in base outputs"' % (subnet)
-    return None
-
-
-def validate_fixed_ip_subnet(heat, fixed_ip, base_template, validator):
-    """ensure fixed_ip has proper parameters
-    Returns error message string or None.
-    """
-    subnet = heat.nested_get(fixed_ip, "subnet", "get_param")
-    if subnet and heat.nested_get(heat.parameters, subnet, "type") != "string":
-        error = 'subnet parameter "%s" must be type "string"' % subnet
-    else:
-        error = None
-    return error
-
-
-@validates("R-38236")
-def test_neutron_port_fixed_ips_subnet(yaml_file):
-    """
-    The VNF's Heat Orchestration Template's
-    resource ``OS::Neutron::Port`` property ``fixed_ips``
-    map property ``subnet``/``subnet_id`` parameter
-    **MUST** be declared type ``string``.
-    """
-    run_test(yaml_file, validate_fixed_ip_subnet)
-
-
-@validates("R-62802", "R-15287")
-def test_neutron_port_external_fixed_ips_subnet(yaml_file):
-    """
-    When the VNF's Heat Orchestration Template's
-    resource ``OS::Neutron::Port`` is attaching
-    to an external network,
-    and an IPv4 address is being cloud assigned by OpenStack's DHCP Service
-    and the external network IPv4 subnet is to be specified
-    using the property ``fixed_ips``
-    map property ``subnet``/``subnet_id``, the parameter
-    **MUST** follow the naming convention
-
-      * ``{network-role}_subnet_id``
-    and the external network IPv6 subnet is to be specified
-      * ``{network-role}_v6_subnet_id``
-    """
-    run_test(
-        yaml_file,
-        validate_external_fixed_ip_subnet,
-        validate_external_subnet_parameter_format,
-    )
+@validates("R-38236", "R-62802", "R-15287")
+def test_external_subnet_format(yaml_file):
+    check_ip_format(yaml_file, fip_regx_dict, "external", "fixed_ips", "subnet")
 
 
 @validates("R-84123", "R-76160")
-def test_neutron_port_internal_fixed_ips_subnet(yaml_file):
-    """
-    When
-
-      * the VNF's Heat Orchestration Template's
-        resource ``OS::Neutron::Port`` in an Incremental Module is attaching
-        to an internal network
-        that is created in the Base Module, AND
-      * an IPv4 address is being cloud assigned by OpenStack's DHCP Service AND
-      * the internal network IPv4 subnet is to be specified
-        using the property ``fixed_ips`` map property ``subnet``/``subnet_id``,
-
-    the parameter **MUST** follow the naming convention
-
-      * ``int_{network-role}_subnet_id``
-    an IPv6 address is being cloud assigned by OpenStack's DHCP Service AND
-      * ``int_{network-role}_v6_subnet_id``
-
-    """
-    run_test(
-        yaml_file,
-        validate_internal_fixed_ip_subnet,
-        validate_internal_subnet_parameter_format,
-    )
-
-
-@validates("R-84123", "R-76160")
-def test_neutron_port_internal_fixed_ips_subnet_in_base(heat_template):
+def test_neutron_port_internal_fixed_ips_subnet_in_base(yaml_files):
     """
     Only check parent incremental modules, because nested file parameter
     name may have been changed.
@@ -286,8 +132,41 @@ def test_neutron_port_internal_fixed_ips_subnet_in_base(heat_template):
     Note that the parameter MUST be defined as an output parameter in
     the base module.
     """
-    run_test(
-        heat_template,
-        validate_internal_fixed_ip_subnet,
-        validate_internal_subnet_exists_in_base_output,
-    )
+
+    base_path = get_base_template_from_yaml_files(yaml_files)
+    base_heat = load_yaml(base_path)
+    base_outputs = base_heat.get("outputs") or {}
+    nested_template_paths = get_nested_files(yaml_files)
+    errors = []
+
+    for yaml_file in yaml_files:
+        if yaml_file == base_path or yaml_file in nested_template_paths:
+            continue  # Only applies to incremental modules
+        heat = Heat(filepath=yaml_file)
+        internal_ports = {
+            r_id: p
+            for r_id, p in heat.neutron_port_resources.items()
+            if get_network_type_from_port(p) == "internal"
+        }
+        for r_id, port in internal_ports.items():
+            props = port.get("properties") or {}
+            fip_list = props.get("fixed_ips") or []
+            if not isinstance(fip_list, list):
+                continue
+            for ip in fip_list:
+                subnet = ip.get("subnet")
+                if not subnet:
+                    continue
+
+                if "get_param" not in subnet:
+                    continue
+                param = subnet.get("get_param")
+                if param not in base_outputs:
+                    errors.append(
+                        (
+                            "Internal fixed_ips/subnet parameter {} is attached to port {}, but the subnet parameter "
+                            "is not defined as an output in the base module ({})."
+                        ).format(param, r_id, base_path)
+                    )
+
+    assert not errors, " ".join(errors)

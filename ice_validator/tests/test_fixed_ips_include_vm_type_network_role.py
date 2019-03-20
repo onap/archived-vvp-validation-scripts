@@ -37,45 +37,58 @@
 #
 #
 
-import pytest
-from tests import cached_yaml as yaml
+import re
 
 from .helpers import validates
-from .utils.ports import get_invalid_ip_addresses
+from .utils.ports import check_ip_format
 
 
-@validates(
-    "R-40971",
-    "R-27818",
-    "R-29765",
-    "R-85235",
-    "R-78380",
-    "R-23503",
-    "R-71577",
-    "R-04697",
-    "R-34037",
+RE_EXTERNAL_PARAM_FIP = re.compile(  # match pattern
+    r"(?P<vm_type>.+)_(?P<network_role>.+[^(v6)])(_v6)?_ip_(?P<ip_index>.+)$"
 )
-def test_fixed_ips_include_vm_type_network_role(yaml_file):
-    """
-    Check that all fixed_ips ip addresses include the {vm_type} of the
-    nova server it is associated to and also contains the {network_role}
-    of the network it is associated with
-    """
-    with open(yaml_file) as fh:
-        yml = yaml.load(fh)
 
-    # skip if resources are not defined
-    if "resources" not in yml:
-        pytest.skip("No resources specified in the heat template")
+RE_EXTERNAL_PARAM_FIPS = re.compile(  # match pattern
+    r"(?P<vm_type>.+)_(?P<network_role>.+[^(v6)])(_v6)?_ips$"
+)
 
-    if "parameters" not in yml:
-        pytest.skip("No parameters specified in the heat template")
+RE_INTERNAL_PARAM_FIP = re.compile(  # match pattern
+    r"(?P<vm_type>.+)_int_(?P<network_role>.+[^(v6)])(_v6)?_ip_(?P<ip_index>.+)$"
+)
 
-    invalid_ip_addresses = get_invalid_ip_addresses(
-        yml["resources"], "fixed_ips", yml["parameters"]
-    )
+RE_INTERNAL_PARAM_FIPS = re.compile(  # match pattern
+    r"(?P<vm_type>.+)_int_(?P<network_role>.+[^(v6)])(_v6)?_ips$"
+)
 
-    msg = "The following fixed_ips are declared incorrectly: {}".format(
-        ", ".join(invalid_ip_addresses)
-    )
-    assert not set(invalid_ip_addresses), msg
+fip_regx_dict = {
+    "external": {
+        "string": {
+            "readable": "{vm-type}_{network-role}_ip_{ip-index} or {vm-type}_{network-role}_v6_ip_{ip-index}",
+            "machine": RE_EXTERNAL_PARAM_FIP,
+        },
+        "comma_delimited_list": {
+            "readable": "{vm-type}_{network-role}_ips or {vm-type}_{network-role}_v6_ips",
+            "machine": RE_EXTERNAL_PARAM_FIPS,
+        },
+    },
+    "internal": {
+        "string": {
+            "readable": "{vm-type}_int_{network-role}_ip_{ip-index} or {vm-type}_int_{network-role}_v6_ip_{ip-index}",
+            "machine": RE_INTERNAL_PARAM_FIP,
+        },
+        "comma_delimited_list": {
+            "readable": "{vm-type}_int_{network-role}_ips or {vm-type}_int_{network-role}_v6_ips",
+            "machine": RE_INTERNAL_PARAM_FIPS,
+        },
+    },
+    "parameter_to_resource_comparisons": ["vm_type", "network_role"],
+}
+
+
+@validates("R-40971", "R-35735", "R-23503", "R-71577", "R-04697", "R-34037")
+def test_external_fip_format(yaml_file):
+    check_ip_format(yaml_file, fip_regx_dict, "external", "fixed_ips", "ip_address")
+
+
+@validates("R-27818", "R-29765", "R-85235", "R-78380", "R-34037")
+def test_internal_fip_format(yaml_file):
+    check_ip_format(yaml_file, fip_regx_dict, "internal", "fixed_ips", "ip_address")
