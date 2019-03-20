@@ -36,43 +36,57 @@
 # ============LICENSE_END============================================
 #
 #
-
-"""
-test_allowed_address_pairs_include_vm_type_network_role
-"""
-
-import pytest
-from tests import cached_yaml as yaml
+import re
 
 from .helpers import validates
-from .utils.ports import get_invalid_ip_addresses
+from .utils.ports import check_ip_format
 
 VERSION = "1.0.0"
 
 # pylint: disable=invalid-name
 
+RE_EXTERNAL_PARAM_AAP = re.compile(  # match pattern
+    r"(?P<vm_type>.+)_(?P<network_role>.+)_floating(_v6)?_ip$"
+)
 
-@validates("R-41492", "R-35735", "R-98748")
-def test_allowed_address_pairs_include_vm_type_network_role(yaml_file):
-    """
-    Check that all allowed_address_pairs include the {vm_type} of the
-    nova server it is associated to and also contains the
-    {network_role} of the network it is associated with
-    """
-    with open(yaml_file) as fh:
-        yml = yaml.load(fh)
+RE_INTERNAL_PARAM_AAP = re.compile(  # match pattern
+    r"(?P<vm_type>.+)_int_(?P<network_role>.+)_floating(_v6)?_ip$"
+)
 
-    # skip if resources are not defined
-    if "resources" not in yml:
-        pytest.skip("No resources specified in the heat template")
+RE_INTERNAL_PARAM_AAPS = re.compile(  # match pattern
+    r"(?P<vm_type>.+)_int_(?P<network_role>.+)_floating(_v6)?_ips$"
+)
 
-    if "parameters" not in yml:
-        pytest.skip("No parameters specified in the heat template")
+aap_regx_dict = {
+    "external": {
+        "string": {
+            "readable": "{vm-type}_{network-role}_floating_ip or {vm-type}_{network-role}_floating_v6_ip",
+            "machine": RE_EXTERNAL_PARAM_AAP,
+        }
+    },
+    "internal": {
+        "string": {
+            "readable": "{vm-type}_int_{network-role}_floating_ip or {vm-type}_int_{network-role}_floating_v6_ip",
+            "machine": RE_INTERNAL_PARAM_AAP,
+        },
+        "comma_delimited_list": {
+            "readable": "{vm-type}_int_{network-role}_floating_ips or {vm-type}_int_{network-role}_floating_v6_ips",
+            "machine": RE_INTERNAL_PARAM_AAPS,
+        },
+    },
+    "parameter_to_resource_comparisons": ["vm_type", "network_role"],
+}
 
-    invalid_ip_addresses = get_invalid_ip_addresses(
-        yml["resources"], "allowed_address_pairs", yml["parameters"]
+
+@validates("R-41492", "R-35735", "R-159016")
+def test_external_aap_format(yaml_file):
+    check_ip_format(
+        yaml_file, aap_regx_dict, "external", "allowed_address_pairs", "ip_address"
     )
 
-    assert not set(
-        invalid_ip_addresses
-    ), "invalid ip addresses allowed address pairs %s" % list(set(invalid_ip_addresses))
+
+@validates("R-717227", "R-805572")
+def test_internal_aap_format(yaml_file):
+    check_ip_format(
+        yaml_file, aap_regx_dict, "internal", "allowed_address_pairs", "ip_address"
+    )
