@@ -93,6 +93,24 @@
     },
     {
       "key": {
+        "uuid": "18bee073_6b08d1d5",
+        "filename": "ice_validator/tests/conftest.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 1141,
+      "author": {
+        "id": 3271
+      },
+      "writtenOn": "2019-03-20T19:14:51Z",
+      "side": 1,
+      "message": "So this field is being used to set the name of the tests to the field of validated_by, so in the rst.csv file it checks if this field has a name, and if not then set it to static. (If I remove this, the \"Test Name\" column comes back blank.)",
+      "parentUuid": "df26bd32_2d1f5f3b",
+      "revId": "2aaafc4c429e1b41bdc045a445ad2f1415b8ad67",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d396b435_13f5ecb1",
         "filename": "ice_validator/tests/conftest.py",
         "patchSetId": 6
