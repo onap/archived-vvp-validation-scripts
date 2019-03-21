@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6f769b38_e0eff528",
+        "filename": "ice_validator/tests/helpers.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-03-21T16:15:32Z",
+      "side": 1,
+      "message": "I don\u0027t think we need to pass the input parameter back to the caller",
+      "revId": "a98842935ec2765c969d099aba313a2579971325",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d105d87d_e210d35a",
+        "filename": "ice_validator/tests/utils/ports.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-03-21T16:15:32Z",
+      "side": 1,
+      "message": "Do we need a check here in case you don\u0027t get a dict back?  Should we skip it, throw an error?  I think the code that follows assumes its a dict",
+      "revId": "a98842935ec2765c969d099aba313a2579971325",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d3d7cca_3e559e4b",
+        "filename": "ice_validator/tests/utils/ports.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-03-21T16:15:32Z",
+      "side": 1,
+      "message": "I made a comment in the helpers.py.  I don\u0027t think you need the function to pass back parameter as it was in input parameter.",
+      "revId": "a98842935ec2765c969d099aba313a2579971325",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
