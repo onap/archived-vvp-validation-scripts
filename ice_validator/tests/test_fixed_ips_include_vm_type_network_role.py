@@ -44,19 +44,19 @@ from .utils.ports import check_ip_format
 
 
 RE_EXTERNAL_PARAM_FIP = re.compile(  # match pattern
-    r"(?P<vm_type>.+)_(?P<network_role>.+[^(v6)])(_v6)?_ip_(?P<ip_index>.+)$"
+    r"(?P<vm_type>.+)_(?P<network_role>.+)(?<!_v6)(_v6)?_ip_(?P<ip_index>.+)$"
 )
 
 RE_EXTERNAL_PARAM_FIPS = re.compile(  # match pattern
-    r"(?P<vm_type>.+)_(?P<network_role>.+[^(v6)])(_v6)?_ips$"
+    r"(?P<vm_type>.+)_(?P<network_role>.+)(?<!_v6)(_v6)?_ips$"
 )
 
 RE_INTERNAL_PARAM_FIP = re.compile(  # match pattern
-    r"(?P<vm_type>.+)_int_(?P<network_role>.+[^(v6)])(_v6)?_ip_(?P<ip_index>.+)$"
+    r"(?P<vm_type>.+)_int_(?P<network_role>.+)(?<!_v6)(_v6)?_ip_(?P<ip_index>.+)$"
 )
 
 RE_INTERNAL_PARAM_FIPS = re.compile(  # match pattern
-    r"(?P<vm_type>.+)_int_(?P<network_role>.+[^(v6)])(_v6)?_ips$"
+    r"(?P<vm_type>.+)_int_(?P<network_role>.+)(?<!_v6)(_v6)?_ips$"
 )
 
 fip_regx_dict = {
