@@ -59,3 +59,32 @@ parameters:
     type: string
     label: Key Name
     description: Name of key-pair to be used for compute instance
+
+resources:
+
+  myport:
+    type: OS::Neutron::Port
+    properties:
+      fixed_ips:
+        - ip_address: { get_param: vm1_nr1_ip_0}
+
+  myport1:
+    type: OS::Neutron::Port
+    properties:
+      fixed_ips:
+        - ip_address: { get_param: vm1_nr1_ip_1}
+
+  myport2:
+    type: OS::Neutron::Port
+    properties:
+      fixed_ips:
+        - ip_address: { get_param: vm1_nr1_v6_ip_0}
+
+  myport3:
+    type: OS::Neutron::Port
+    properties:
+      fixed_ips:
+        - ip_address: { get_param: vm1_nr1_v6_ip_1}
+
+
+

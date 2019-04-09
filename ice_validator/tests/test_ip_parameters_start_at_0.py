@@ -38,6 +38,7 @@ import re
 
 from tests.helpers import validates, check_indices
 from tests.structures import Heat
+from tests.utils import nested_dict
 
 
 IP_PARAM_PATTERN = re.compile(r"^(.*_ip_)(\d+)$")
@@ -45,6 +46,19 @@ IP_PARAM_PATTERN = re.compile(r"^(.*_ip_)(\d+)$")
 
 @validates("R-71577", "R-40971")
 def test_ips_start_at_0(yaml_file):
-    params = Heat(yaml_file).parameters
-    invalid_params = check_indices(IP_PARAM_PATTERN, params, "IP Parameters")
+    heat = Heat(filepath=yaml_file)
+    ports = heat.get_resource_by_type("OS::Neutron::Port")
+    ip_parameters = []
+
+    for rid, resource in ports.items():
+        fips = nested_dict.get(resource, "properties", "fixed_ips", default={})
+        for fip in fips:
+            ip_address = fip.get("ip_address", {})
+            param = ip_address.get("get_param")
+            if isinstance(param, list):
+                param = param[0]
+            if isinstance(param, str):
+                ip_parameters.append(param)
+
+    invalid_params = check_indices(IP_PARAM_PATTERN, ip_parameters, "IP Parameters")
     assert not invalid_params, ". ".join(invalid_params)
