@@ -312,7 +312,6 @@ def pytest_runtest_makereport(item, call):
     if outcome.get_result().when != "call":
         return  # only capture results of test cases themselves
     result = TestResult(item, outcome)
-    ALL_RESULTS.append(result)
     if (
         not item.config.option.continue_on_failure
         and result.is_base_test
@@ -321,7 +320,11 @@ def pytest_runtest_makereport(item, call):
         msg = "!!Base Test Failure!! Halting test suite execution...\n{}".format(
             result.error_message
         )
+        result.error_message = msg
+        ALL_RESULTS.append(result)
         pytest.exit("{}\n{}\n{}".format(msg, result.files, result.test_case))
+
+    ALL_RESULTS.append(result)
 
 
 def make_timestamp():
