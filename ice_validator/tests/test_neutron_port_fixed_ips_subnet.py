@@ -73,11 +73,11 @@ from .utils.ports import check_ip_format
 VERSION = "1.3.0"
 
 RE_EXTERNAL_PARAM_SUBNET = re.compile(  # match pattern
-    r"(?P<network_role>.+[^(v6)])(_v6)?_subnet_id$"
+    r"(?P<network_role>.+?)(_v6)?_subnet_id$"
 )
 
 RE_INTERNAL_PARAM_SUBNET = re.compile(  # match pattern
-    r"int_(?P<network_role>.+[^(v6)])(_v6)?_subnet_id$"
+    r"int_(?P<network_role>.+?)(_v6)?_subnet_id$"
 )
 
 fip_regx_dict = {
