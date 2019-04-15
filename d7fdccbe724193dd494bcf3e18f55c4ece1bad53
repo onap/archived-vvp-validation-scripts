@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fce9c1e0_4c2b6a01",
+        "filename": "ice_validator/tests/test_neutron_port_network_attachment.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 3013
+      },
+      "writtenOn": "2019-04-15T17:47:00Z",
+      "side": 1,
+      "message": "Once network_role is confirmed to match, I think the script should look for an OS::Neutron::Net or an OS::ContrailV2::VirtualNetwork that is created somewhere with this network_role. Without it, a heat author could pass through an \"internal network\" parameter from base to incremental without actually creating the internal network in the template.",
+      "revId": "d7fdccbe724193dd494bcf3e18f55c4ece1bad53",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
