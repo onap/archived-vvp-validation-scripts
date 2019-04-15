@@ -38,62 +38,16 @@
 #
 # VERSION: '1.0.0'
 
----
 parameters:
+  external_net_id:
+    type: string
 
-  vm_typeX_bialy_vlan_filter:
-    type: comma_delimited_list
-  vm_typeX_bialy_public_vlans:
-    type: comma_delimited_list
-  vm_typeX_bialy_private_vlans:
-    type: comma_delimited_list
-  vm_typeX_bialy_guest_vlans:
-    type: comma_delimited_list
-  subnet_param:
+  external_net_name:
     type: string
-  subnet_id_param:
-    type: string
-  int_extnet_net_id:
-    type: string
-  int_intranet_net_name:
-    type: string
+
 resources:
 
-  vm_typeX_0_intranet_port_2:
+  vmtype_0_external_port_0:
     type: OS::Neutron::Port
     properties:
-      network: { get_param: int_intranet_net_name }
-      fixed_ips:
-        - ip_address: { get_param: lb_1_int_intranet_floating_ip }
-          subnet: { get_param: subnet_param }
-          subnet_id: { get_param: subnet_id_param }
-      binding:vnic_type: direct
-      value_specs:
-        vlan_filter: {get_param: vm_typeX_bialy_vlan_filter}
-        public_vlans: {get_param: vm_typeX_bialy_public_vlans}
-        private_vlans: {get_param: vm_typeX_bialy_private_vlans}
-        guest_vlans: {get_param: vm_typeX_bialy_guest_vlans}
-        vlan_mirror: 
-        ATT_FABRIC_CONFIGURATION_REQUIRED: true
-    metadata:
-        port_type: SR-IOV_Trunk
-
-  vm_typeX_3_extnet_port_2:
-    type: OS::Neutron::Port
-    properties:
-      network: { get_param: int_extnet_net_id }
-      fixed_ips:
-        - ip_address: { get_param: lb_2_extnet_floating_v6_ip }
-          subnet: { get_param: subnet_param }
-          subnet_id: { get_param: subnet_id_param }
-      binding:vnic_type: direct
-      value_specs:
-        vlan_filter: {get_param: vm_typeX_bialy_vlan_filter}
-        public_vlans: {get_param: vm_typeX_bialy_public_vlans}
-        private_vlans: {get_param: vm_typeX_bialy_private_vlans}
-        guest_vlans: {get_param: vm_typeX_bialy_guest_vlans}
-        vlan_mirror: 
-        ATT_FABRIC_CONFIGURATION_REQUIRED: true
-    metadata:
-        port_type: SR-IOV_Mirrored_Trunk
-
+      network: 123

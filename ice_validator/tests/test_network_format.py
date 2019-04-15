@@ -43,46 +43,12 @@ import re
 from tests import cached_yaml as yaml
 
 from .helpers import validates
-from .utils.network_roles import get_network_role_from_port, property_uses_get_resource
+from .utils.network_roles import property_uses_get_resource
 
 RE_INTERNAL_NETWORK_RID = re.compile(  # match pattern
     r"int_(?P<network_role>.+)_network$"
 )
 NETWORK_RESOURCE_TYPES = ["OS::Neutron::Net", "OS::ContrailV2::VirtualNetwork"]
-
-
-@validates("R-62983", "R-86182")
-def test_network_format(yaml_file):
-    """
-    Make sure all network properties use the allowed naming
-    conventions
-    """
-    with open(yaml_file) as fh:
-        yml = yaml.load(fh)
-
-    # skip if resources are not defined
-    if "resources" not in yml:
-        pytest.skip("No resources specified in the heat template")
-
-    invalid_ports = []
-    for k, v in yml["resources"].items():
-        if not isinstance(v, dict):
-            continue
-        if "properties" not in v:
-            continue
-        if property_uses_get_resource(v, "network"):
-            continue
-        if v.get("type") != "OS::Neutron::Port":
-            continue
-        if not get_network_role_from_port(v):
-            invalid_ports.append(k)
-
-    assert not set(invalid_ports), (
-        "Missing 'network' property or improperly "
-        "formatted network parameter name on the "
-        "following OS::Neutron::Ports: "
-        "{}".format(", ".join(invalid_ports))
-    )
 
 
 @validates("R-16968", "R-35666")

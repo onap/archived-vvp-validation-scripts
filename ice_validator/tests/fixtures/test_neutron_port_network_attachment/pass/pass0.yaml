@@ -37,69 +37,43 @@
 
 parameters:
 
-  vm_typeX_bialy_vlan_filter:
-    type: comma_delimited_list
-  vm_typeX_bialy_public_vlans:
-    type: comma_delimited_list
-  vm_typeX_bialy_private_vlans:
-    type: comma_delimited_list
-  vm_typeX_bialy_guest_vlans:
-    type: comma_delimited_list
-  subnet_param:
-    type: string
-  subnet_id_param:
-    type: string
   int_intranet_net_id:
     type: string
 
+
+  int_intranet_net_name:
+    type: string
+
+  other_net_name:
+    type: string
+
+
 resources:
 
-  vm_typeX_0_intranet_port_2:
+  vmtype_0_int_intranet_port_0:
     type: OS::Neutron::Port
     properties:
       network: { get_param: int_intranet_net_id }
-      fixed_ips:
-        - ip_address: { get_param: lb_1_int_intranet_floating_ip }
-          subnet: { get_param: subnet_param }
-          subnet_id: { get_param: subnet_id_param }
-      binding:vnic_type: direct
-      value_specs:
-        vlan_filter: {get_param: vm_typeX_bialy_vlan_filter}
-        public_vlans: {get_param: vm_typeX_bialy_public_vlans}
-        private_vlans: {get_param: vm_typeX_bialy_private_vlans}
-        guest_vlans: {get_param: vm_typeX_bialy_guest_vlans}
-        vlan_mirror: 
-        ATT_FABRIC_CONFIGURATION_REQUIRED: true
-    metadata:
-        port_type: SR-IOV_Trunk
 
-  vm_typeX_3_extnet_port_2:
+  vmtype_0_int_intranet_port_1:
     type: OS::Neutron::Port
     properties:
-      network: { get_param: int_intranet_net_id }
-      fixed_ips:
-        - ip_address: { get_param: lb_2_extnet_floating_v6_ip }
-          subnet: { get_param: subnet_param }
-          subnet_id: { get_param: subnet_id_param }
-      binding:vnic_type: direct
-      value_specs:
-        vlan_filter: {get_param: vm_typeX_bialy_vlan_filter}
-        public_vlans: {get_param: vm_typeX_bialy_public_vlans}
-        private_vlans: {get_param: vm_typeX_bialy_private_vlans}
-        guest_vlans: {get_param: vm_typeX_bialy_guest_vlans}
-        vlan_mirror: 
-        ATT_FABRIC_CONFIGURATION_REQUIRED: true
-    metadata:
-        port_type: SR-IOV_Mirrored_Trunk
+      network: { get_param: int_intranet_net_name }
 
-    int_special_network:
-      type: OS::Neutron::Net
+  vmtype_0_other_port_0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: other_net_name }
 
-    vm_typeX_3_extnet_port_3:
-      type: nested.yaml
-      properties:
-        int_special_net_id: { get_resource: int_special_network }
+  int_module_network:
+    type: OS::Neutron::Net
+    properties:
+      name: network_name
 
+  vmtype_1_int_module_port_0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: int_module_network }
 
-
-
+  nested_resource:
+    type: nested.yaml

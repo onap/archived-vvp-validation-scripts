@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -34,16 +34,17 @@
 # limitations under the License.
 #
 # ============LICENSE_END============================================
+#
+#
+# VERSION: '1.0.0'
 
 parameters:
-
-  int_special_net_id:
+  external_net_id:
     type: string
 
 resources:
 
-  vm_typeX_0_intranet_port_3:
+  vmtype_0_other_port_0:
     type: OS::Neutron::Port
     properties:
-      network: { get_param: int_special_net_id }
-
+      network: { get_param: external_net_id }
