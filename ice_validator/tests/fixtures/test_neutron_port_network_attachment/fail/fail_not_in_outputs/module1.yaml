@@ -1,8 +1,8 @@
 # -*- coding: utf8 -*-
-# ============LICENSE_START=======================================================
+# ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -34,42 +34,16 @@
 # limitations under the License.
 #
 # ============LICENSE_END============================================
-#
-#
----
+
+parameters:
+
+  int_intranet_net_id:
+    type: string
+
+
 resources:
-  vm_type_1_int_intranet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { int_intranet_net_name }
 
-  vm_type_1_int_vpnnet_0_port:
-        type: OS::Neutron::Port
-        properties:
-            network: { get_param: int_vpnnet_net_id }
-
-  vm_type_1_external_net_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: external_net_name }
-
-  vm_type_1_extnet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: extnet_net_id }
-
-  int_network:
-        type: OS::Neutron::Net
-        properties:
-            name:
-                str_replace:
-                    template: $PREFIX_int_network
-                    params:
-                        $PREFIX: { get_param: vnf_name }
-            admin_state_up: True
-            shared: False
-
-  vm_type_0_int_network_0_port:
-        type: OS::Neutron::Port
-        properties:
-            network: { get_resource: int_network }
+  vmtype_0_int_intranet_port_0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: int_intranet_net_id }
