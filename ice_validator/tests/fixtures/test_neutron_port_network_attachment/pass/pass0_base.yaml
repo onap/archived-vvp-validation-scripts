@@ -40,7 +40,7 @@
 
 resources:
 
-  int_intranet_network:
+  int_INTRANET_network:
     type: OS::Neutron::Net
     properties:
       name: network_name
