@@ -196,6 +196,13 @@ class TestResult:
         return self.item.function.__module__.split(".")[-1]
 
     @property
+    def test_id(self):
+        """
+        :return: ID of the test (test_module + test_case)
+        """
+        return "{}::{}".format(self.test_module, self.test_case)
+
+    @property
     def raw_output(self):
         """
         :return: Full output from pytest for the given test case
@@ -525,7 +532,7 @@ def generate_csv_report(output_dir, categories, template_path, failures):
         rows.append(
             [
                 "\n".join(failure.files),
-                failure.test_module,
+                failure.test_id,
                 failure.requirement_text(reqs),
                 failure.resolution_steps(resolutions),
                 failure.error_message,
@@ -589,7 +596,7 @@ def generate_excel_report(output_dir, categories, template_path, failures):
     # table content
     for row, failure in enumerate(failures, start=start_error_table_row + 2):
         worksheet.write(row, 0, "\n".join(failure.files), normal)
-        worksheet.write(row, 1, failure.test_module, normal)
+        worksheet.write(row, 1, failure.test_id, normal)
         worksheet.write(row, 2, failure.requirement_text(reqs), normal)
         worksheet.write(row, 3, failure.resolution_steps(resolutions), normal)
         worksheet.write(row, 4, failure.error_message, normal)
@@ -808,7 +815,7 @@ def generate_html_report(outpath, categories, template_path, failures):
         fail_data.append(
             {
                 "file_links": make_href(failure.files),
-                "test_id": failure.test_module,
+                "test_id": failure.test_id,
                 "error_message": failure.error_message,
                 "raw_output": failure.raw_output,
                 "requirements": docutils.core.publish_parts(
