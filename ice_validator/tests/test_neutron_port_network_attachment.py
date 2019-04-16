@@ -90,7 +90,7 @@ def test_internal_network_parameters(yaml_files):
 
             param_network_role = param_match.groupdict().get("network_role")
             rid_network_role = rid_match.groupdict().get("network_role")
-            if param_network_role != rid_network_role:
+            if param_network_role.lower() != rid_network_role.lower():
                 errors.append((
                     "The network role ({}) extracted from the resource ID ({}) "
                     "does not match network role ({}) extracted from the "
@@ -103,8 +103,8 @@ def test_internal_network_parameters(yaml_files):
                         in {"OS::Neutron::Net",
                             "OS::ContrailV2::VirtualNetwork"}}
             matches = (INTERNAL_NETWORK_PATTERN.match(n) for n in networks)
-            roles = {m.groupdict()["network_role"] for m in matches if m}
-            if param_network_role not in roles:
+            roles = {m.groupdict()["network_role"].lower() for m in matches if m}
+            if param_network_role.lower() not in roles:
                 errors.append((
                     "No internal network with a network role of {} was "
                     "found in the base modules networks: {}"
@@ -149,7 +149,7 @@ def test_external_network_parameter(heat_template):
             continue
         rid_network_role = rid_match.groupdict()["network_role"]
         param_network_role = param_match.groupdict()["network_role"]
-        if rid_network_role != param_network_role:
+        if rid_network_role.lower() != param_network_role.lower():
             errors.append((
                 "The network role ({}) extracted from the resource ID ({}) "
                 "does not match network role ({}) extracted from the "
