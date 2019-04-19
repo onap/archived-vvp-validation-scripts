@@ -1,0 +1,153 @@
+heat_template_version: 2015-04-30
+
+description: |
+  stark nested template
+
+parameters:
+
+  stark_volumes:
+    type: comma_delimited_list
+    description: ndjsfka
+
+  index:
+    type: number
+    description: nsadlf
+
+  dummy_net_id:
+    type: string
+    description: nsdaljfnsak
+
+  dummy_subnet_id:
+    type: string
+    description: nsdaljfnsak
+
+  stark_dummy_ips:
+    type: comma_delimited_list
+    description: dsnafljsadnlfks
+
+  vnf_name:
+    label: VNF name
+    description: this name will also be used on VM server and other resources.
+    type: string
+
+  vnf_id:
+    label: VNF ID
+    description: 'This ID will be passed as metadata on all Nova Servers, Cinder Volumes, and any other resource that supports metadata'
+    type: string
+
+  vf_module_id:
+    type: string
+    description: Unique ID for this VF Module instance 
+
+  vf_module_name:
+    type: string
+    description: Unique name for this VF Module instance
+    
+  vm_role: 
+    type: string
+    description: role tagged to VM 
+  
+  stark_flavor_name:
+    label: VMs flavor
+    description: The JSON map containing the nova Flavors to be used for the VM Servers
+    type: string
+
+  stark_image_name:
+    type: string
+    description: "stark image name"
+    
+  stark_names:
+    type: comma_delimited_list
+    description: VM name for stark VM 1
+        
+  workload_context:
+    type: string
+    description: Workload Context for this VNF instance
+
+  environment_context:
+    type: string
+    description: Environment Context for this VNF instance     
+  
+  stark_dummy_floating_ip:
+    type: string
+    description: Test floating IP test
+
+  int_mummy_net_id:
+    type: string
+    description: Test floating IP test
+
+  int_mummy_subnet_id:
+    type: string
+    description: Test floating IP test
+
+  stark_int_mummy_ips:
+    type: comma_delimited_list
+    description: Test floating IP test
+
+  oam_net_fqdn:
+    type: string
+    description: nsdaklfnsaklfsdl
+
+  oam2_net_fqdn:
+    type: string
+    description: ndjfls
+
+  instance_ip_address:
+    type: string
+    description: nsdlfkn
+
+resources:
+
+  fw_0_oam_protected_vmi_0_IP_0:
+    type: OS::ContrailV2::InstanceIp
+    properties:
+      instance_ip_address: { get_param: instance_ip_address }
+
+  fw_0_oam_vmi_0:
+    type: OS::ContrailV2::VirtualMachineInterface
+    properties:
+      virtual_network_refs:
+        - get_param: oam_net_fqdn
+        - get_param: oam2_net_fqdn
+
+  stark_0_dummy_port_0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: dummy_net_id }
+      fixed_ips:
+        - subnet: { get_param: dummy_subnet_id }
+          ip_address: { get_param: [stark_dummy_ips, { get_param: index }] }
+      allowed_address_pairs:
+        - ip_address: { get_param: stark_dummy_floating_ip }
+
+  stark_0_int_mummy_port_0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: int_mummy_net_id }
+      fixed_ips:
+        - subnet: { get_param: int_mummy_subnet_id }
+          ip_address: { get_param: [stark_int_mummy_ips, { get_param: index }] }
+
+  stark_server_0:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: [stark_names, { get_param: index }] }
+      image: { get_param: stark_image_name}
+      flavor: { get_param: stark_flavor_name }
+      networks:
+        - port: { get_resource: stark_0_dummy_port_0 }
+        - port: { get_resource: stark_0_int_mummy_port_0 }
+      metadata: 
+        vnf_id: {get_param: vnf_id}
+        vnf_name: {get_param: vnf_name}
+        vf_module_id: {get_param: vf_module_id}
+        vf_module_name:   {get_param: vf_module_name}
+        vm_role: {get_param: vm_role}
+        workload_context: {get_param: workload_context }
+        environment_context: {get_param: environment_context }
+
+  stark_volume_attachment_0:
+    type: OS::Cinder::VolumeAttachment
+    properties:
+      instance_uuid: {get_resource: stark_server_0 }
+      volume_id: {get_param: [stark_volumes, { get_param: index }] }
