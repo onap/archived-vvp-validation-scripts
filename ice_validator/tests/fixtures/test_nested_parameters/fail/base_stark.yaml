@@ -1,0 +1,139 @@
+heat_template_version: 2015-04-30
+
+description: |
+  this is a test template
+
+parameters:
+
+  stark_volumes:
+    description: nfsadnfkl
+    type: json
+
+  vnfname:
+    label: VNF name
+    description: this name will also be used on VM server and other resources.
+    type: string
+
+  vnfid:
+    label: VNF ID
+    description: 'This ID will be passed as metadata on all Nova Servers, Cinder Volumes, and any other resource that supports metadata'
+    type: string
+
+  vfmodule_id:
+    type: string
+    description: Unique ID for this VF Module instance 
+
+  vfmodule_index:
+    type: string
+    description: Unique ID for this VF Module instance 
+
+  vfmodule_name:
+    type: string
+    description: Unique name for this VF Module instance
+    
+  vmrole: 
+    type: string
+    description: role tagged to VM 
+
+  flavor:
+    label: VMs flavor
+    description: The JSON map containing the nova Flavors to be used for the VM Servers
+    type: string
+
+  starkimage_name:
+    type: string
+    description: "stark image name"
+    
+  names:
+    type: comma_delimited_list
+    description: VM name for STARK VM 1
+
+  workloadcontext:
+    type: string
+    description: Workload Context for this VNF instance
+
+  environmentcontext:
+    type: string
+    description: Environment Context for this VNF instance     
+
+  dummynet_id:
+    type: string
+    description: nsdaljfnsak
+
+  dummysubnet_id:
+    type: string
+    description: nsdaljfnsak
+
+  iplist:
+    type: comma_delimited_list
+    description: dsnafljsadnlfks
+
+  stark_count: 
+    type: number
+    description: njsdlf
+
+  starkdummy_floating_ip:
+    type: string
+    description: nfalsd
+
+  starkint_mummy_ips:
+    type: comma_delimited_list
+    description: nfdsa
+
+  oamnet_fqdn:
+    type: string
+    description: ndfsakl
+
+  oam2net_fqdn:
+    type: string
+    description: nfkldas
+
+  instanceip_address:
+    type: string
+    description: nfsakdl
+
+  my_contrailip:
+    type: string
+    description: nlfdsa
+
+resources:
+
+  int_mummy_network:
+    type: OS::Neutron::Net
+
+  int_mummy_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network: { get_resource: int_mummy_network }
+
+  stark_RG:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: stark_count }
+      resource_def:
+        type: stark_nested.yaml
+        properties:
+          index: '%index%'
+          dummy_net_id: { get_param: dummynet_id }
+          dummy_subnet_id: { get_param: dummysubnet_id }
+          stark_dummy_ips: { get_param: iplist }
+          vnf_name: { get_param: vnfname }
+          vnf_id: { get_param: vnfid }
+          vf_module_id: { get_param: vfmodule_id }
+          vf_module_index: { get_param: vfmodule_index }
+          vf_module_name: { get_param: vfmodule_name }    
+          vm_role: { get_param: vmrole }
+          stark_flavor_name: { get_param: flavor }
+          stark_image_name: { get_param: starkimage_name }
+          stark_names: { get_param: names }
+          workload_context: { get_param: workloadcontext }
+          environment_context: { get_param: environmentcontext }
+          stark_volumes: { get_param: stark_volumes }
+          stark_dummy_floating_ip: { get_param: starkdummy_floating_ip }
+          int_mummy_net_id: { get_resource: int_mummy_network }
+          int_mummy_subnet_id: { get_resource: int_mummy_subnet }
+          stark_int_mummy_ips: { get_param: starkint_mummy_ips }
+          oam_net_fqdn: { get_param: oamnet_fqdn }
+          oam2_net_fqdn: { get_param: oam2net_fqdn }
+          instance_ip_address: { get_param: instanceip_address }
+          mycontrailip: { get_param: my_contrailip }

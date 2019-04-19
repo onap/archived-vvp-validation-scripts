@@ -1,0 +1,49 @@
+heat_template_version: 2014-10-16
+
+description: >
+  this is a test
+
+parameters:
+
+  vnf_name:
+    type: string
+    label: VF name
+    description: Unique name for this VF instance.
+
+  vf_module_id:
+    type: string
+    label: VF module id
+    description: VF module id
+
+  vf_module_name:
+    type: string
+    label: VF module name
+    description: Unique name for this VF module instance.
+
+  stark_volume_size:
+    type: number
+    label: stark cinder volume size 
+    description: Size of the Cinder volume. Measured in gigabytes.
+
+resources:
+
+  stark_volume_0:
+    type: OS::Cinder::Volume
+    properties:
+      name:
+        str_replace:
+          template: VNF_NAME_volume_0
+          params:
+            VNF_NAME: {get_param: vnf_name}
+      metadata:
+        vnf_name: {get_param: vnf_name}
+        vf_module_id: { get_param: vf_module_id }
+        vf_module_name: { get_param: vf_module_name }
+      size: { get_param: stark_volume_size }
+
+outputs:
+
+  stark_volume_0:
+    value: {get_resource: stark_volume_0}
+    description: test
+
