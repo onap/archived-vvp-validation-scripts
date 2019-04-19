@@ -1,0 +1,36 @@
+{
+  "name": "stark_static_nesting",
+  "description": "test to check if nesting nesting is viable",
+  "version": "0.0",
+  "data": [
+    {
+      "isBase": true,
+      "file": "base_stark.yaml",
+      "type": "HEAT",
+      "data": [
+        {
+          "file": "base_stark.env",
+          "type": "HEAT_ENV"
+        },
+        {
+          "file": "base_stark_volume.yaml",
+          "type": "HEAT_VOL",
+          "data": [
+            {
+              "file": "base_stark_volume.env",
+              "type": "HEAT_ENV"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "stark_nested.yaml",
+      "type": "HEAT"
+    },
+    {
+      "file": "base_stark_nested_volume.yaml",
+      "type": "HEAT"
+    }
+  ]
+}
