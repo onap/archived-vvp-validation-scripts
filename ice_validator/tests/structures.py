@@ -452,7 +452,7 @@ class ContrailV2VirtualNetworkProcessor(HeatProcessor):
     re_rids = collections.OrderedDict(
         [
             ("network", _get_regex(r"int" r"_(?P<network_role>.+)" r"_network" r"$")),
-            ("rvn", _get_regex(r"int" r"_(?P<network_role>.+)" r"_RVN" r"$")),
+            # ("rvn", _get_regex(r"int" r"_(?P<network_role>.+)" r"_RVN" r"$")),
         ]
     )
 
