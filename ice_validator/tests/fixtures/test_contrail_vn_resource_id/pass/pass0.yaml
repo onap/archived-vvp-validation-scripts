@@ -43,7 +43,4 @@
 resources:
   int_0_romeo_network:
     type: OS::ContrailV2::VirtualNetwork
-        
-  int_0_romeo_RVN:
-    type: OS::ContrailV2::VirtualNetwork
 
