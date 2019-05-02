@@ -108,6 +108,11 @@ def validate_virtual_network_refs(heat, virtual_network_refs, network_role):
     expect = "%s_net_fqdn" % network_role
     for vn_ref in virtual_network_refs:
         param = heat.nested_get(vn_ref, "get_param")
+
+        # skip if not connecting via get_param
+        if not param:
+            return None
+
         if param == expect:
             param_type = heat.nested_get(heat.parameters, param, "type")
             if param_type != "string":
