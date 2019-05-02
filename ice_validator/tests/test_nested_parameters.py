@@ -265,3 +265,10 @@ def test_iip_instance_ip_parameter_name_doesnt_change_in_nested_template(heat_te
     check_nested_parameter_doesnt_change(
         heat_template, "OS::ContrailV2::InstanceIp", "instance_ip_address"
     )
+
+
+@validates("R-708564")
+def test_iip_subnet_uuid_parameter_name_doesnt_change_in_nested_template(heat_template):
+    check_nested_parameter_doesnt_change(
+        heat_template, "OS::ContrailV2::InstanceIp", "subnet_uuid"
+    )

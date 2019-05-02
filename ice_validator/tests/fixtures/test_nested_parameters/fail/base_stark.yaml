@@ -96,6 +96,10 @@ parameters:
     type: string
     description: nlfdsa
 
+  subnet_uid:
+    type: string
+    description: nlfdsa
+
 resources:
 
   int_mummy_network:
@@ -137,3 +141,4 @@ resources:
           oam2_net_fqdn: { get_param: oam2net_fqdn }
           instance_ip_address: { get_param: instanceip_address }
           mycontrailip: { get_param: my_contrailip }
+          subnet_uuid: { get_param: subnet_uid }

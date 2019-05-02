@@ -100,13 +100,17 @@ parameters:
     type: string
     description: njsaf
 
+  subnet_uid:
+    type: string
+    description: njsaf
+
 resources:
 
   fw_0_oam_protected_vmi_0_IP_0:
     type: OS::ContrailV2::InstanceIp
     properties:
       instance_ip_address: { get_param: instance_ip_address }
-
+      subnet_uuid: { get_param: subnet_uid }
   fw_0_oam_vmi_0:
     type: OS::ContrailV2::VirtualMachineInterface
     properties:
