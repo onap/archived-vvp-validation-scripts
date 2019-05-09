@@ -52,6 +52,26 @@ parameters:
 
 resources:
 
+  testr0:
+    type: testr
+    properties:
+      name:
+        str_replace:
+          template: vnfname_param
+          params:
+            vnfname: { get_param: vnf_name }
+            param: { get_param: [params, 0]}
+
+  testr1:
+    type: testr
+    properties:
+      name:
+        str_replace:
+          template: vnfname_param
+          params:
+            vnfname: { get_param: vnf_name }
+            param: { get_param: [params, 1]}
+
   vm_typeX_0_bialy_port_2:
     type: OS::Neutron::Port
     properties:

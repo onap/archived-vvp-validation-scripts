@@ -85,13 +85,19 @@ class HeatProcessor(object):
     # regex parses the proper resource id format.
 
     @staticmethod
-    def get_param_value(value):
+    def get_param_value(value, withIndex=False):
         """Return get_param value of `value`
         """
         if isinstance(value, dict) and len(value) == 1:
             v = value.get("get_param")
             if isinstance(v, list) and v:
-                v = v[0]
+                if withIndex and len(v) > 1:
+                    idx = v[1]
+                    if isinstance(idx, dict):
+                        idx = idx.get("get_param", idx)
+                    v = "{}{}".format(v[0], idx)
+                else:
+                    v = v[0]
         else:
             v = None
         return v
@@ -161,7 +167,7 @@ class HeatProcessor(object):
         # are replaced in the template in arbitrary order.
         name = template
         for key, value in params.items():
-            param = cls.get_param_value(value)
+            param = cls.get_param_value(value, withIndex=True)
             if param is None:
                 return None
             name = name.replace(key, str(param))
