@@ -40,16 +40,26 @@
 
 ---
 parameters:
-  bialy_net_fqdn:
+  oam_net_fqdn:
+    type: string
+  huey:
+    type: string
+  dewey:
     type: string
 
 resources:
 
-  vm_typeX_0_bialy_port_2:
+  fw_0_oam_vmi_0:
     type: OS::ContrailV2::VirtualMachineInterface
     properties:
       virtual_network_refs:
-      - get_param: huey
-      - get_param: dewey
-      - get_param: bialy_net_fqdn
+        - get_param: oam_net_fqdn
 
+  fw_0_int_internal_vmi_0:
+    type: OS::ContrailV2::VirtualMachineInterface
+    properties:
+      virtual_network_refs:
+        - get_resource: { int_internal_network }
+
+  int_internal_network:
+    type: OS::Neutron::Net
