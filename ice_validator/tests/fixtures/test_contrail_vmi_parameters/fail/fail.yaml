@@ -1,0 +1,65 @@
+heat_template_version: 2015-04-30
+
+description: fdsafsfsa
+
+parameters:
+
+  TESTDB_priv_floating_ips:
+   type: comma_delimited_list
+   description: asnfjl
+
+  TESTDB_int_priav_floating_ip:
+   type: string
+   description: asnfjl
+
+resources:
+
+  TESTDB_0_priv_vmi_0:
+    type: OS::ContrailV2::VirtualMachineInterface
+    properties:
+      virtual_machine_interface_properties:
+        virtual_machine_interface_properties_service_interface_type: {
+          "priv_interface_type" 
+        }
+      virtual_network_refs:
+        - get_param: priv_net_fqdn
+      virtual_machine_interface_allowed_address_pairs:
+        {
+          virtual_machine_interface_allowed_address_pairs_allowed_address_pair:
+            [{
+              virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip:
+                {
+                  virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip_ip_prefix: { get_param: [TESTDB_priv_floating_ip, 0] },
+                  virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip_ip_prefix_len: "dsafasdF",
+                },
+              virtual_machine_interface_allowed_address_pairs_allowed_address_pair_mac: "sdnfjkas",
+              virtual_machine_interface_allowed_address_pairs_allowed_address_pair_address_mode: "sadfnjasdfknj",
+            }],
+        }
+
+
+  TESTDB_0_int_private_vmi_0:
+    type: OS::ContrailV2::VirtualMachineInterface
+    properties:
+      virtual_machine_interface_properties:
+        virtual_machine_interface_properties_service_interface_type: {
+          "priv_interface_type" 
+        }
+      virtual_network_refs:
+        - get_param: priv_net_fqdn
+      virtual_machine_interface_allowed_address_pairs:
+        {
+          virtual_machine_interface_allowed_address_pairs_allowed_address_pair:
+            [{
+              virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip:
+                {
+                  virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip_ip_prefix: { get_param: TESTDB_int_priav_floating_ip },
+                  virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip_ip_prefix_len: "dsafasdF",
+                },
+              virtual_machine_interface_allowed_address_pairs_allowed_address_pair_mac: "sdnfjkas",
+              virtual_machine_interface_allowed_address_pairs_allowed_address_pair_address_mode: "sadfnjasdfknj",
+            }],
+        }
+
+  #testnlksadf:
+  #  type: http://www.google.com

@@ -36,31 +36,6 @@
 # ============LICENSE_END============================================
 #
 #
-
-"""
-resources:
-{vm-type}_{vm-type_index}_{network-role}_port_{port-index}:
-  type: OS::Neutron::Port
-  properties:
-    network: { get_param: ...}
-    fixed_ips: [ { "ipaddress": { get_param: ... } } ]
-    binding:vnic_type: direct           #only SR-IOV ports, not OVS ports
-    value_specs: {
-      vlan_filter: { get_param: ... },  #all NC ports
-      public_vlans: { get_param: ... }, #all NC ports
-      private_vlans: { get_param: ... },#all NC ports
-      guest_vlans: { get_param: ... },  #SR-IOV Trunk Port only
-      vlan_mirror: { get_param: ... },  #SRIOV Trunk Port
-                                        # Receiving Mirrored Traffic only
-     ATT_FABRIC_CONFIGURATION_REQUIRED: true #all NC ports
-    }
-  metadata:
-    port_type: SR-IOV_Trunk             #SR-IOV Trunk Port
-    port_type: SR-IOV_Non_Trunk         #SR-IOV Non Trunk Port
-    port_type: OVS                      #OVS Port
-    port_type: SR-IOV_Mirrored_Trunk    #SR-IOV Trunk Port
-                                        # Receiving Mirrored Traffic
-"""
 import re
 
 from tests.utils.network_roles import get_network_type_from_port
@@ -68,7 +43,8 @@ from tests.parametrizers import get_nested_files
 
 from .structures import Heat
 from .helpers import validates, load_yaml, get_base_template_from_yaml_files
-from .utils.ports import check_ip_format
+from .utils.ports import check_parameter_format
+from tests.structures import NeutronPortProcessor
 
 VERSION = "1.3.0"
 
@@ -99,12 +75,12 @@ fip_regx_dict = {
 
 @validates("R-38236", "R-84123", "R-76160")
 def test_internal_subnet_format(yaml_file):
-    check_ip_format(yaml_file, fip_regx_dict, "internal", "fixed_ips", "subnet")
+    check_parameter_format(yaml_file, fip_regx_dict, "internal", NeutronPortProcessor, "fixed_ips", "subnet")
 
 
 @validates("R-38236", "R-62802", "R-15287")
 def test_external_subnet_format(yaml_file):
-    check_ip_format(yaml_file, fip_regx_dict, "external", "fixed_ips", "subnet")
+    check_parameter_format(yaml_file, fip_regx_dict, "external", NeutronPortProcessor, "fixed_ips", "subnet")
 
 
 @validates("R-84123", "R-76160")

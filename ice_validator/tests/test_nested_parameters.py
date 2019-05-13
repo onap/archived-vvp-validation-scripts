@@ -90,7 +90,8 @@ def check_nested_parameter_doesnt_change(yaml_file, nresource_type, *nprops):
                     continue
 
                 for nparam in prop_iterator(nresource_dict, *nprops):  # get iterator of all target parameters
-                    if nparam:  # iterator yields None if parameter isn't found
+                    if nparam and "get_param" in nparam:  # iterator yields None if parameter isn't found
+                        nparam = nparam.get("get_param")
                         for k1, v1 in properties.items():  # found nparam, now comparing to parent template
                             if isinstance(v1, dict) and "get_param" in v1:
                                 parameter = v1.get("get_param")

@@ -229,7 +229,7 @@ class ContrailV2NetworkFlavorBaseProcessor(HeatProcessor):
 
     network_flavor_external = "external"
     network_flavor_internal = "internal"
-    network_flavor_subint = "subint"
+    network_flavor_subint = "subinterface"
 
     @classmethod
     def get_network_flavor(cls, resource):
@@ -270,7 +270,7 @@ class ContrailV2InstanceIpProcessor(ContrailV2NetworkFlavorBaseProcessor):
     re_rids = collections.OrderedDict(
         [
             (
-                "int_ip",
+                "internal",
                 _get_regex(
                     r"(?P<vm_type>.+)"
                     r"_(?P<vm_type_index>\d+)"
@@ -278,27 +278,14 @@ class ContrailV2InstanceIpProcessor(ContrailV2NetworkFlavorBaseProcessor):
                     r"_(?P<network_role>.+)"
                     r"_vmi"
                     r"_(?P<vmi_index>\d+)"
+                    r"(_v6)?"
                     r"_IP"
                     r"_(?P<index>\d+)"
                     r"$"
                 ),
             ),
             (
-                "int_v6_ip",
-                _get_regex(
-                    r"(?P<vm_type>.+)"
-                    r"_(?P<vm_type_index>\d+)"
-                    r"_int"
-                    r"_(?P<network_role>.+)"
-                    r"_vmi"
-                    r"_(?P<vmi_index>\d+)"
-                    r"_v6_IP"
-                    r"_(?P<index>\d+)"
-                    r"$"
-                ),
-            ),
-            (
-                "subint_ip",
+                "subinterface",
                 _get_regex(
                     r"(?P<vm_type>.+)"
                     r"_(?P<vm_type_index>\d+)"
@@ -306,47 +293,22 @@ class ContrailV2InstanceIpProcessor(ContrailV2NetworkFlavorBaseProcessor):
                     r"_(?P<network_role>.+)"
                     r"_vmi"
                     r"_(?P<vmi_index>\d+)"
+                    r"(_v6)?"
                     r"_IP"
                     r"_(?P<index>\d+)"
                     r"$"
                 ),
             ),
             (
-                "subint_v6_ip",
-                _get_regex(
-                    r"(?P<vm_type>.+)"
-                    r"_(?P<vm_type_index>\d+)"
-                    r"_subint"
-                    r"_(?P<network_role>.+)"
-                    r"_vmi"
-                    r"_(?P<vmi_index>\d+)"
-                    r"_v6_IP"
-                    r"_(?P<index>\d+)"
-                    r"$"
-                ),
-            ),
-            (
-                "ip",
+                "external",
                 _get_regex(
                     r"(?P<vm_type>.+)"
                     r"_(?P<vm_type_index>\d+)"
                     r"_(?P<network_role>.+)"
                     r"_vmi"
                     r"_(?P<vmi_index>\d+)"
+                    r"(_v6)?"
                     r"_IP"
-                    r"_(?P<index>\d+)"
-                    r"$"
-                ),
-            ),
-            (
-                "v6_ip",
-                _get_regex(
-                    r"(?P<vm_type>.+)"
-                    r"_(?P<vm_type_index>\d+)"
-                    r"_(?P<network_role>.+)"
-                    r"_vmi"
-                    r"_(?P<vmi_index>\d+)"
-                    r"_v6_IP"
                     r"_(?P<index>\d+)"
                     r"$"
                 ),
@@ -412,7 +374,7 @@ class ContrailV2VirtualMachineInterfaceProcessor(ContrailV2NetworkFlavorBaseProc
     re_rids = collections.OrderedDict(
         [
             (
-                "vmi_internal",
+                "internal",
                 _get_regex(
                     r"(?P<vm_type>.+)"
                     r"_(?P<vm_type_index>\d+)"
@@ -424,7 +386,7 @@ class ContrailV2VirtualMachineInterfaceProcessor(ContrailV2NetworkFlavorBaseProc
                 ),
             ),
             (
-                "vmi_subint",
+                "subinterface",
                 _get_regex(
                     r"(?P<vm_type>.+)"
                     r"_(?P<vm_type_index>\d+)"
@@ -436,7 +398,7 @@ class ContrailV2VirtualMachineInterfaceProcessor(ContrailV2NetworkFlavorBaseProc
                 ),
             ),
             (
-                "vmi_external",
+                "external",
                 _get_regex(
                     r"(?P<vm_type>.+)"
                     r"_(?P<vm_type_index>\d+)"
@@ -504,7 +466,7 @@ class NeutronPortProcessor(HeatProcessor):
     re_rids = collections.OrderedDict(
         [
             (
-                "internal_port",
+                "internal",
                 _get_regex(
                     r"(?P<vm_type>.+)"
                     r"_(?P<vm_type_index>\d+)"
@@ -515,32 +477,12 @@ class NeutronPortProcessor(HeatProcessor):
                 ),
             ),
             (
-                "port",
+                "external",
                 _get_regex(
                     r"(?P<vm_type>.+)"
                     r"_(?P<vm_type_index>\d+)"
                     r"_(?P<network_role>.+)"
                     r"_port_(?P<port_index>\d+)"
-                    r"$"
-                ),
-            ),
-            (
-                "floating_ip",
-                _get_regex(
-                    r"reserve_port"
-                    r"_(?P<vm_type>.+)"
-                    r"_(?P<network_role>.+)"
-                    r"_floating_ip_(?P<index>\d+)"
-                    r"$"
-                ),
-            ),
-            (
-                "floating_v6_ip",
-                _get_regex(
-                    r"reserve_port"
-                    r"_(?P<vm_type>.+)"
-                    r"_(?P<network_role>.+)"
-                    r"_floating_v6_ip_(?P<index>\d+)"
                     r"$"
                 ),
             ),

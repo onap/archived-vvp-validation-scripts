@@ -42,7 +42,7 @@
 
 resources:
 
-  vm_typeS_0_bialy_port_0:
+  vm_typeS_0_int_bialy_port_0:
     type: OS::ContrailV2::InstanceIp
     properties:
       virtual_network_refs:

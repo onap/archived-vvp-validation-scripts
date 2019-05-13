@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -38,13 +38,9 @@
 #
 import re
 
-from .helpers import validates
-from .utils.ports import check_parameter_format
-from tests.structures import NeutronPortProcessor
-
-VERSION = "1.0.0"
-
-# pylint: disable=invalid-name
+from tests.structures import ContrailV2VirtualMachineInterfaceProcessor
+from tests.helpers import validates
+from tests.utils.ports import check_parameter_format
 
 RE_EXTERNAL_PARAM_AAP = re.compile(  # match pattern
     r"(?P<vm_type>.+)_(?P<network_role>.+)_floating(_v6)?_ip$"
@@ -79,15 +75,25 @@ aap_regx_dict = {
 }
 
 
-@validates("R-41492", "R-35735", "R-159016")
-def test_external_aap_format(yaml_file):
-    check_parameter_format(
-        yaml_file, aap_regx_dict, "external", NeutronPortProcessor, "allowed_address_pairs", "ip_address"
-    )
+@validates("R-100310", "R-100330", "R-100350")
+def test_contrail_external_vmi_aap_parameter(yaml_file):
+    check_parameter_format(yaml_file,
+                           aap_regx_dict,
+                           "external",
+                           ContrailV2VirtualMachineInterfaceProcessor,
+                           "virtual_machine_interface_allowed_address_pairs",
+                           "virtual_machine_interface_allowed_address_pairs_allowed_address_pair",
+                           "virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip",
+                           "virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip_ip_prefix")
 
 
-@validates("R-717227", "R-805572")
-def test_internal_aap_format(yaml_file):
-    check_parameter_format(
-        yaml_file, aap_regx_dict, "internal", NeutronPortProcessor, "allowed_address_pairs", "ip_address"
-    )
+@validates("R-100360", "R-100370")
+def test_contrail_internal_vmi_aap_parameter(yaml_file):
+    check_parameter_format(yaml_file,
+                           aap_regx_dict,
+                           "internal",
+                           ContrailV2VirtualMachineInterfaceProcessor,
+                           "virtual_machine_interface_allowed_address_pairs",
+                           "virtual_machine_interface_allowed_address_pairs_allowed_address_pair",
+                           "virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip",
+                           "virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip_ip_prefix")

@@ -51,6 +51,8 @@ parameters:
     type: comma_delimited_list
   subnet_param:
     type: comma_delimited_list
+  int_subnet_param:
+    type: comma_delimited_list
   subnet_id_param:
     type: comma_delimited_list
 
@@ -81,6 +83,24 @@ resources:
       fixed_ips:
         - ip_address: { get_param: lb_2_extnet_floating_v6_ip }
           subnet: { get_param: subnet_param }
+      binding:vnic_type: direct
+      value_specs:
+        vlan_filter: {get_param: vm_typeX_bialy_vlan_filter}
+        public_vlans: {get_param: vm_typeX_bialy_public_vlans}
+        private_vlans: {get_param: vm_typeX_bialy_private_vlans}
+        guest_vlans: {get_param: vm_typeX_bialy_guest_vlans}
+        vlan_mirror: 
+        ATT_FABRIC_CONFIGURATION_REQUIRED: true
+    metadata:
+        port_type: SR-IOV_Mirrored_Trunk
+
+  vm_typeX_3_int_bialy_port_2:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: extnet_net_id }
+      fixed_ips:
+        - ip_address: { get_param: lb_2_extnet_floating_v6_ip }
+          subnet: { get_param: int_subnet_param }
       binding:vnic_type: direct
       value_specs:
         vlan_filter: {get_param: vm_typeX_bialy_vlan_filter}

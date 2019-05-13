@@ -36,120 +36,114 @@
 # ============LICENSE_END============================================
 #
 #
-from .network_roles import get_network_role_and_type
-from tests.structures import Heat, NeutronPortProcessor
-from tests.helpers import parameter_type_to_heat_type
+from tests.structures import Heat
+from tests.helpers import parameter_type_to_heat_type, prop_iterator
 from . import nested_dict
 
 
-def check_ip_format(yaml_file, regx, port_type, resource_property, nested_property):
+def check_parameter_format(yaml_file, regx, intext, resource_processor, *properties):
     """
     yaml_file: input file to check
     regx: dictionary containing the regex to use to validate parameter
-    port_type: internal or external
-    resource_property: OS::Neutron::Port property to check for parameter
-    nested_property: resource_property will be a list of dicts, this is the key to index into
+    intext: internal or external
+    resource_processor: resource type specific helper, defined in structures.py
+    properties: arg list of property that is being checked
     """
-    invalid_ips = []
+
+    invalid_parameters = []
     heat = Heat(filepath=yaml_file)
-    ports = heat.get_resource_by_type("OS::Neutron::Port")
+    resource_type = resource_processor.resource_type
+    resources = heat.get_resource_by_type(resource_type)
     heat_parameters = heat.parameters
-
-    for rid, resource in ports.items():
-        network_role, network_type = get_network_role_and_type(resource)
-        if (
-            network_type != port_type
-        ):  # skipping if port type (internal/external) doesn't match
-            continue
-
-        name, port_match = NeutronPortProcessor.get_rid_match_tuple(rid)
+    for rid, resource in resources.items():
+        resource_intext, port_match = resource_processor.get_rid_match_tuple(rid)
         if not port_match:
             continue  # port resource ID not formatted correctely
 
-        params = nested_dict.get(resource, "properties", resource_property, default={})
+        if (
+            resource_intext != intext
+        ):  # skipping if type (internal/external) doesn't match
+            continue
 
-        for param in params:
-            prop = nested_dict.get(param, nested_property)
+        for param in prop_iterator(resource, *properties):
             if (
-                not prop
-                or not isinstance(prop, dict)
-                or "get_resource" in prop
-                or "get_attr" in prop
-                # or "str_replace" in prop - should str_replace be checked?
+                param
+                and isinstance(param, dict)
+                and "get_resource" not in param
+                and "get_attr" not in param
             ):
-                continue  # lets only check parameters shall we?
 
-            # checking parameter uses get_param
-            parameter = nested_dict.get(prop, "get_param")
-            if not parameter:
-                msg = (
-                    "Unexpected parameter format for OS::Neutron::Port {} property {}: {}. "
-                    + "Please consult the heat guidelines documentation for details."
-                ).format(rid, resource_property, prop)
-                invalid_ips.append(msg)  # should this be a failure?
-                continue
-
-            # getting parameter if the get_param uses list, and getting official HEAT parameter type
-            parameter_type = parameter_type_to_heat_type(parameter)
-            if parameter_type == "comma_delimited_list":
-                parameter = parameter[0]
-            elif parameter_type != "string":
-                continue
-
-            # checking parameter format = type defined in template
-            heat_parameter_type = nested_dict.get(heat_parameters, parameter, "type")
-            if not heat_parameter_type or heat_parameter_type != parameter_type:
-                msg = (
-                    "OS::Neutron::Port {} parameter {} defined as type {} "
-                    + "is being used as type {} in the heat template"
-                ).format(
-                    resource_property, parameter, heat_parameter_type, parameter_type
-                )
-                invalid_ips.append(msg)
-                continue
-
-            # if parameter type is not in regx dict, then it is not supported by automation
-            regx_dict = regx[port_type].get(parameter_type)
-            if not regx_dict:
-                msg = (
-                    "WARNING: OS::Neutron::Port {} parameter {} defined as type {} "
-                    + "is not supported by platform automation. If this VNF is not able "
-                    + "to adhere to this requirement, please consult the Heat Orchestration "
-                    + "Template guidelines for alternative solutions. If already adhering to "
-                    + "an alternative provided by the heat guidelines, please disregard this "
-                    + "message."
-                ).format(resource_property, parameter, parameter_type)
-                invalid_ips.append(msg)
-                continue
-
-            # checking if param adheres to guidelines format
-            regexp = regx[port_type][parameter_type]["machine"]
-            readable_format = regx[port_type][parameter_type]["readable"]
-            match = regexp.match(parameter)
-            if not match:
-                msg = "{} parameter {} does not follow format {}".format(
-                    resource_property, parameter, readable_format
-                )
-                invalid_ips.append(msg)
-                continue
-
-            # checking that parameter includes correct vm_type/network_role
-            parameter_checks = regx.get("parameter_to_resource_comparisons", [])
-            for check in parameter_checks:
-                resource_match = port_match.group(check)
-                if (
-                    resource_match
-                    and not parameter.startswith(resource_match)
-                    and parameter.find("_{}_".format(resource_match)) == -1
-                ):
+                # checking parameter uses get_param
+                parameter = param.get("get_param")
+                if not parameter:
                     msg = (
-                        "OS::Neutron::Port {0} property {1} parameter "
-                        + "{2} {3} does match resource {3} {4}"
-                    ).format(rid, resource_property, parameter, check, resource_match)
-                    invalid_ips.append(msg)
+                        "Unexpected parameter format for {} {} property {}: {}. "
+                        + "Please consult the heat guidelines documentation for details."
+                    ).format(resource_type, rid, properties, param)
+                    invalid_parameters.append(msg)  # should this be a failure?
                     continue
 
-    assert not invalid_ips, "%s" % "\n".join(invalid_ips)
+                # getting parameter if the get_param uses list, and getting official HEAT parameter type
+                parameter_type = parameter_type_to_heat_type(parameter)
+                if parameter_type == "comma_delimited_list":
+                    parameter = parameter[0]
+                elif parameter_type != "string":
+                    continue
+
+                # checking parameter format = parameter type defined in parameters section
+                heat_parameter_type = nested_dict.get(heat_parameters, parameter, "type")
+                if not heat_parameter_type or heat_parameter_type != parameter_type:
+                    msg = (
+                        "{} {} parameter {} defined as type {} "
+                        + "is being used as type {} in the heat template"
+                    ).format(
+                        resource_type, properties, parameter, heat_parameter_type, parameter_type
+                    )
+                    invalid_parameters.append(msg)  # should this actually be an error?
+                    continue
+
+                # if parameter type is not in regx dict, then it is not supported by automation
+                regx_dict = regx[resource_intext].get(parameter_type)
+                if not regx_dict:
+                    msg = (
+                        "WARNING: {} {} parameter {} defined as type {} "
+                        "is not supported by platform automation. If this VNF is not able "
+                        "to adhere to this requirement, please consult the Heat Orchestration "
+                        "Template guidelines for alternative solutions. If already adhering to "
+                        "an alternative provided by the heat guidelines, please disregard this "
+                        "message."
+                    ).format(resource_type, properties, parameter, parameter_type)
+                    invalid_parameters.append(msg)
+                    continue
+
+                # checking if param adheres to guidelines format
+                regexp = regx[resource_intext][parameter_type]["machine"]
+                readable_format = regx[resource_intext][parameter_type]["readable"]
+                match = regexp.match(parameter)
+                if not match:
+                    msg = "{} {} property {} parameter {} does not follow {} format {}".format(
+                        resource_type, rid, properties, parameter, resource_intext, readable_format
+                    )
+                    invalid_parameters.append(msg)
+                    continue
+
+                # checking that parameter includes correct vm_type/network_role
+                parameter_checks = regx.get("parameter_to_resource_comparisons", [])
+                for check in parameter_checks:
+                    resource_match = port_match.group(check)
+                    if (
+                        resource_match
+                        and not parameter.startswith(resource_match)
+                        and parameter.find("_{}_".format(resource_match)) == -1
+                    ):
+                        msg = (
+                            "{0} {1} property {2} parameter "
+                            "{3} {4} does match resource {4} {5}"
+                        ).format(resource_type, rid, properties, parameter, check, resource_match)
+                        invalid_parameters.append(msg)
+                        continue
+
+    assert not invalid_parameters, "%s" % "\n".join(invalid_parameters)
 
 
 def get_list_of_ports_attached_to_nova_server(nova_server):

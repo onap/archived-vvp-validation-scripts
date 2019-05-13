@@ -53,6 +53,8 @@ parameters:
     type: comma_delimited_list
   bialy_subnet_id:
     type: string
+  int_biay_subnet_id:
+    type: string
 
 resources:
 
@@ -74,13 +76,13 @@ resources:
     metadata:
         port_type: SR-IOV_Trunk
 
-  vm_typeX_3_bialy_port_2:
+  vm_typeX_3_int_bialy_port_2:
     type: OS::Neutron::Port
     properties:
       network: { get_param: extnet_net_id }
       fixed_ips:
         - ip_address: { get_param: lb_2_extnet_floating_v6_ip }
-          subnet: { get_param: bialy_susbnet }
+          subnet: { get_param: int_biay_subnet_id }
       binding:vnic_type: direct
       value_specs:
         vlan_filter: {get_param: vm_typeX_bialy_vlan_filter}

@@ -36,10 +36,6 @@
 # ============LICENSE_END============================================
 #
 #
-"""
-resources:
-{vm-type}_server_{vm-type_index}
-"""
 import pytest
 
 from .structures import Heat
@@ -64,8 +60,9 @@ def run_test(heat_template, regex_names, network_flavor):
         flavor = processor.get_network_flavor(resource)
         if flavor != network_flavor:
             continue
+
         regex_name = processor.get_rid_match_tuple(rid)[0]
-        if regex_name in regex_names:
+        if regex_name and regex_name in regex_names:
             continue
         bad.append(rid)
     assert not bad, "%s resource ids %s must match one of %s" % (
@@ -101,7 +98,7 @@ def test_contrail_instance_ip_resource_id_external(yaml_file):
 
     run_test(
         yaml_file,
-        regex_names=("ip", "v6_ip"),
+        regex_names=("external"),
         network_flavor=ContrailV2InstanceIpProcessor.network_flavor_external,
     )
 
@@ -117,6 +114,6 @@ def test_contrail_instance_ip_resource_id_internal(yaml_file):
     """
     run_test(
         yaml_file,
-        regex_names=("int_ip", "int_v6_ip"),
+        regex_names=("internal"),
         network_flavor=ContrailV2InstanceIpProcessor.network_flavor_internal,
     )

@@ -310,17 +310,17 @@ def parameter_type_to_heat_type(parameter):
 
 
 def prop_iterator(resource, *props):
-    terminators = ["get_resource", "get_attr", "str_replace"]
+    terminators = ["get_resource", "get_attr", "str_replace", "get_param"]
     if "properties" in resource:
         resource = resource.get("properties")
     props = list(props)
 
-    if isinstance(resource, dict) and "get_param" in resource:
-        yield resource.get("get_param")
+    if isinstance(resource, dict) and any(x for x in terminators if x in resource):
+        yield resource
     else:
         prop = resource.get(props.pop(0))
         if isinstance(prop, list):
             for x in prop:
                 yield from prop_iterator(x, *props)
-        elif isinstance(prop, dict) and not any(x for x in terminators if x in prop):
+        elif isinstance(prop, dict):
             yield from prop_iterator(prop, *props)

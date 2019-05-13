@@ -92,7 +92,7 @@ def test_contrail_instance_ip_resource_id_external(yaml_file):
     """
     run_test(
         yaml_file,
-        regex_name="vmi_external",
+        regex_name="external",
         network_flavor=ContrailV2VirtualMachineInterfaceProcessor.network_flavor_external,
     )
 
@@ -109,6 +109,6 @@ def test_contrail_instance_ip_resource_id_internal(yaml_file):
     """
     run_test(
         yaml_file,
-        regex_name="vmi_internal",
+        regex_name="internal",
         network_flavor=ContrailV2VirtualMachineInterfaceProcessor.network_flavor_internal,
     )
