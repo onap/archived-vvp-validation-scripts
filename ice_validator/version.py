@@ -38,3 +38,5 @@
 #
 
 VERSION = "4.0.0"
+BRANCH = "master"
+RELEASE = "dublin"
