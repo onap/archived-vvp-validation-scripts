@@ -2,7 +2,7 @@
 # ============LICENSE_START=======================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -41,6 +41,14 @@ from tests.helpers import parameter_type_to_heat_type, prop_iterator
 from . import nested_dict
 
 
+AAP_EXEMPT_CAVEAT = (
+    "If this VNF is not able to adhere to this requirement, please consult the Heat "
+    "Orchestration Template guidelines for more information. If you are knowingly "
+    "violating this requirement after reading the guidelines, then add the parameter "
+    "to the aap_exempt list under this resources metadata to suppress this warning."
+)
+
+
 def get_aap_exemptions(resource_props):
     """
     Gets the list of parameters that the Heat author has exempted from following
@@ -53,13 +61,17 @@ def get_aap_exemptions(resource_props):
     return metadata.get("aap_exempt") or []
 
 
-def check_parameter_format(yaml_file, regx, intext, resource_processor, *properties):
+def check_parameter_format(
+    yaml_file, regx, intext, resource_processor, *properties, exemptions_allowed=False
+):
     """
     yaml_file: input file to check
     regx: dictionary containing the regex to use to validate parameter
     intext: internal or external
     resource_processor: resource type specific helper, defined in structures.py
     properties: arg list of property that is being checked
+    exemptions_allowed: If True, then parameters in the aap_exempt list are allowed to
+                        not follow the rules
     """
 
     invalid_parameters = []
@@ -89,19 +101,21 @@ def check_parameter_format(yaml_file, regx, intext, resource_processor, *propert
                 if not parameter:
                     msg = (
                         "Unexpected parameter format for {} {} property {}: {}. "
-                        + "Please consult the heat guidelines documentation for details."
+                        "Please consult the heat guidelines documentation for details."
                     ).format(resource_type, rid, properties, param)
                     invalid_parameters.append(msg)  # should this be a failure?
                     continue
 
-                # getting parameter if the get_param uses list, and getting official HEAT parameter type
+                # getting parameter if the get_param uses list, and getting official
+                # HEAT parameter type
                 parameter_type = parameter_type_to_heat_type(parameter)
                 if parameter_type == "comma_delimited_list":
                     parameter = parameter[0]
                 elif parameter_type != "string":
                     continue
 
-                # checking parameter format = parameter type defined in parameters section
+                # checking parameter format = parameter type defined in parameters
+                # section
                 heat_parameter_type = nested_dict.get(
                     heat_parameters, parameter, "type"
                 )
@@ -119,21 +133,20 @@ def check_parameter_format(yaml_file, regx, intext, resource_processor, *propert
                     invalid_parameters.append(msg)  # should this actually be an error?
                     continue
 
-                if parameter in get_aap_exemptions(resource):
+                if exemptions_allowed and parameter in get_aap_exemptions(resource):
                     continue
 
-                # if parameter type is not in regx dict, then it is not supported by automation
+                # if parameter type is not in regx dict, then it is not supported
+                # by automation
                 regx_dict = regx[resource_intext].get(parameter_type)
                 if not regx_dict:
                     msg = (
-                        "WARNING: {} {} parameter {} defined as type {} "
-                        "is not supported by platform automation. If this VNF is not "
-                        "able to adhere to this requirement, please consult the Heat "
-                        "Orchestration Template guidelines for alternative solutions. "
-                        "If you are using an alternate option and wish to suppress "
-                        "error, then add the parameter to the aap_exempt list "
-                        "under this resources metadata."
+                        "{} {} parameter {} defined as type {} "
+                        "which is required by platform data model for proper "
+                        "assignment and inventory."
                     ).format(resource_type, properties, parameter, parameter_type)
+                    if exemptions_allowed:
+                        msg = "WARNING: {} {}".format(msg, AAP_EXEMPT_CAVEAT)
                     invalid_parameters.append(msg)
                     continue
 
@@ -143,13 +156,9 @@ def check_parameter_format(yaml_file, regx, intext, resource_processor, *propert
                 match = regexp.match(parameter)
                 if not match:
                     msg = (
-                        "{} {} property {} parameter {} does not follow {} format {} "
-                        "which is required by platform automation. If this VNF is not "
-                        "able to adhere to this requirement, please consult the Heat "
-                        "Orchestration Template guidelines for alternative solutions. "
-                        "If you are using an alternate option and wish to suppress "
-                        "error, then add the parameter to the aap_exempt list "
-                        "under this resources metadata."
+                        "{} {} property {} parameter {} does not follow {} "
+                        "format {} which is required by platform data model for proper "
+                        "assignment and inventory."
                     ).format(
                         resource_type,
                         rid,
@@ -158,6 +167,8 @@ def check_parameter_format(yaml_file, regx, intext, resource_processor, *propert
                         resource_intext,
                         readable_format,
                     )
+                    if exemptions_allowed:
+                        msg = "WARNING: {} {}".format(msg, AAP_EXEMPT_CAVEAT)
                     invalid_parameters.append(msg)
                     continue
 

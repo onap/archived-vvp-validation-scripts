@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -35,18 +35,34 @@
 #
 # ============LICENSE_END============================================
 #
-#
-# VERSION: '1.0.0'
 
----
-resources:
+"""
+This script will refresh the heat_requirements.json file by pulling the
+latest version from Nexus.
+"""
+import os
+from urllib import request
 
-  other_typeX_0_bialy_port_2:
-    type: OS::Neutron::Port
-    properties:
-      allowed_address_pairs:
-        - ip_address: { get_param: my_ip }
-        - ip_address: { get_param: my_v6_ip }
-        - ip_address: { get_param: my2_ip }
-        - ip_address: { get_param: my2_v6_ip }
+from ice_validator import version
 
+REQS_URL = (
+    f"https://nexus.onap.org/"
+    f"content/sites/raw/org.onap.vnfrqts.requirements/{version.BRANCH}/needs.json"
+)
+
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+def get_requirements():
+    """Retrieves the binary JSON content fom REQS_URL"""
+    return request.urlopen(REQS_URL)
+
+
+def write_file(contents, path):
+    with open(path, "wb") as f:
+        f.write(contents)
+
+
+if __name__ == "__main__":
+    reqs = get_requirements().read()
+    write_file(reqs, os.path.join(THIS_DIR, "ice_validator/heat_requirements.json"))

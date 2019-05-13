@@ -82,7 +82,7 @@ aap_regx_dict = {
 }
 
 
-@validates("R-41492", "R-35735", "R-159016", "R-91810", "R-41956")
+@validates("R-41492", "R-35735", "R-159016", "R-91810", "R-41956", "R-41493")
 def test_external_aap_format(yaml_file):
     check_parameter_format(
         yaml_file,
@@ -91,6 +91,7 @@ def test_external_aap_format(yaml_file):
         NeutronPortProcessor,
         "allowed_address_pairs",
         "ip_address",
+        exemptions_allowed=True,
     )
 
 
@@ -106,7 +107,7 @@ def test_internal_aap_format(yaml_file):
     )
 
 
-@validates("R-100280", "R-100290", "R-100310", "R-100330", "R-100350")
+@validates("R-100280", "R-100290", "R-100310", "R-100330", "R-100350", "R-41493")
 def test_external_aap_format_contrail(yaml_file):
     check_parameter_format(
         yaml_file,
@@ -117,6 +118,7 @@ def test_external_aap_format_contrail(yaml_file):
         "virtual_machine_interface_allowed_address_pairs_allowed_address_pair",
         "virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip",
         "virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip_ip_prefix",
+        exemptions_allowed=True,
     )
 
 
