@@ -45,18 +45,10 @@ must have at most one ip_address and at most one v6_ip_address.
 import collections
 import os.path
 
-import pytest
-
 from .structures import Heat
 from .helpers import validates
 
 VERSION = "1.1.0"
-
-
-def is_v6_ip(ip_address):
-    if ip_address.find("v6") != -1:
-        return True
-    return False
 
 
 def get_neutron_ports(heat):
@@ -111,109 +103,6 @@ def nested_update(out_dict, in_dict):
         else:
             out_dict[key] = value
     return out_dict
-
-
-def run_test(heat_template, validate):
-    """call validate with allowed_address_pairs
-    """
-    heat = Heat(filepath=heat_template)
-    if not heat.resources:
-        pytest.skip("No resources found")
-
-    neutron_ports = get_neutron_ports(heat)
-    if not neutron_ports:
-        pytest.skip("No OS::Neutron::Port resources found")
-
-    bad = {}
-    for rid, resource in neutron_ports.items():
-        if rid.startswith("int_"):
-            continue
-        allowed_address_pairs = heat.nested_get(
-            resource, "properties", "allowed_address_pairs"
-        )
-        if allowed_address_pairs is None:
-            continue
-        if not isinstance(allowed_address_pairs, list):
-            bad[rid] = "properties.allowed_address_pairs must be a list."
-            continue
-        error = validate(heat, allowed_address_pairs)
-        if error:
-            bad[rid] = error
-            break
-    if bad:
-        # raise RuntimeError(
-        raise AssertionError(
-            "Bad OS::Neutron::Port: %s"
-            % (", ".join("%s: %s" % (rid, error) for rid, error in bad.items()))
-        )
-
-
-def validate_field(heat, allowed_address_pairs, field, v6=False):
-    """ensure at most one `field` is found in `allowed_address_pairs'
-    validate allowed_addrfess_pairs as well.
-    Returns error message string or None.
-    """
-    error = None
-    ports = set()
-    port_type = "ipv6" if v6 else "ipv4"
-    for allowed_address_pair in allowed_address_pairs:
-        if not isinstance(allowed_address_pair, dict):
-            error = 'allowed_address_pair "%s" is not a dict' % (allowed_address_pair)
-            break
-        if field in allowed_address_pair:
-            param = heat.nested_get(allowed_address_pair, field, "get_param")
-            if param is None:
-                # error = 'allowed_address_pair %s requires "get_param"' % field
-                break
-            else:
-                # if v6 and testing v6, or inverse
-                param = param[0] if isinstance(param, list) else param
-                if v6 == is_v6_ip(param):
-                    ports.add(param)
-    if error is None and len(ports) > 1:
-        error = 'More than one %s "%s" found in allowed_address_pairs: %s' % (
-            port_type,
-            field,
-            list(ports),
-        )
-    return error
-
-
-def validate_external_ipaddress(heat, allowed_address_pairs):
-    """ensure allowed_address_pairs has at most one ip_address
-    Returns error message string or None.
-    """
-    return validate_field(heat, allowed_address_pairs, "ip_address")
-
-
-def validate_external_ipaddress_v6(heat, allowed_address_pairs):
-    """ensure allowed_address_pairs has at most one v6_ip_address
-    Returns error message string or None.
-    """
-    return validate_field(heat, allowed_address_pairs, "ip_address", v6=True)
-
-
-# pylint: disable=invalid-name
-
-
-@validates("R-91810")
-def test_neutron_port_external_ipaddress(yaml_file):
-    """
-    If a VNF requires ONAP to assign a Virtual IP (VIP) Address to
-    ports connected an external network, the port
-    **MUST NOT** have more than one IPv4 VIP address.
-    """
-    run_test(yaml_file, validate_external_ipaddress)
-
-
-@validates("R-41956")
-def test_neutron_port_external_ipaddress_v6(yaml_file):
-    """
-    If a VNF requires ONAP to assign a Virtual IP (VIP) Address to
-    ports connected an external network, the port
-    **MUST NOT** have more than one IPv6 VIP address.
-    """
-    run_test(yaml_file, validate_external_ipaddress_v6)
 
 
 @validates("R-10754")
