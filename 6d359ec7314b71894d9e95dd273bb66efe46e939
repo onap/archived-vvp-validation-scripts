@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6c2650e6_b85e86e9",
+        "filename": "ice_validator/tests/test_allowed_address_pairs_include_vm_type_network_role.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 3013
+      },
+      "writtenOn": "2019-05-14T21:55:18Z",
+      "side": 1,
+      "message": "I think it makes sense to re-use the regex here, but do you want to move over the internal test and req mappings too and then delete test_contrail_vmi_parameters.py?",
+      "range": {
+        "startLine": 110,
+        "startChar": 4,
+        "endLine": 110,
+        "endChar": 37
+      },
+      "revId": "6d359ec7314b71894d9e95dd273bb66efe46e939",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
