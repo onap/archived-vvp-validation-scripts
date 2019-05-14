@@ -324,3 +324,17 @@ def prop_iterator(resource, *props):
                 yield from prop_iterator(x, *props)
         elif isinstance(prop, dict):
             yield from prop_iterator(prop, *props)
+
+
+def get_param(property_value):
+    """
+    Returns the first parameter name from a get_param or None if get_param is
+    not used
+    """
+    if property_value and isinstance(property_value, dict):
+        param = property_value.get("get_param")
+        if param and isinstance(param, list) and len(param) > 0:
+            return param[0]
+        else:
+            return param
+    return None

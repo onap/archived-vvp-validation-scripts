@@ -166,6 +166,12 @@ parameters:
     type: string
     description: nafs
 
+  fw_other_ip_0:
+    type: string
+
+  fw_oam_protected_ips:
+    type: comma_delimited_list
+
 resources:
 
   STARKDB_cinder_attach:
@@ -282,6 +288,7 @@ resources:
     type: STARKDB-nested.yaml
     properties:
       my_nested_parame: { get_param: vnf_id }
+      subnet_uuid: { get_param: subnet_uuid }
 
   int_priv_subnet:
       type: OS::Neutron::Subnet
@@ -338,6 +345,9 @@ resources:
   STARKDB_cloud_config:
     type: OS::Heat::CloudConfig
 
+  subnet_uuid:
+    type: string
+
 
   myrouteprefix:
     type: OS::ContrailV2::InterfaceRouteTable
@@ -359,6 +369,18 @@ resources:
         type: STARKDB-nested.yaml
         properties:
           my_nested_parameter: 4
+          subnet_uuid: { get_param: subnet_uuid }
+
+  fw_0_oam_protected_vmi_0_IP_0:
+    type: OS::ContrailV2::InstanceIp
+    properties:
+      instance_ip_address: { get_param: [fw_oam_protected_ips, get_param: index ] }
+
+  fw_0_int_other_vmi_0_IP_0:
+    type: OS::ContrailV2::InstanceIp
+    properties:
+      instance_ip_address: { get_param: fw_other_ip_0 }
+      subnet_uuid: { get_param: subnet_uuid }
 
 outputs:
   test_output:
