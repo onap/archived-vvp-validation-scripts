@@ -43,9 +43,6 @@ description: fdsafsfsa
 
 parameters:
 
-  my_nested_parameter:
-    type: number
-    description: sdfnklafd
   STARKDB_image_name:
     type: number
     description: sdfnklafd
@@ -57,6 +54,8 @@ parameters:
     description: sdfnklafd
     #constraints:
     #  - range: { min: 100, max: 400 }
+  subnet_uuid:
+    type: string
 
 resources:
 
@@ -116,6 +115,17 @@ resources:
         type: STARKDB-nested.yaml
         properties:
           my_nested_parameter: 4
+
+  fw_0_oam_protected_vmi_0_IP_0:
+    type: OS::ContrailV2::InstanceIp
+    properties:
+      instance_ip_address: { get_param: [fw_oam_protected_ips, get_param: index ] }
+
+  fw_0_int_other_vmi_0_IP_0:
+    type: OS::ContrailV2::InstanceIp
+    properties:
+      instance_ip_address: { get_param: fw_other_ip_0 }
+      subnet_uuid: { get_param: subnet_uuid }
 
 outputs:
   test_value: 

@@ -39,7 +39,16 @@
 """ environment file structure
 """
 import os
-from .helpers import validates, categories, get_environment_pair, find_environment_file
+
+from tests.structures import Heat
+from tests.utils import nested_dict
+from .helpers import (
+    validates,
+    categories,
+    get_environment_pair,
+    find_environment_file,
+    get_param,
+)
 import re
 import pytest
 from tests import cached_yaml as yaml
@@ -190,7 +199,6 @@ def check_resource_parameter(
 def run_check_resource_parameter(
     yaml_file, prop, DESIRED, resource_type, check_resource=True, **kwargs
 ):
-
     filepath, filename = os.path.split(yaml_file)
     environment_pair = get_environment_pair(yaml_file)
 
@@ -228,7 +236,7 @@ def run_check_resource_parameter(
             filename,
             " not" if DESIRED else "",
             environment_pair.get("name"),
-            invalid_parameters,
+            ", ".join(invalid_parameters),
         )
     )
 
@@ -364,7 +372,9 @@ def test_neutron_port_fixedips_subnet_parameter_doesnt_exist_in_environment_file
 
 @categories("environment_file")
 @validates("R-83412", "R-83418")
-def test_neutron_port_external_aap_ip_parameter_doesnt_exist_in_environment_file(yaml_file):
+def test_neutron_port_external_aap_ip_parameter_doesnt_exist_in_environment_file(
+    yaml_file
+):
     run_check_resource_parameter(
         yaml_file,
         "allowed_address_pairs",
@@ -412,3 +422,89 @@ def test_heat_rg_count_parameter_exists_in_environment_file(yaml_file):
         "OS::Heat::ResourceGroup",
         exclude_resource=re.compile(r"^(.+?)_subint_(.+?)_port_(.+?)_subinterfaces$"),
     )
+
+
+@categories("environment_file")
+@validates("R-100020", "R-100040", "R-100060", "R-100080", "R-100170")
+def test_contrail_external_instance_ip_does_not_exist_in_environment_file(yaml_file):
+    run_check_resource_parameter(
+        yaml_file,
+        "instance_ip_address",
+        False,
+        "OS::ContrailV2::InstanceIp",
+        exclude_resource=re.compile(r"^.*_int_.*$"),  # exclude internal IPs
+    )
+
+
+@validates("R-100100", "R-100120", "R-100140", "R-100160", "R-100180")
+def test_contrail_internal_instance_ip_does_not_exist_in_environment_file(yaml_file):
+    run_check_resource_parameter(
+        yaml_file,
+        "instance_ip_address",
+        True,
+        "OS::ContrailV2::InstanceIp",
+        exclude_resource=re.compile(r"(?!.*_int_.*)"),  # exclude external IPs
+    )
+
+
+@categories("environment_file")
+@validates("R-100210", "R-100230", "R-100250", "R-100270")
+def test_contrail_subnet_uuid_does_not_exist_in_environment_file(yaml_file):
+    run_check_resource_parameter(
+        yaml_file, "subnet_uuid", False, "OS::ContrailV2::InstanceIp"
+    )
+
+
+@categories("environment_file")
+@validates("R-100320", "R-100340")
+def test_contrail_vmi_aap_does_not_exist_in_environment_file(yaml_file):
+    # This test needs to check a more complex structure.  Rather than try to force
+    # that into the existing run_check_resource_parameter logic we'll just check it
+    # directly
+    pairs = get_environment_pair(yaml_file)
+    if not pairs:
+        pytest.skip("No matching env file found")
+    heat = Heat(filepath=yaml_file)
+    env_parameters = pairs["eyml"].get("parameters") or {}
+    vmis = heat.get_resource_by_type("OS::ContrailV2::VirtualMachineInterface")
+    external_vmis = {rid: data for rid, data in vmis.items() if "_int_" not in rid}
+    invalid_params = []
+    for r_id, vmi in external_vmis.items():
+        aap_value = nested_dict.get(
+            vmi,
+            "properties",
+            "virtual_machine_interface_allowed_address_pairs",
+            "virtual_machine_interface_allowed_address_pairs_allowed_address_pair",
+        )
+        if not aap_value or not isinstance(aap_value, list):
+            # Skip if aap not used or is not a list.
+            continue
+        for pair_ip in aap_value:
+            if not isinstance(pair_ip, dict):
+                continue  # Invalid Heat will be detected by another test
+            settings = (
+                pair_ip.get(
+                    "virtual_machine_interface_allowed_address"
+                    "_pairs_allowed_address_pair_ip"
+                )
+                or {}
+            )
+            if isinstance(settings, dict):
+                ip_prefix = (
+                    settings.get(
+                        "virtual_machine_interface_allowed_address"
+                        "_pairs_allowed_address_pair_ip_ip_prefix"
+                    )
+                    or {}
+                )
+                ip_prefix_param = get_param(ip_prefix)
+                if ip_prefix_param and ip_prefix_param in env_parameters:
+                    invalid_params.append(ip_prefix_param)
+
+    msg = (
+        "OS::ContrailV2::VirtualMachineInterface "
+        "virtual_machine_interface_allowed_address_pairs"
+        "_allowed_address_pair_ip_ip_prefix "
+        "parameters found in environment file {}: {}"
+    ).format(pairs.get("name"), ", ".join(invalid_params))
+    assert not invalid_params, msg
