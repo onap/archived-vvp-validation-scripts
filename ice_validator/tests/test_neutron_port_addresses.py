@@ -193,29 +193,6 @@ def validate_external_ipaddress_v6(heat, allowed_address_pairs):
     return validate_field(heat, allowed_address_pairs, "ip_address", v6=True)
 
 
-# pylint: disable=invalid-name
-
-
-@validates("R-91810")
-def test_neutron_port_external_ipaddress(yaml_file):
-    """
-    If a VNF requires ONAP to assign a Virtual IP (VIP) Address to
-    ports connected an external network, the port
-    **MUST NOT** have more than one IPv4 VIP address.
-    """
-    run_test(yaml_file, validate_external_ipaddress)
-
-
-@validates("R-41956")
-def test_neutron_port_external_ipaddress_v6(yaml_file):
-    """
-    If a VNF requires ONAP to assign a Virtual IP (VIP) Address to
-    ports connected an external network, the port
-    **MUST NOT** have more than one IPv6 VIP address.
-    """
-    run_test(yaml_file, validate_external_ipaddress_v6)
-
-
 @validates("R-10754")
 def test_neutron_port_floating(yaml_files):
     """
