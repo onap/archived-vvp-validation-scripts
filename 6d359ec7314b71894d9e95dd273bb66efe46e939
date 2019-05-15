@@ -22,6 +22,30 @@
       "revId": "6d359ec7314b71894d9e95dd273bb66efe46e939",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd45464c_51e96196",
+        "filename": "ice_validator/tests/test_allowed_address_pairs_include_vm_type_network_role.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-05-15T14:25:21Z",
+      "side": 1,
+      "message": "Yes, I think that makes sense.  Didn\u0027t realize it was there and only related to aap.  i\u0027ll make that change and push it up",
+      "parentUuid": "6c2650e6_b85e86e9",
+      "range": {
+        "startLine": 110,
+        "startChar": 4,
+        "endLine": 110,
+        "endChar": 37
+      },
+      "revId": "6d359ec7314b71894d9e95dd273bb66efe46e939",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
     }
   ]
 }
