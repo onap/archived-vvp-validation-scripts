@@ -40,9 +40,9 @@
 """
 import pytest
 from tests import cached_yaml as yaml
-from tests.parametrizers import file_is_a_nested_template
 
-from .helpers import validates
+from tests.helpers import validates
+from tests.utils.nested_files import file_is_a_nested_template
 
 VERSION = "1.1.0"
 

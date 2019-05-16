@@ -37,7 +37,7 @@
 import os
 
 from tests.helpers import validates
-from tests.parametrizers import get_nested_files
+from tests.utils.nested_files import get_nested_files
 from tests.structures import Heat, Resource
 
 

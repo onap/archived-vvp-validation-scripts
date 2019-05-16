@@ -39,10 +39,10 @@
 import re
 
 from tests.utils.network_roles import get_network_type_from_port
-from tests.parametrizers import get_nested_files
 
-from .structures import Heat
-from .helpers import validates, load_yaml, get_base_template_from_yaml_files
+from tests.structures import Heat
+from tests.helpers import validates, load_yaml, get_base_template_from_yaml_files
+from tests.utils.nested_files import get_nested_files
 from .utils.ports import check_parameter_format
 from tests.structures import NeutronPortProcessor
 

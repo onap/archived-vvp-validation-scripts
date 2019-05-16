@@ -35,32 +35,29 @@
 #
 # ============LICENSE_END============================================
 #
+#
 import os
-from tests.helpers import validates
+
+from tests.helpers import get_base_template_from_yaml_files
 from tests.utils.nested_files import get_nested_files
-from .utils.vm_types import get_all_vm_types
-
-VERSION = "1.0.0"
-
-# pylint: disable=invalid-name
 
 
-@validates("R-70276")
-def test_filename_is_vmtype_dot_yaml(yaml_files):
-
-    vm_types = []
-    invalid_files = []
-    nested_files = []
-
-    nested_files.extend(
-        os.path.splitext(os.path.basename(filename))[0]
-        for filename in get_nested_files(yaml_files)
+def is_incremental_module(yaml_file, yaml_files):
+    """
+    Returns true if the file is not a base module, volume module, or nested module.
+    """
+    base_template = get_base_template_from_yaml_files(yaml_files)
+    nested_templates = get_nested_files(yaml_files)
+    is_volume_module = os.path.splitext(yaml_file)[0].endswith("_volume")
+    return (
+        yaml_file != base_template
+        and yaml_file not in nested_templates
+        and not is_volume_module
     )
 
-    vm_types = get_all_vm_types(yaml_files)
 
-    invalid_files.extend(vm_type for vm_type in vm_types if vm_type in nested_files)
-
-    assert (
-        not invalid_files
-    ), "Nested filenames must not be in format vm_type.yaml: {}".format(invalid_files)
+def get_incremental_modules(yaml_files):
+    """
+    Returns the a list of file paths for the incremental modules in yaml_files
+    """
+    return [f for f in yaml_files if is_incremental_module(f, yaml_files)]

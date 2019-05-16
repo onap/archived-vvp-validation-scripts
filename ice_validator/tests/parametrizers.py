@@ -44,8 +44,8 @@ from os import path, listdir
 import re
 from tests import cached_yaml as yaml
 import pytest
-from .helpers import get_parsed_yml_for_yaml_files, check_basename_ending
-from .utils.nested_files import get_list_of_nested_files
+from tests.helpers import get_parsed_yml_for_yaml_files, check_basename_ending
+from tests.utils.nested_files import get_nested_files
 
 VERSION = "1.0.0"
 
@@ -66,37 +66,6 @@ def get_template_dir(metafunc):
         )
     else:
         return metafunc.config.getoption("template_dir")[0]
-
-
-def file_is_a_nested_template(file):
-    directory = path.dirname(file)
-    nested_files = []
-    for filename in listdir(directory):
-        if filename.endswith(".yaml") or filename.endswith(".yml"):
-            filename = "{}/{}".format(directory, filename)
-            try:
-                with open(filename) as fh:
-                    yml = yaml.load(fh)
-                if "resources" not in yml:
-                    continue
-                nested_files.extend(
-                    get_list_of_nested_files(yml["resources"], path.dirname(filename))
-                )
-            except yaml.YAMLError as e:
-                print(e)  # pylint: disable=superfluous-parens
-                continue
-    return file in nested_files
-
-
-def get_nested_files(filenames):
-    """
-    returns all the nested files for a set of filenames
-    """
-    nested_files = []
-    for filename in filenames:
-        if file_is_a_nested_template(filename):
-            nested_files.append(filename)
-    return nested_files
 
 
 def list_filenames_in_template_dir(

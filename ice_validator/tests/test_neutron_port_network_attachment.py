@@ -4,7 +4,7 @@ import re
 import pytest
 
 from tests.helpers import validates, get_base_template_from_yaml_files, get_param
-from tests.parametrizers import get_nested_files
+from tests.utils.nested_files import get_nested_files
 from tests.structures import Heat
 
 

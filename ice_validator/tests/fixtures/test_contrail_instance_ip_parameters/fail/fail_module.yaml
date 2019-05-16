@@ -34,33 +34,49 @@
 # limitations under the License.
 #
 # ============LICENSE_END============================================
-#
-import os
-from tests.helpers import validates
-from tests.utils.nested_files import get_nested_files
-from .utils.vm_types import get_all_vm_types
 
-VERSION = "1.0.0"
+heat_template_version: 2015-04-30
 
-# pylint: disable=invalid-name
+description: fdsafsfsa
 
+parameters:
 
-@validates("R-70276")
-def test_filename_is_vmtype_dot_yaml(yaml_files):
+  TESTDB_int_priav_ips:
+   type: comma_delimited_list
+   description: asnfjl
 
-    vm_types = []
-    invalid_files = []
-    nested_files = []
+  TESTDB_private_ips:
+   type: string
+   description: asnfjl
 
-    nested_files.extend(
-        os.path.splitext(os.path.basename(filename))[0]
-        for filename in get_nested_files(yaml_files)
-    )
+  priv_subnet_id:
+   type: string
+   description: asnfjl
 
-    vm_types = get_all_vm_types(yaml_files)
+  privte_v6_subnet_id:
+   type: string
+   description: asnfjl
 
-    invalid_files.extend(vm_type for vm_type in vm_types if vm_type in nested_files)
+resources:
 
-    assert (
-        not invalid_files
-    ), "Nested filenames must not be in format vm_type.yaml: {}".format(invalid_files)
+  TESTDB_0_int_priv_vmi_0_IP_1:
+    type: OS::ContrailV2::InstanceIp
+    properties:
+      virtual_machine_interface_refs: { get_resource: TESTDB_0_priv_vmi_0 }
+      virtual_network_refs: [{ get_resource: int_priv_network }]
+      instance_ip_address: { get_param: [TESTDB_int_priav_ips, 0] }
+      subnet_uuid: { get_param: priv_subnet_id }
+
+  TESTDB_0_private_vmi_1_IP_1:
+    type: OS::ContrailV2::InstanceIp
+    properties:
+      virtual_machine_interface_refs: { get_resource: TESTDB_1_priv_vmi_0 }
+      virtual_network_refs: [{ get_param: priv_net_fqdn }]
+      instance_ip_address: { get_param: [TESTDB_private_ips, 1] }
+      subnet_uuid: { get_param: privte_v6_subnet_id }
+
+  other_0_int_priv_vmi_0_IP_0:
+    type: OS::ContrailV2::InstanceIp
+    properties:
+      instance_ip_address: { get_param: [other_int_priv_ips, 0] }
+      subnet_uuid: { get_param: int_priv_subnet_id }

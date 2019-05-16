@@ -40,7 +40,7 @@
 """nested files
 """
 
-from os import path
+from os import path, listdir
 import re
 from tests import cached_yaml as yaml
 from tests.structures import Heat
@@ -258,3 +258,34 @@ def get_type_nested_files(yml, dirpath):
                 if path.exists(filepath):
                     nested_files[rid] = nested_file
     return nested_files
+
+
+def get_nested_files(filenames):
+    """
+    returns all the nested files for a set of filenames
+    """
+    nested_files = []
+    for filename in filenames:
+        if file_is_a_nested_template(filename):
+            nested_files.append(filename)
+    return nested_files
+
+
+def file_is_a_nested_template(file):
+    directory = path.dirname(file)
+    nested_files = []
+    for filename in listdir(directory):
+        if filename.endswith(".yaml") or filename.endswith(".yml"):
+            filename = "{}/{}".format(directory, filename)
+            try:
+                with open(filename) as fh:
+                    yml = yaml.load(fh)
+                if "resources" not in yml:
+                    continue
+                nested_files.extend(
+                    get_list_of_nested_files(yml["resources"], path.dirname(filename))
+                )
+            except yaml.YAMLError as e:
+                print(e)  # pylint: disable=superfluous-parens
+                continue
+    return file in nested_files

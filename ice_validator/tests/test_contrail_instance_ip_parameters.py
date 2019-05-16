@@ -36,10 +36,14 @@
 # ============LICENSE_END============================================
 #
 #
+import os
 import re
 
-from tests.structures import ContrailV2InstanceIpProcessor
-from tests.helpers import validates
+import pytest
+
+from tests.structures import ContrailV2InstanceIpProcessor, Heat
+from tests.helpers import validates, get_base_template_from_yaml_files, get_param
+from tests.utils.incrementals import get_incremental_modules
 from tests.utils.ports import check_parameter_format
 
 RE_EXTERNAL_PARAM_IIP = re.compile(  # match pattern
@@ -108,12 +112,12 @@ sid_regx_dict = {
 }
 
 
-@validates("R-100000", "R-100010", "R-100030", "R-100150", "R-100070")
+@validates("R-100000", "R-100010", "R-100030", "R-100050", "R-100070")
 def test_contrail_external_instance_ip_address_parameter(yaml_file):
     check_parameter_format(yaml_file, iip_regx_dict, "external", ContrailV2InstanceIpProcessor, "instance_ip_address")
 
 
-@validates("R-100000", "R-100090", "R-100110", "R-100130", "R-100180")
+@validates("R-100000", "R-100090", "R-100110", "R-100130", "R-100150")
 def test_contrail_internal_instance_ip_address_parameter(yaml_file):
     check_parameter_format(yaml_file, iip_regx_dict, "internal", ContrailV2InstanceIpProcessor, "instance_ip_address")
 
@@ -128,6 +132,28 @@ def test_contrail_internal_instance_subnet_id_parameter(yaml_file):
     check_parameter_format(yaml_file, sid_regx_dict, "internal", ContrailV2InstanceIpProcessor, "subnet_uuid")
 
 
-
-
-
+@validates("R-100240", "R-100260")
+def test_contrail_incremental_module_internal_subnet_usage(yaml_files):
+    base_path = get_base_template_from_yaml_files(yaml_files)
+    if not base_path:
+        pytest.skip("No base module detected to check")
+    base_outputs = Heat(filepath=base_path).outputs
+    incremental_modules = get_incremental_modules(yaml_files)
+    errors = []
+    for module in incremental_modules:
+        heat = Heat(filepath=module)
+        ips = heat.get_resource_by_type(ContrailV2InstanceIpProcessor.resource_type)
+        internal_ips = ((r_id, props) for r_id, props in ips.items() if "_int_" in r_id)
+        for r_id, ip in internal_ips:
+            subnet_uuid = (ip.get("properties") or {}).get("subnet_uuid")
+            subnet_param = get_param(subnet_uuid)
+            if not subnet_param:
+                continue
+            if subnet_param not in base_outputs:
+                errors.append((
+                    "Resource ({}) is designated as an internal IP, but its "
+                    "subnet_uuid parameter ({}) does not refer to subnet in "
+                    "this template nor is it defined in the output section "
+                    "of the base module ({})"
+                ).format(r_id, subnet_param, os.path.basename(base_path)))
+    assert not errors, ". ".join(errors)
