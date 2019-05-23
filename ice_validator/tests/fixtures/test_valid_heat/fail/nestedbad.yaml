@@ -1,0 +1,16 @@
+heat_template_version: 2014-10-16 
+ 
+description: This is a test heat template 
+ 
+parameters: 
+ 
+  testparam: 
+    type: string 
+    description: This is a test parameter
+ 
+resources: 
+ 
+  test_resource: 
+    type: OS::Nova::Server 
+    properties: 
+      notaprop: { get_param: testparam }
