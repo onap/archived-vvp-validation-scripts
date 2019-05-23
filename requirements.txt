@@ -49,3 +49,5 @@ jinja2==2.10
 yamllint==1.12.1
 six==1.12.0
 pyinstaller 
+mock
+openstack-heat
