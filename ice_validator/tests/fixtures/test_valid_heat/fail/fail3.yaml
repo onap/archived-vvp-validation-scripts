@@ -1,0 +1,20 @@
+heat_template_version: 2014-10-16 
+ 
+description: This is a test heat template 
+ 
+parameters: 
+ 
+  testparam: 
+    type: string 
+    description: This is a test parameter
+ 
+resources: 
+ 
+  test_resource: 
+    type: OS::Heat::RandomString 
+    properties: 
+      length: { get_param: testparam }
+
+outputs:
+  badoutput:
+    value: { get_attr: [test_resource, notanattr, 0] }
