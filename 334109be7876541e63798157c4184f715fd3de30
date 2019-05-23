@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7b4ca17f_e0c2f8ef",
+        "filename": "ice_validator/tests/test_valid_heat.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-05-23T21:35:33Z",
+      "side": 1,
+      "message": "lower case",
+      "range": {
+        "startLine": 52,
+        "startChar": 24,
+        "endLine": 52,
+        "endChar": 35
+      },
+      "revId": "334109be7876541e63798157c4184f715fd3de30",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "436c5fbb_ea33edc0",
+        "filename": "ice_validator/tests/test_valid_heat.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-05-23T21:35:33Z",
+      "side": 1,
+      "message": "lowercase since it\u0027s not a global",
+      "revId": "334109be7876541e63798157c4184f715fd3de30",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
