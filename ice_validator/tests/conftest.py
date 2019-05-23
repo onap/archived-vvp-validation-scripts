@@ -56,6 +56,9 @@ import xlsxwriter
 from six import string_types
 
 import version
+import logging
+
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.ERROR)
 
 __path__ = [os.path.dirname(os.path.abspath(__file__))]
 
