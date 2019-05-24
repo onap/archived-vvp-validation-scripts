@@ -36,76 +36,45 @@
 # ============LICENSE_END============================================
 #
 #
+import os
 
-"""heat parameters
-"""
+from tests.helpers import validates, traverse, load_yaml
 
-import collections
 
-import pytest
+def is_get_param(arg):
+    return isinstance(arg, dict) and "get_param" in arg
 
-from .structures import Heat
-from .helpers import validates
 
-VERSION = "1.0.0"
+class GetParamChecker:
+    def __init__(self, yaml_file):
+        self.errors = []
+        self.filename = os.path.basename(yaml_file)
+
+    def __call__(self, keys, param_value, *args, **kwargs):
+        if isinstance(param_value, str):
+            return  # refers to a string or parameter - this is OK
+        if isinstance(param_value, list):
+            nested_get_params = (arg for arg in param_value if is_get_param(arg))
+            args = (call["get_param"] for call in nested_get_params)
+            invalid_args = (arg for arg in args if not isinstance(arg, str))
+            # We don't check if the args really point to parameters, because that
+            # check is already covered by test_05_all_get_param_have_defined_parameter
+            # in test_initial_configuration.py
+            if any(invalid_args):
+                self.errors.append(
+                    (
+                        "Invalid nesting of get_param detected in {} at {}. Calls to "
+                        "get_param can only be nested two deep, and the argument to "
+                        "the second get_param must only be a parameter name: {}"
+                    ).format(
+                        self.filename, " > ".join(keys), {"get_param": param_value}
+                    )
+                )
 
 
 @validates("R-10834")
 def test_nested_parameter_args(yaml_file):
-    """
-    If a VNF’s Heat Orchestration Template resource attribute
-    property metadata uses a nested get_param, then the "outer"
-    get_param must take 2 arguments.  The first argument must be
-    a parameter of type "comma_delimited_list", and the second
-    argument must be the "inner" get_param whose value must be a
-    parameter of type "number".
-
-    parameters:
-        cdl:
-            type: comma_delimited_list
-        num:
-            type: number
-    resources:
-        ex1_nova_server_0:
-            type: OS::Nova::Server
-            properties:
-                name: { get_param: [ ex1_vm_names, 0 ] }
-                metadata:
-                    vnf_id: { get_param: vnf_id }
-                    vf_module_id:
-                        get_param: [ cdl, { get_param: num }]
-    """
-    heat = Heat(filepath=yaml_file)
-    if not heat.resources:
-        pytest.skip("No resources found")
-    has_nested_parameters = False
-    bad = collections.defaultdict(list)
-    for rid, r in heat.resources.items():
-        metadata = heat.nested_get(r, "properties", "metadata", default={})
-        for key, value in metadata.items():
-            param = heat.nested_get(value, "get_param")
-            if isinstance(param, list) and len(param) == 2:
-                nested_param = heat.nested_get(param[1], "get_param")
-                if nested_param:
-                    has_nested_parameters = True
-                    if (
-                        heat.nested_get(heat.parameters, param[0], "type")
-                        != Heat.type_cdl
-                    ):
-                        bad[rid].append(
-                            "%s %s parameter type not %s"
-                            % (key, param[0], Heat.type_cdl)
-                        )
-                    if (
-                        heat.nested_get(heat.parameters, nested_param, "type")
-                        != Heat.type_num
-                    ):
-                        bad[rid].append(
-                            "%s %s nested parameter type not %s"
-                            % (key, nested_param, Heat.type_num)
-                        )
-    assert not bad, "resource ids with invalid nested parameter arguments\n    %s" % (
-        "\n    ".join("%s %s" % (k, ", ".join(v)) for k, v in bad.items())
-    )
-    if has_nested_parameters is False:
-        pytest.skip("No nested parameters found")
+    heat = load_yaml(yaml_file)
+    checker = GetParamChecker(yaml_file)
+    traverse(heat, "get_param", checker)
+    assert not checker.errors, ". ".join(checker.errors)

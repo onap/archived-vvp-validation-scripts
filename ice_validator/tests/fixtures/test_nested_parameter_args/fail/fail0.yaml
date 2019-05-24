@@ -40,19 +40,16 @@
 
 ---
 parameters:
-    cdl:
+    list_one:
         type: comma_delimited_list
-    num:
+    list_two:
+        type: comma_delimited_list
+    index_one:
+        type: number
+    index_two:
         type: number
 resources:
-    ex1_nova_server_0:
-        type: OS::Nova::Server
+    resource:
         properties:
-            name: { get_param: [ ex1_vm_names, 0 ] }
-            metadata:
-                vnf_id: { get_param: vnf_id }
-                vf_module_id1:
-                    get_param: [ cdl, { get_param: xnum }]
-                vf_module_id2:
-                    get_param: [ xcdl, { get_param: num }]
-
+            prop: {get_param: [list_one, {get_param: [list_two, {get_param: index_two}]}]}
+            prop_two: {get_param: [list_one, {get_param: [list_two, 0]}]}
