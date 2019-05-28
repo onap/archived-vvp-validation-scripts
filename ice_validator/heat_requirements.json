@@ -1,5 +1,5 @@
 {
-    "created": "2019-05-17T18:14:51.379866", 
+    "created": "2019-05-24T06:32:42.966223", 
     "current_version": "dublin", 
     "project": "", 
     "versions": {
@@ -45910,7 +45910,7 @@
             "needs_amount": 789
         }, 
         "dublin": {
-            "created": "2019-05-17T18:14:51.379790", 
+            "created": "2019-05-24T06:32:42.966152", 
             "needs": {
                 "R-00011": {
                     "description": "A VNF's Heat Orchestration Template's parameter defined\nin a nested YAML file\n**SHOULD NOT** have a parameter constraint defined.", 
@@ -45943,7 +45943,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -46175,7 +46175,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -46278,7 +46278,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -46346,7 +46346,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -46412,7 +46412,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -46711,7 +46711,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -46746,7 +46746,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -46781,7 +46781,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -46880,7 +46880,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -46913,7 +46913,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -46981,7 +46981,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -47117,7 +47117,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -47150,7 +47150,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -47382,7 +47382,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "none"
                 }, 
@@ -47616,7 +47616,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -47650,7 +47650,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -47684,7 +47684,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -47752,7 +47752,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -47820,7 +47820,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -47854,7 +47854,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -49220,7 +49220,7 @@
                     "hide_links": "", 
                     "id": "R-100400", 
                     "impacts": "", 
-                    "introduced": "2019-1", 
+                    "introduced": "dublin", 
                     "is_need": true, 
                     "is_part": false, 
                     "keyword": "SHOULD", 
@@ -49253,7 +49253,7 @@
                     "hide_links": "", 
                     "id": "R-100410", 
                     "impacts": "", 
-                    "introduced": "2019-1", 
+                    "introduced": "dublin", 
                     "is_need": true, 
                     "is_part": false, 
                     "keyword": "MAY", 
@@ -49344,7 +49344,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -49379,7 +49379,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -49414,7 +49414,40 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
+                    "validated_by": "", 
+                    "validation_mode": ""
+                }, 
+                "R-106240": {
+                    "description": "The following VES Events **SHOULD** be supported by the PNF: pnfRegistration\nVES Event, HVol VES Event, and Fault VES Event. These are onboarded via\nhe SDC Design Studio.\n\nNote: these VES Events are emitted from the PNF to support PNF Plug and\nPlay, High Volume Measurements, and Fault events respectively.", 
+                    "docname": "Chapter7/PNF-Plug-and-Play", 
+                    "full_title": "", 
+                    "hide_links": "", 
+                    "id": "R-106240", 
+                    "impacts": "", 
+                    "introduced": "casablanca", 
+                    "is_need": true, 
+                    "is_part": false, 
+                    "keyword": "SHOULD", 
+                    "links": [], 
+                    "notes": "", 
+                    "parts": {}, 
+                    "section_name": "PNF Plug and Play", 
+                    "sections": [
+                        "PNF Plug and Play", 
+                        "PNF Plug and Play"
+                    ], 
+                    "status": null, 
+                    "tags": [], 
+                    "target": "PNF", 
+                    "test": "", 
+                    "test_case": "", 
+                    "test_file": "", 
+                    "title": "", 
+                    "title_from_content": "", 
+                    "type": "req", 
+                    "type_name": "Requirement", 
+                    "updated": "El Alto", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -49449,12 +49482,12 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
                 "R-10834": {
-                    "description": "If a VNF's Heat Orchestration Template resource attribute\n``property:`` uses a nested ``get_param``, the nested\n``get_param`` **MUST** reference an index.\n\nThat is, to obtain a property value, two ``get_param`` intrinsic\nfunctions are used.  The second ``get_param`` must be used\nto obtain an index value used to reference a parameter value in\na parameter defined as ``type: comma_delimited_list``.  For\nexample:\n\n* ``name: {get_param: [ name, get_param: index ] }``", 
+                    "description": "A VNF's Heat Orchestration Template resource attribute ``property:``\n**MUST NOT** use more than two levels of nested ``get_param`` intrinsic\nfunctions when deriving a property value.  SDC does not support nested\n``get_param`` with recursive lists (i.e., a list inside list).\nThe second ``get_param`` in a nested lookup must directly derive its value\nwithout further calls to ``get_param`` functions.\n\n* Example of valid nesting:\n\n  * ``name: {get_param: [ {vm-type}_names, {get_param : index } ] }``\n\n* Examples of invalid nesting.  SDC will not support these examples since\n  there is an array inside array.\n\n  * ``name: {get_param: [ {vm-type}_names, { get_param: [ indexlist, 0 ] } ] }``\n  * ``name: {get_param: [ {vm-type}_names, { get_param: [ indexlist1, { get_param: indexlist2 } ] } ] }``", 
                     "docname": "Chapter5/Heat/ONAP Heat Orchestration Template Format", 
                     "full_title": "", 
                     "hide_links": "", 
@@ -49463,7 +49496,7 @@
                     "introduced": "", 
                     "is_need": true, 
                     "is_part": false, 
-                    "keyword": "MUST", 
+                    "keyword": "MUST NOT", 
                     "links": [], 
                     "notes": "", 
                     "parts": {}, 
@@ -49484,7 +49517,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "dublin", 
+                    "updated": "El Alto", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -49618,7 +49651,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -49652,7 +49685,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -49722,7 +49755,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -49754,7 +49787,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -49853,7 +49886,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -49921,7 +49954,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -49954,7 +49987,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "in_service"
                 }, 
@@ -50087,7 +50120,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -50319,7 +50352,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -50420,7 +50453,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -50556,7 +50589,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "in_service"
                 }, 
@@ -50856,7 +50889,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -50923,7 +50956,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -51124,7 +51157,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -51494,7 +51527,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -51596,7 +51629,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -51695,7 +51728,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -51729,7 +51762,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -51829,7 +51862,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -51998,7 +52031,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -52066,7 +52099,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -52100,7 +52133,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -52663,7 +52696,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -52764,7 +52797,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -52865,7 +52898,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -53262,7 +53295,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -53297,7 +53330,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -53365,7 +53398,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -53534,7 +53567,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -53666,7 +53699,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -53734,7 +53767,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "in_service"
                 }, 
@@ -53870,7 +53903,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -54039,7 +54072,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -54074,7 +54107,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -54107,7 +54140,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -54208,7 +54241,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -54308,7 +54341,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -54575,7 +54608,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -54676,7 +54709,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -54745,7 +54778,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -54780,7 +54813,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -55144,7 +55177,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -55211,7 +55244,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -55413,7 +55446,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -55517,7 +55550,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -55717,7 +55750,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -55751,7 +55784,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -55818,7 +55851,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "in_service"
                 }, 
@@ -55853,7 +55886,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -55919,7 +55952,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -55984,7 +56017,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -56019,7 +56052,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -56054,7 +56087,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -56252,7 +56285,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -56263,7 +56296,7 @@
                     "hide_links": "", 
                     "id": "R-348813", 
                     "impacts": "", 
-                    "introduced": "", 
+                    "introduced": "dublin", 
                     "is_need": true, 
                     "is_part": false, 
                     "keyword": "MUST", 
@@ -56318,7 +56351,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -56386,7 +56419,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -56620,7 +56653,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -57085,7 +57118,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -57483,7 +57516,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -57652,7 +57685,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -57685,7 +57718,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -57752,7 +57785,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -57885,7 +57918,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -58021,7 +58054,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -58120,7 +58153,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -58154,7 +58187,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -58221,7 +58254,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -58322,7 +58355,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -58356,7 +58389,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -58424,7 +58457,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -58628,7 +58661,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -58662,7 +58695,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -58695,7 +58728,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -58764,7 +58797,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -58798,7 +58831,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -58864,7 +58897,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -58998,7 +59031,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -59099,7 +59132,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -59165,7 +59198,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -59233,7 +59266,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -59367,7 +59400,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -59633,7 +59666,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -59734,7 +59767,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -59767,7 +59800,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -59966,7 +59999,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -60134,7 +60167,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -60303,7 +60336,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -60371,7 +60404,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -60472,7 +60505,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -60506,7 +60539,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -60541,7 +60574,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -60576,7 +60609,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -60646,7 +60679,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -60780,7 +60813,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "2019-1", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -60791,7 +60824,7 @@
                     "hide_links": "", 
                     "id": "R-511776", 
                     "impacts": "", 
-                    "introduced": "", 
+                    "introduced": "dublin", 
                     "is_need": true, 
                     "is_part": false, 
                     "keyword": "MUST", 
@@ -60915,7 +60948,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -60981,7 +61014,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -61081,7 +61114,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "none"
                 }, 
@@ -61148,7 +61181,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "in_service"
                 }, 
@@ -61183,7 +61216,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -61252,7 +61285,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -61420,7 +61453,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -61455,7 +61488,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -61557,7 +61590,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -62053,7 +62086,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -62317,7 +62350,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "in_service"
                 }, 
@@ -62584,7 +62617,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -62619,7 +62652,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -62782,7 +62815,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -63051,7 +63084,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -63095,7 +63128,7 @@
                     "hide_links": "", 
                     "id": "R-599443", 
                     "impacts": "", 
-                    "introduced": "", 
+                    "introduced": "dublin", 
                     "is_need": true, 
                     "is_part": false, 
                     "keyword": "MUST", 
@@ -63116,7 +63149,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -63185,7 +63218,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -63220,7 +63253,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -63252,7 +63285,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "none"
                 }, 
@@ -63320,7 +63353,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -63422,7 +63455,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -63656,7 +63689,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -63823,7 +63856,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -63858,7 +63891,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -64156,7 +64189,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -64224,7 +64257,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -64259,7 +64292,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -64293,7 +64326,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "in_service"
                 }, 
@@ -64394,7 +64427,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -64429,7 +64462,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -64464,7 +64497,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -64730,7 +64763,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "2019-1", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -64797,7 +64830,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -64808,7 +64841,7 @@
                     "hide_links": "", 
                     "id": "R-681859", 
                     "impacts": "", 
-                    "introduced": "", 
+                    "introduced": "dublin", 
                     "is_need": true, 
                     "is_part": false, 
                     "keyword": "MUST", 
@@ -64899,7 +64932,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -65001,7 +65034,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -65033,7 +65066,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "none"
                 }, 
@@ -65298,7 +65331,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "in_service"
                 }, 
@@ -65331,7 +65364,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -65398,7 +65431,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -65500,7 +65533,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -65733,7 +65766,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -65779,7 +65812,7 @@
                     "hide_links": "", 
                     "id": "R-717227", 
                     "impacts": "", 
-                    "introduced": "", 
+                    "introduced": "dublin", 
                     "is_need": true, 
                     "is_part": false, 
                     "keyword": "MUST", 
@@ -65802,7 +65835,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "dublin", 
+                    "updated": "", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -65903,7 +65936,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -66103,7 +66136,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -66171,7 +66204,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -66206,7 +66239,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -66239,7 +66272,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -66571,7 +66604,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -66670,7 +66703,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -67071,7 +67104,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -67106,7 +67139,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -67139,7 +67172,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -67276,7 +67309,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -67343,7 +67376,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -67445,7 +67478,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "in_service"
                 }, 
@@ -67588,7 +67621,7 @@
                     "hide_links": "", 
                     "id": "R-805572", 
                     "impacts": "", 
-                    "introduced": "", 
+                    "introduced": "dublin", 
                     "is_need": true, 
                     "is_part": false, 
                     "keyword": "MUST", 
@@ -67611,7 +67644,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "dublin", 
+                    "updated": "", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -67713,7 +67746,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -67980,7 +68013,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -68049,7 +68082,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -68148,7 +68181,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "in_service"
                 }, 
@@ -68313,7 +68346,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -68347,7 +68380,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -68548,7 +68581,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -68583,7 +68616,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -68683,7 +68716,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -68947,7 +68980,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -69079,7 +69112,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -69111,7 +69144,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -69210,7 +69243,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -69276,7 +69309,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -69475,7 +69508,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -69974,7 +70007,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -70042,7 +70075,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -70077,7 +70110,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -70143,7 +70176,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -70244,7 +70277,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -70279,7 +70312,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -70412,7 +70445,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -70478,7 +70511,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -70513,7 +70546,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -70749,7 +70782,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -70782,7 +70815,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -70816,7 +70849,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "in_service"
                 }, 
@@ -70985,7 +71018,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -71152,7 +71185,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -71284,7 +71317,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "none"
                 }, 
@@ -71319,7 +71352,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -71419,7 +71452,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -71521,7 +71554,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -71789,7 +71822,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -71925,7 +71958,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -72089,7 +72122,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -72123,7 +72156,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -72158,7 +72191,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -72226,7 +72259,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -72261,7 +72294,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -72328,7 +72361,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -72460,7 +72493,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -72591,7 +72624,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "casablanca", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -72657,7 +72690,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -72725,7 +72758,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": ""
                 }, 
@@ -73127,7 +73160,7 @@
                     "validation_mode": "static"
                 }
             }, 
-            "needs_amount": 812
+            "needs_amount": 813
         }
     }
 }
