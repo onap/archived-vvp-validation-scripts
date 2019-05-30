@@ -53,6 +53,8 @@ class GetParamChecker:
     def __call__(self, keys, param_value, *args, **kwargs):
         if isinstance(param_value, str):
             return  # refers to a string or parameter - this is OK
+        if "outputs" in keys:
+            return  # output section is exempt from this requirement
         if isinstance(param_value, list):
             nested_get_params = (arg for arg in param_value if is_get_param(arg))
             args = (call["get_param"] for call in nested_get_params)

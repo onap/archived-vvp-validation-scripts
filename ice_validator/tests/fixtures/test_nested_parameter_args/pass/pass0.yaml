@@ -55,4 +55,5 @@ resources:
                     get_param: [ cdl, { get_param: num }]
                 vf_module_id2:
                     get_param: [ cdl, { get_param: num }]
-
+outputs:
+    prop: {get_param: [list_one, {get_param: [list_two, {get_param: index_two}]}]}

@@ -1,5 +1,5 @@
 {
-    "created": "2019-05-24T06:32:42.966223", 
+    "created": "2019-05-30T06:32:36.717304", 
     "current_version": "dublin", 
     "project": "", 
     "versions": {
@@ -45910,7 +45910,9 @@
             "needs_amount": 789
         }, 
         "dublin": {
-            "created": "2019-05-24T06:32:42.966152", 
+            "created": "2019-05-30T06:32:36.717169", 
+            "filters": {}, 
+            "filters_amount": 0, 
             "needs": {
                 "R-00011": {
                     "description": "A VNF's Heat Orchestration Template's parameter defined\nin a nested YAML file\n**SHOULD NOT** have a parameter constraint defined.", 
@@ -49517,7 +49519,7 @@
                     "title_from_content": "", 
                     "type": "req", 
                     "type_name": "Requirement", 
-                    "updated": "El Alto", 
+                    "updated": "dublin", 
                     "validated_by": "", 
                     "validation_mode": "static"
                 }, 
@@ -49858,7 +49860,7 @@
                     "validation_mode": ""
                 }, 
                 "R-120182": {
-                    "description": "The VNF or PNF provider **MUST** indicate specific conditions that may arise, and\nrecommend actions that may be taken at specific thresholds, or if specific\nconditions repeat within a specified time interval, using the semantics and\nsyntax described by the :doc:`VES Event Registration specification <../../../../vnfsdk/model.git/docs/files/VESEventRegistration_3_0>`.", 
+                    "description": "The VNF or PNF provider **MUST** indicate specific conditions that may arise, and\nrecommend actions that may be taken at specific thresholds, or if specific\nconditions repeat within a specified time interval, using the semantics and\nsyntax described by the :ref:`VES Event Registration specification <ves_event_registration_3_2>`.", 
                     "docname": "Chapter7/Monitoring-And-Management", 
                     "full_title": "", 
                     "hide_links": "", 
@@ -52566,7 +52568,7 @@
                     "validation_mode": "static"
                 }, 
                 "R-22346": {
-                    "description": "The VNF or PNF package **MUST** provide :doc:`VES Event Registration <../../../../vnfsdk/model.git/docs/files/VESEventRegistration_3_0>`\nfor all VES events provided by that VNF or PNF.", 
+                    "description": "The VNF or PNF package **MUST** provide :ref:`VES Event Registration <ves_event_registration_3_2>`\nfor all VES events provided by that VNF or PNF.", 
                     "docname": "Chapter7/VNF-On-boarding-and-package-management", 
                     "full_title": "", 
                     "hide_links": "", 
@@ -55150,7 +55152,7 @@
                     "validation_mode": ""
                 }, 
                 "R-304011": {
-                    "description": "A VNF's Heat Orchestration Template's ``OS::Nova::Server`` resource's\n\n* Resource ID (defined in R-29751)\n* property ``image`` parameter name (defined in R-58670)\n* property ``flavor`` parameter name (defined in R-45188)\n* property ``name`` parameter name (defined in R-54171 & R-87817)\n* property port referenced OS::Neutron::Port Resource ID\n  (defined in R-20453)\n\n**MUST** contain the identical ``{vm-type}``\nand **MUST** follow the naming conventions defined\nin R-58670, R-45188, R-54171, R-87817, and R-29751.  And the ``{index}`` in\nthe ``OS::Nova::Server`` Resource ID (defined in R-29751) **MUST** match\nthe ``{vm-type_index}`` defined in\nthe ``OS::Nova::Server`` property ``port``\nreferenced ``OS::Neutron::Port`` Resource ID (defined in R-20453).", 
+                    "description": "A VNF's Heat Orchestration Template's ``OS::Nova::Server`` resource's\n\n* Resource ID (defined in R-29751)\n* property ``image`` parameter name (defined in R-58670)\n* property ``flavor`` parameter name (defined in R-45188)\n* property ``name`` parameter name (defined in R-54171 & R-87817)\n* property ``networks`` map property ``port`` value which is a\n  ``OS::Neutron::Port`` Resource ID (defined in R-20453)\n  referenced using the intrinsic function ``get_attr``\n\n**MUST** contain the identical ``{vm-type}``\nand **MUST** follow the naming conventions defined\nin R-58670, R-45188, R-54171, R-87817, and R-29751.  And the ``{index}`` in\nthe ``OS::Nova::Server`` Resource ID (defined in R-29751) **MUST** match\nthe ``{vm-type_index}`` defined in\nthe ``OS::Nova::Server`` property ``networks`` map property ``port``\nreferenced ``OS::Neutron::Port`` Resource ID (defined in R-20453).", 
                     "docname": "Chapter5/Heat/ONAP Heat Resource ID and Parameter Naming Convention/Nova Parameters", 
                     "full_title": "", 
                     "hide_links": "", 
@@ -58125,7 +58127,7 @@
                     "validation_mode": ""
                 }, 
                 "R-42018": {
-                    "description": "The VNF or PNF Package **MUST** include documentation which must include\nall events (fault, measurement for VNF or PNF Scaling, Syslogs, State Change\nand Mobile Flow), that need to be collected at each VM, VNFC (defined in `VNF Guidelines <https://onap.readthedocs.io/en/latest/submodules/vnfrqts/guidelines.git/docs/vnf_guidelines/vnf_guidelines.html>`__ ) and for the overall VNF or PNF.", 
+                    "description": "The VNF or PNF Package **MUST** include documentation which must include\nall events (fault, measurement for VNF or PNF Scaling, Syslogs, State Change\nand Mobile Flow), that need to be collected at each VM, VNFC (defined in `VNF Guidelines <https://onap.readthedocs.io/en/latest/submodules/vnfrqts/guidelines.git/docs/vnf_guidelines.html>`__ ) and for the overall VNF or PNF.", 
                     "docname": "Chapter7/VNF-On-boarding-and-package-management", 
                     "full_title": "", 
                     "hide_links": "", 
@@ -60986,7 +60988,7 @@
                     "validation_mode": ""
                 }, 
                 "R-520802": {
-                    "description": "The VNF or PNF provider **MUST** provide a YAML file formatted in adherence with\nthe :doc:`VES Event Registration specification <../../../../vnfsdk/model.git/docs/files/VESEventRegistration_3_0>`\nthat defines the following information for each event produced by the VNF:\n\n* ``eventName``\n* Required fields\n* Optional fields\n* Any special handling to be performed for that event", 
+                    "description": "The VNF or PNF provider **MUST** provide a YAML file formatted in adherence with\nthe :ref:`VES Event Registration specification <ves_event_registration_3_2>`\nthat defines the following information for each event produced by the VNF:\n\n* ``eventName``\n* Required fields\n* Optional fields\n* Any special handling to be performed for that event", 
                     "docname": "Chapter7/Monitoring-And-Management", 
                     "full_title": "", 
                     "hide_links": "", 
@@ -62322,7 +62324,7 @@
                     "validation_mode": ""
                 }, 
                 "R-570134": {
-                    "description": "The events produced by the VNF or PNF **MUST** must be compliant with the common\nevent format defined in the\n:doc:`VES Event Listener<../../../../vnfsdk/model.git/docs/files/VESEventListener_7_0_1>`\nspecification.", 
+                    "description": "The events produced by the VNF or PNF **MUST** must be compliant with the common\nevent format defined in the\n:ref:`VES Event Listener<ves_event_listener_7_1>`\nspecification.", 
                     "docname": "Chapter7/Monitoring-And-Management", 
                     "full_title": "", 
                     "hide_links": "", 
@@ -62820,7 +62822,7 @@
                     "validation_mode": ""
                 }, 
                 "R-589037": {
-                    "description": "A VNF Heat Orchestration Template's Cinder Volume Module resources section\n**MUST** only be defined using one of the following:\n\n* one of more ``OS::Cinder::Volume`` resources\n* one or more ``OS::Heat::ResourceGroup`` resources that call a nested YAML\n  file that contains only ``OS::Cinder::Volume`` resources\n* a resource that calls a nested YAML file (static nesting) that contains\n  only ``OS::Cinder::Volume`` resources", 
+                    "description": "A VNF Heat Orchestration Template's Cinder Volume Module ``resources:``\nsection\n**MUST** only be defined using one of the following:\n\n* one of more ``OS::Cinder::Volume`` resources\n* one or more ``OS::Heat::ResourceGroup`` resources that call a nested YAML\n  file that contains only ``OS::Cinder::Volume`` resources\n* a resource that calls a nested YAML file (static nesting) that contains\n  only ``OS::Cinder::Volume`` resources", 
                     "docname": "Chapter5/Heat/ONAP Heat Orchestration Templates Overview", 
                     "full_title": "", 
                     "hide_links": "", 
@@ -66742,7 +66744,7 @@
                     "validation_mode": "static"
                 }, 
                 "R-76057": {
-                    "description": "VNF Heat Orchestration Template's Nested YAML file name **MUST** contain\nonly alphanumeric characters and underscores '_' and\n**MUST NOT** contain the case insensitive word ``base``.", 
+                    "description": "VNF Heat Orchestration Template's Nested YAML file name **MUST** contain\nonly alphanumeric characters and underscores '_' and\n**MUST NOT** contain the case insensitive string ``base``.", 
                     "docname": "Chapter5/Heat/ONAP Heat Orchestration Templates Overview", 
                     "full_title": "", 
                     "hide_links": "", 
@@ -67851,7 +67853,7 @@
                     "validation_mode": "static"
                 }, 
                 "R-81339": {
-                    "description": "A VNF Heat Orchestration Template's Base Module file name **MUST** include\ncase insensitive 'base' in the filename and\n**MUST** match one of the following four\nformats:\n\n 1.) ``base_<text>.y[a]ml``\n\n 2.) ``<text>_base.y[a]ml``\n\n 3.) ``base.y[a]ml``\n\n 4.) ``<text>_base_<text>``.y[a]ml\n\nwhere ``<text>`` **MUST** contain only alphanumeric characters and\nunderscores '_' and **MUST NOT** contain the case insensitive word ``base``.", 
+                    "description": "A VNF Heat Orchestration Template's Base Module file name **MUST** include\ncase insensitive 'base' in the filename and\n**MUST** match one of the following four\nformats:\n\n 1.) ``base_<text>.y[a]ml``\n\n 2.) ``<text>_base.y[a]ml``\n\n 3.) ``base.y[a]ml``\n\n 4.) ``<text>_base_<text>``.y[a]ml\n\nwhere ``<text>`` **MUST** contain only alphanumeric characters and\nunderscores '_' and **MUST NOT** contain the case insensitive string\n``base`` or ``volume``.", 
                     "docname": "Chapter5/Heat/ONAP Heat Orchestration Templates Overview", 
                     "full_title": "", 
                     "hide_links": "", 
@@ -69810,7 +69812,7 @@
                     "validation_mode": ""
                 }, 
                 "R-87247": {
-                    "description": "VNF Heat Orchestration Template's Incremental Module file name\n**MUST** contain only alphanumeric characters and underscores\n'_' and **MUST NOT** contain the case insensitive word ``base``.", 
+                    "description": "VNF Heat Orchestration Template's Incremental Module file name\n**MUST** contain only alphanumeric characters and underscores\n'_' and **MUST NOT** contain the case insensitive string ``base``.", 
                     "docname": "Chapter5/Heat/ONAP Heat Orchestration Templates Overview", 
                     "full_title": "", 
                     "hide_links": "", 

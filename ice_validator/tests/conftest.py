@@ -58,7 +58,7 @@ from six import string_types
 import version
 import logging
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.ERROR)
+logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.ERROR)
 
 __path__ = [os.path.dirname(os.path.abspath(__file__))]
 
@@ -1058,9 +1058,9 @@ def select_heat_requirements(reqs):
 def is_testable(reqs):
     """Filters dict requirements to only those which are testable"""
     for key, values in reqs.items():
-        if (("MUST" in values.get("keyword", "").upper()) and (
+        if ("MUST" in values.get("keyword", "").upper()) and (
             "none" not in values.get("validation_mode", "").lower()
-        )):
+        ):
             reqs[key]["testable"] = True
         else:
             reqs[key]["testable"] = False
