@@ -39,8 +39,13 @@ FROM python:3.6-alpine
 
 COPY requirements.txt /
 
-RUN pip install --upgrade pip
-RUN pip install --no-use-pep517 -r /requirements.txt
+RUN apk add --virtual build_dependencies openssl-dev gcc libffi-dev musl-dev linux-headers python3-dev
+
+RUN apk add libxml2-dev libxslt-dev \
+  && pip install --upgrade pip \
+  && pip install -r /requirements.txt
+
+RUN apk del build_dependencies
 
 RUN adduser -D vvpuser
 USER vvpuser
