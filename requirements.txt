@@ -38,6 +38,8 @@
 #
 
 pytest==3.7.4
+docutils
+six
 PyYAML==3.13
 pytest-tap==2.3
 boltons==18.0.1

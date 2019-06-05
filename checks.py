@@ -167,7 +167,9 @@ def check_non_testable_requirements_are_not_mapped():
 
 
 def check_flake8_passes():
-    result = subprocess.run(["flake8", "."], encoding="utf-8", capture_output=True)
+    result = subprocess.run(["flake8", "."], encoding="utf-8",
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
     msgs = result.stdout.split("\n") if result.returncode != 0 else []
     return ["flake8 errors detected:"] + [f"  {e}" for e in msgs] if msgs else []
 
