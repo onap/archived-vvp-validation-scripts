@@ -52,24 +52,16 @@ def test_volume_templates_contains_cinder_or_resource_group(volume_template):
     in fact volume templates
     """
     acceptable_resources = []
-
-    with open(volume_template) as fh:
-        yml = yaml.load(fh)
-
-    # skip if resources are not defined
-    if "resources" not in yml:
-        pytest.skip("No resources specified in the heat template")
-
     dirname = os.path.dirname(volume_template)
-    list_of_files = get_list_of_nested_files(yml, dirname)
+    list_of_files = get_list_of_nested_files(volume_template, dirname)
 
     list_of_files.append(volume_template)
 
     for file in list_of_files:
         with open(file) as fh:
             yml = yaml.load(fh)
-
-        for k, v in yml["resources"].items():
+        resources = yml.get("resources") or {}
+        for k, v in resources.items():
             if not isinstance(v, dict):
                 continue
             if "type" not in v:
