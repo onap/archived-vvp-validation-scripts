@@ -44,7 +44,6 @@ import os
 import re
 import time
 from collections import defaultdict
-from itertools import chain
 
 import traceback
 
@@ -55,6 +54,7 @@ from more_itertools import partition
 import xlsxwriter
 from six import string_types
 
+# noinspection PyUnresolvedReferences
 import version
 import logging
 
@@ -393,17 +393,19 @@ def pytest_collection_modifyitems(session, config, items):
                     ):
                         item.add_marker(
                             pytest.mark.skip(
-                                reason="Test categories do not match all the passed categories"
+                                reason=("Test categories do not match "
+                                        "all the passed categories")
                             )
                         )
                 else:
                     item.add_marker(
                         pytest.mark.skip(
-                            reason="Test belongs to a category but no categories were passed"
+                            reason=("Test belongs to a category but "
+                                    "no categories were passed")
                         )
                     )
     items.sort(
-        key=lambda item: 0 if "base" in set(m.name for m in item.iter_markers()) else 1
+        key=lambda x: 0 if "base" in set(m.name for m in x.iter_markers()) else 1
     )
 
 
@@ -617,44 +619,20 @@ def make_iso_timestamp():
     return now.isoformat()
 
 
-def aggregate_requirement_adherence(r_id, collection_failures, test_results):
-    """
-    Examines all tests associated with a given requirement and determines
-    the aggregate result (PASS, FAIL, ERROR, or SKIP) for the requirement.
-
-    * ERROR - At least one ERROR occurred
-    * PASS -  At least one PASS and no FAIL or ERRORs.
-    * FAIL -  At least one FAIL occurred (no ERRORs)
-    * SKIP - All tests were SKIP
-
-
-    :param r_id: Requirement ID to examing
-    :param collection_failures: Errors that occurred during test setup.
-    :param test_results: List of TestResult
-    :return: 'PASS', 'FAIL', 'SKIP', or 'ERROR'
-    """
-    errors = any(r_id in f["requirements"] for f in collection_failures)
-    outcomes = set(r.outcome for r in test_results if r_id in r.requirement_ids)
-    return aggregate_results(errors, outcomes, r_id)
-
-
-def aggregate_results(has_errors, outcomes, r_id=None):
+def aggregate_results(outcomes, r_id=None):
     """
     Determines the aggregate result for the conditions provided.  Assumes the
     results have been filtered and collected for analysis.
 
-    :param has_errors: True if collection failures occurred for the tests being
-                       analyzed.
     :param outcomes: set of outcomes from the TestResults
     :param r_id: Optional requirement ID if known
     :return: 'ERROR', 'PASS', 'FAIL', or 'SKIP'
              (see aggregate_requirement_adherence for more detail)
     """
-    if has_errors:
-        return "ERROR"
-
     if not outcomes:
         return "PASS"
+    elif "ERROR" in outcomes:
+        return "ERROR"
     elif "FAIL" in outcomes:
         return "FAIL"
     elif "PASS" in outcomes:
@@ -690,53 +668,11 @@ def aggregate_run_results(collection_failures, test_results):
         return "PASS"
 
 
-def error(failure_or_result):
-    """
-    Extracts the error message from a collection failure or test result
-    :param failure_or_result: Entry from COLLECTION_FAILURE or a TestResult
-    :return: Error message as string
-    """
-    if isinstance(failure_or_result, TestResult):
-        return failure_or_result.error_message
-    else:
-        return failure_or_result["error"]
-
-
-def req_ids(failure_or_result):
-    """
-    Extracts the requirement IDs from a collection failure or test result
-    :param failure_or_result: Entry from COLLECTION_FAILURE or a TestResult
-    :return: set of Requirement IDs.  If no requirements mapped, then an empty set
-    """
-    if isinstance(failure_or_result, TestResult):
-        return set(failure_or_result.requirement_ids)
-    else:
-        return set(failure_or_result["requirements"])
-
-
-def collect_errors(r_id, collection_failures, test_result):
-    """
-    Creates a list of error messages from the collection failures and
-    test results.  If r_id is provided, then it collects the error messages
-    where the failure or test is associated with that requirement ID.  If
-    r_id is None, then it collects all errors that occur on failures and
-    results that are not mapped to requirements
-    """
-
-    def selector(item):
-        if r_id:
-            return r_id in req_ids(item)
-        else:
-            return not req_ids(item)
-
-    errors = (error(x) for x in chain(collection_failures, test_result) if selector(x))
-    return [e for e in errors if e]
-
-
 def relative_paths(base_dir, paths):
     return [os.path.relpath(p, base_dir) for p in paths]
 
 
+# noinspection PyTypeChecker
 def generate_json(outpath, template_path, categories):
     """
     Creates a JSON summary of the entire test run.
@@ -779,30 +715,40 @@ def generate_json(outpath, template_path, categories):
             }
         )
 
+    # Build a mapping of requirement ID to the results
+    r_id_results = defaultdict(lambda: {"errors": set(), "outcomes": set()})
+    for test_result in results:
+        test_reqs = test_result["requirements"]
+        r_ids = (
+            [r["id"] if isinstance(r, dict) else r for r in test_reqs]
+            if test_reqs
+            else ("",)
+        )
+        for r_id in r_ids:
+            item = r_id_results[r_id]
+            item["outcomes"].add(test_result["result"])
+            if test_result["error"]:
+                item["errors"].add(test_result["error"])
+
     requirements = data["requirements"]
     for r_id, r_data in reqs.items():
-        result = aggregate_requirement_adherence(r_id, COLLECTION_FAILURES, ALL_RESULTS)
-        if result:
-            requirements.append(
-                {
-                    "id": r_id,
-                    "text": r_data["description"],
-                    "keyword": r_data["keyword"],
-                    "result": result,
-                    "errors": collect_errors(r_id, COLLECTION_FAILURES, ALL_RESULTS),
-                }
-            )
-    # If there are tests that aren't mapped to a requirement, then we'll
-    # map them to a special entry so the results are coherent.
-    unmapped_outcomes = {r.outcome for r in ALL_RESULTS if not r.requirement_ids}
-    has_errors = any(not f["requirements"] for f in COLLECTION_FAILURES)
-    if unmapped_outcomes or has_errors:
+        requirements.append(
+            {
+                "id": r_id,
+                "text": r_data["description"],
+                "keyword": r_data["keyword"],
+                "result": aggregate_results(r_id_results[r_id]["outcomes"]),
+                "errors": list(r_id_results[r_id]["errors"]),
+            }
+        )
+
+    if r_id_results[""]["errors"] or r_id_results[""]["outcomes"]:
         requirements.append(
             {
                 "id": "Unmapped",
                 "text": "Tests not mapped to requirements (see tests)",
-                "result": aggregate_results(has_errors, unmapped_outcomes),
-                "errors": collect_errors(None, COLLECTION_FAILURES, ALL_RESULTS),
+                "result": aggregate_results(r_id_results[""]["outcomes"]),
+                "errors": list(r_id_results[""]["errors"]),
             }
         )
 

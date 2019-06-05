@@ -132,7 +132,7 @@ def test_heat(yaml_file):
 
     files = {}
     dirname = os.path.dirname(yaml_file)
-    for file in set(get_list_of_nested_files(yml, dirname)):
+    for file in set(get_list_of_nested_files(yaml_file, dirname)):
         load_file(file, files)
 
     validator = HOTValidator(yaml_file, files, yml)

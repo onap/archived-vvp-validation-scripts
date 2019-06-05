@@ -39,11 +39,13 @@
 
 """nested files
 """
-
+from functools import lru_cache
 from os import path, listdir
 import re
 from tests import cached_yaml as yaml
 from tests.structures import Heat
+
+from tests.helpers import load_yaml
 
 VERSION = "1.4.0"
 
@@ -108,40 +110,31 @@ def get_dict_of_nested_files(yml, dirpath):
     return nested_files
 
 
-def get_list_of_nested_files(yml, dirpath):
+@lru_cache(maxsize=None)
+def get_list_of_nested_files(yml_path, dirpath):
     """
     return a list of all nested files
     """
 
-    if not hasattr(yml, "items"):
-        return []
-
+    yml = load_yaml(yml_path)
     nested_files = []
+    resources = yml.get("resources") or {}
 
-    for v in yml.values():
+    for v in resources.values():
         if isinstance(v, dict) and "type" in v:
             t = v["type"]
             if t.endswith(".yml") or t.endswith(".yaml"):
                 filepath = path.join(dirpath, t)
                 if path.exists(filepath):
-                    with open(filepath) as fh:
-                        t_yml = yaml.load(fh)
                     nested_files.append(filepath)
-                    nested_files.extend(get_list_of_nested_files(t_yml, dirpath))
+                    nested_files.extend(get_list_of_nested_files(filepath, dirpath))
             elif t == "OS::Heat::ResourceGroup":
                 rdt = v.get("properties", {}).get("resource_def", {}).get("type", None)
                 if rdt and (rdt.endswith(".yml") or rdt.endswith(".yaml")):
                     filepath = path.join(dirpath, rdt)
                     if path.exists(filepath):
-                        with open(filepath) as fh:
-                            rdt_yml = yaml.load(fh)
                         nested_files.append(filepath)
-                        nested_files.extend(get_list_of_nested_files(rdt_yml, dirpath))
-        if isinstance(v, dict):
-            nested_files.extend(get_list_of_nested_files(v, dirpath))
-        elif isinstance(v, list):
-            for d in v:
-                nested_files.extend(get_list_of_nested_files(d, dirpath))
+                        nested_files.extend(get_list_of_nested_files(filepath, dirpath))
     return nested_files
 
 
@@ -271,6 +264,7 @@ def get_nested_files(filenames):
     return nested_files
 
 
+@lru_cache(maxsize=None)
 def file_is_a_nested_template(file):
     directory = path.dirname(file)
     nested_files = []
@@ -278,12 +272,8 @@ def file_is_a_nested_template(file):
         if filename.endswith(".yaml") or filename.endswith(".yml"):
             filename = "{}/{}".format(directory, filename)
             try:
-                with open(filename) as fh:
-                    yml = yaml.load(fh)
-                if "resources" not in yml:
-                    continue
                 nested_files.extend(
-                    get_list_of_nested_files(yml["resources"], path.dirname(filename))
+                    get_list_of_nested_files(filename, path.dirname(filename))
                 )
             except yaml.YAMLError as e:
                 print(e)  # pylint: disable=superfluous-parens
