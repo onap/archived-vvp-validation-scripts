@@ -46,8 +46,7 @@ docutils==0.14
 requests==2.20.0
 appdirs==1.4.3
 jinja2==2.10
-yamllint==1.12.1
 six==1.12.0
-pyinstaller 
+pyinstaller
 mock
 openstack-heat
