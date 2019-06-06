@@ -64,7 +64,6 @@ __path__ = [os.path.dirname(os.path.abspath(__file__))]
 
 DEFAULT_OUTPUT_DIR = "{}/../output".format(__path__[0])
 
-RESOLUTION_STEPS_FILE = "resolution_steps.json"
 HEAT_REQUIREMENTS_FILE = os.path.join(__path__[0], "..", "heat_requirements.json")
 TEST_SCRIPT_SITE = (
     "https://github.com/onap/vvp-validation-scripts/blob/master/ice_validator/tests/"
@@ -74,12 +73,11 @@ VNFRQTS_ID_URL = (
 )
 
 REPORT_COLUMNS = [
+    ("Error #", "err_num"),
     ("Input File", "file"),
-    ("Test", "test_file"),
     ("Requirements", "req_description"),
-    ("Resolution Steps", "resolution_steps"),
     ("Error Message", "message"),
-    ("Raw Test Output", "raw_output"),
+    ("Test", "test_file"),
 ]
 
 COLLECTION_FAILURE_WARNING = """WARNING: The following unexpected errors occurred
@@ -142,7 +140,7 @@ class TestResult:
     def __init__(self, item, outcome):
         self.item = item
         self.result = outcome.get_result()
-        self.files = [os.path.normpath(p) for p in self._get_files()]
+        self.files = self._get_files()
         self.error_message = self._get_error_message()
 
     @property
@@ -254,30 +252,6 @@ class TestResult:
             )
         return data
 
-    def resolution_steps(self, resolutions):
-        """
-        :param resolutions: Loaded from contents for resolution_steps.json
-        :return: Header and text for the resolution step associated with this
-                 test case.  Returns empty string if no resolutions are
-                 provided.
-        """
-        text = (
-            "\n{}: \n{}".format(entry["header"], entry["resolution_steps"])
-            for entry in resolutions
-            if self._match(entry)
-        )
-        return "".join(text)
-
-    def _match(self, resolution_entry):
-        """
-        Returns True if the test result maps to the given entry in
-        the resolutions file
-        """
-        return (
-            self.test_case == resolution_entry["function"]
-            and self.test_module == resolution_entry["module"]
-        )
-
     def _get_files(self):
         """
         Extracts the list of files passed into the test case.
@@ -294,12 +268,12 @@ class TestResult:
                 "{} volume pair".format(self.item.funcargs["heat_volume_pair"]["name"])
             ]
         elif "heat_templates" in self.item.fixturenames:
-            return self.item.funcargs["heat_templates"]
+            return [os.path.basename(f) for f in self.item.funcargs["heat_templates"]]
         elif "yaml_files" in self.item.fixturenames:
-            return self.item.funcargs["yaml_files"]
+            return [os.path.basename(f) for f in self.item.funcargs["yaml_files"]]
         else:
             parts = self.result.nodeid.split("[")
-            return [""] if len(parts) == 1 else [parts[1][:-1]]
+            return [""] if len(parts) == 1 else [os.path.basename(parts[1][:-1])]
 
     def _get_error_message(self):
         """
@@ -416,14 +390,17 @@ def pytest_collection_modifyitems(session, config, items):
     )
 
 
-def make_href(paths):
+def make_href(paths, base_dir=None):
     """
     Create an anchor tag to link to the file paths provided.
     :param paths: string or list of file paths
+    :param base_dir: If specified this is pre-pended to each path
     :return: String of hrefs - one for each path, each seperated by a line
              break (<br/).
     """
     paths = [paths] if isinstance(paths, string_types) else paths
+    if base_dir:
+        paths = [os.path.join(base_dir, p) for p in paths]
     links = []
     for p in paths:
         abs_path = os.path.abspath(p)
@@ -434,16 +411,6 @@ def make_href(paths):
             )
         )
     return "<br/>".join(links)
-
-
-def load_resolutions_file():
-    """
-    :return: dict of data loaded from resolutions_steps.json
-    """
-    resolution_steps = "{}/../{}".format(__path__[0], RESOLUTION_STEPS_FILE)
-    if os.path.exists(resolution_steps):
-        with open(resolution_steps, "r") as f:
-            return json.loads(f.read())
 
 
 def generate_report(outpath, template_path, categories, output_format="html"):
@@ -537,18 +504,16 @@ def generate_csv_report(output_dir, categories, template_path, failures):
     rows.append([col for col, _ in REPORT_COLUMNS])
 
     reqs = load_current_requirements()
-    resolutions = load_resolutions_file()
 
     # table content
-    for failure in failures:
+    for i, failure in enumerate(failures, start=1):
         rows.append(
             [
+                i,
                 "\n".join(failure.files),
-                failure.test_id,
                 failure.requirement_text(reqs),
-                failure.resolution_steps(resolutions),
                 failure.error_message,
-                failure.raw_output,
+                failure.test_id,
             ]
         )
 
@@ -562,9 +527,11 @@ def generate_csv_report(output_dir, categories, template_path, failures):
 def generate_excel_report(output_dir, categories, template_path, failures):
     output_path = os.path.join(output_dir, "report.xlsx")
     workbook = xlsxwriter.Workbook(output_path)
-    bold = workbook.add_format({"bold": True})
-    code = workbook.add_format(({"font_name": "Courier", "text_wrap": True}))
-    normal = workbook.add_format({"text_wrap": True})
+    bold = workbook.add_format({"bold": True, "align": "top"})
+    code = workbook.add_format(
+        {"font_name": "Courier", "text_wrap": True, "align": "top"}
+    )
+    normal = workbook.add_format({"text_wrap": True, "align": "top"})
     heading = workbook.add_format({"bold": True, "font_size": 18})
     worksheet = workbook.add_worksheet("failures")
     worksheet.write(0, 0, "Validation Failures", heading)
@@ -603,17 +570,24 @@ def generate_excel_report(output_dir, categories, template_path, failures):
         worksheet.write(start_error_table_row + 1, col_num, col_name, bold)
 
     reqs = load_current_requirements()
-    resolutions = load_resolutions_file()
 
     # table content
+    for col, width in enumerate((20, 30, 60, 60, 40)):
+        worksheet.set_column(col, col, width)
+    err_num = 1
     for row, failure in enumerate(failures, start=start_error_table_row + 2):
-        worksheet.write(row, 0, "\n".join(failure.files), normal)
-        worksheet.write(row, 1, failure.test_id, normal)
+        worksheet.write(row, 0, str(err_num), normal)
+        worksheet.write(row, 1, "\n".join(failure.files), normal)
         worksheet.write(row, 2, failure.requirement_text(reqs), normal)
-        worksheet.write(row, 3, failure.resolution_steps(resolutions), normal)
-        worksheet.write(row, 4, failure.error_message, normal)
-        worksheet.write(row, 5, failure.raw_output, code)
-
+        worksheet.write(row, 3, failure.error_message, normal)
+        worksheet.write(row, 4, failure.test_id, normal)
+        err_num += 1
+    worksheet.autofilter(
+        start_error_table_row + 1,
+        0,
+        start_error_table_row + 1 + err_num,
+        len(REPORT_COLUMNS) - 1,
+    )
     workbook.close()
 
 
@@ -765,19 +739,17 @@ def generate_json(outpath, template_path, categories):
 
 def generate_html_report(outpath, categories, template_path, failures):
     reqs = load_current_requirements()
-    resolutions = load_resolutions_file()
     fail_data = []
     for failure in failures:
         fail_data.append(
             {
-                "file_links": make_href(failure.files),
+                "file_links": make_href(failure.files, template_path),
                 "test_id": failure.test_id,
                 "error_message": failure.error_message,
                 "raw_output": failure.raw_output,
                 "requirements": docutils.core.publish_parts(
                     writer_name="html", source=failure.requirement_text(reqs)
                 )["body"],
-                "resolution_steps": failure.resolution_steps(resolutions),
             }
         )
     pkg_dir = os.path.split(__file__)[0]
