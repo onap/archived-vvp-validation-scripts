@@ -141,10 +141,10 @@ def check_parameter_format(
                 regx_dict = regx[resource_intext].get(parameter_type)
                 if not regx_dict:
                     msg = (
-                        "{} {} parameter {} defined as type {} "
+                        "{} {} {} parameter {} defined as type {} "
                         "which is required by platform data model for proper "
                         "assignment and inventory."
-                    ).format(resource_type, properties, parameter, parameter_type)
+                    ).format(resource_type, rid, properties, parameter, parameter_type)
                     if exemptions_allowed:
                         msg = "WARNING: {} {}".format(msg, AAP_EXEMPT_CAVEAT)
                     invalid_parameters.append(msg)
