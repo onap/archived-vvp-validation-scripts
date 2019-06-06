@@ -65,7 +65,7 @@
         table-layout: fixed;
     }
     .fileNames {
-        width: 25%;
+        width: 20%;
         word-wrap: break-word;
         word-break: break-all;
         white-space: normal;
@@ -147,7 +147,6 @@
                 <th>File(s)</th>
                 <th>Error Message</th>
                 <th>Requirement(s)</th>
-                <th>Resolution Steps</th>
             </tr>
             </thead>
             <tbody>
@@ -165,9 +164,6 @@
                     </td>
                     <td>
                         {{ failure.requirements }}
-                    </td>
-                    <td>
-                        {{ failure.resolution_steps }}
                     </td>
                 </tr>
             {% endfor %}
@@ -207,10 +203,9 @@
                 fixedHeader: true,
                 pageLength: 50,
                 columns: [
-                    {width: "25%", className: "fileLinks"},
-                    {width: "25%", className: "errorMessage"},
-                    {width: "25%", className: "requirements"},
-                    {width: "25%", className: "resolutionSteps"},
+                    {width: "20%", className: "fileLinks"},
+                    {width: "40%", className: "errorMessage"},
+                    {width: "40%", className: "requirements"},
                 ]
             });
         });
