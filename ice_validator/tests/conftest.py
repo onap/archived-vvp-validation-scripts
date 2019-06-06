@@ -393,19 +393,26 @@ def pytest_collection_modifyitems(session, config, items):
                     ):
                         item.add_marker(
                             pytest.mark.skip(
-                                reason=("Test categories do not match "
-                                        "all the passed categories")
+                                reason=(
+                                    "Test categories do not match "
+                                    "all the passed categories"
+                                )
                             )
                         )
                 else:
                     item.add_marker(
                         pytest.mark.skip(
-                            reason=("Test belongs to a category but "
-                                    "no categories were passed")
+                            reason=(
+                                "Test belongs to a category but "
+                                "no categories were passed"
+                            )
                         )
                     )
+
     items.sort(
-        key=lambda x: 0 if "base" in set(m.name for m in x.iter_markers()) else 1
+        key=lambda x: (0, x.name)
+        if "base" in set(m.name for m in x.iter_markers())
+        else (1, x.name)
     )
 
 

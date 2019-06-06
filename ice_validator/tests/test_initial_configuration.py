@@ -38,41 +38,31 @@
 from os import path
 
 import pytest
+from yaml import YAMLError
 from yaml.constructor import ConstructorError
 
 from tests import cached_yaml as yaml
 from tests.utils import yaml_custom_utils
 
-from .helpers import validates
-from yamllint.config import YamlLintConfig
-from yamllint import linter
-from .utils.nested_files import check_for_invalid_nesting
-from .utils.nested_iterables import find_all_get_resource_in_yml
-from .utils.nested_iterables import find_all_get_param_in_yml
+from tests.helpers import validates, load_yaml
+from tests.utils.nested_files import check_for_invalid_nesting
+from tests.utils.nested_iterables import find_all_get_resource_in_yml
+from tests.utils.nested_iterables import find_all_get_param_in_yml
 
 
 @pytest.mark.base
 @validates("R-95303")
 def test_00_valid_yaml(filename):
-    """
-    Read in each .yaml or .env file. If it is successfully parsed as yaml, save
-    contents, else add filename to list of bad yaml files. Log the result of
-    parse attempt.
-    """
-    conf = YamlLintConfig("rules: {}")
-
-    if path.splitext(filename)[-1] in [".yml", ".yaml", ".env"]:
-        gen = linter.run(open(filename), conf)
-        errors = list(gen)
-
-        assert not errors, "Error parsing file {} with error {}".format(
-            filename, errors
-        )
-    else:
-        pytest.skip(
-            "The file does not have any of the extensions .yml,\
-            .yaml, or .env"
-        )
+    if path.splitext(filename)[-1].lower() not in (".yml", ".yaml", ".env"):
+        pytest.skip("Not a YAML file")
+    try:
+        load_yaml(filename)
+    except YAMLError as e:
+        assert False, (
+            "Invalid YAML detected: {} "
+            "NOTE: Online YAML checkers such as yamllint.com "
+            "can helpful in diagnosing errors in YAML"
+        ).format(str(e).replace("\n", " "))
 
 
 @pytest.mark.base
