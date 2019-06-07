@@ -41,6 +41,8 @@ from os import listdir
 from os import path
 import re
 
+import pytest
+
 from .helpers import check_basename_ending
 from .helpers import validates
 
@@ -59,6 +61,9 @@ def test_base_template_names(template_dir):
         if path.isfile(path.join(template_dir, f))
         and path.splitext(f)[-1] in [".yaml", ".yml"]
     ]
+
+    if not filenames and listdir(template_dir):
+        pytest.skip("Nested directory detected.  Let that test fail instead.")
 
     base_modules = []
     for filename in filenames:

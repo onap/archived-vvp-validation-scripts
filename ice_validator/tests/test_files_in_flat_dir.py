@@ -44,7 +44,8 @@ def test_files_in_flat_dir(template_dir):
     paths = (os.path.join(template_dir, p) for p in os.listdir(template_dir))
     nested_dirs = (p for p in paths if os.path.isdir(p))
     nested_dirs = [os.path.relpath(p, template_dir) for p in nested_dirs]
-    msg = "Nested directories detected in template directory: {}".format(
-        ", ".join(nested_dirs)
-    )
+    msg = (
+        "Sub-directories are not allowed in a Heat package. The following "
+        "directories were detected: {}"
+    ).format(", ".join(nested_dirs))
     assert not nested_dirs, msg
