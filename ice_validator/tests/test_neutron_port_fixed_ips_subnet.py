@@ -38,6 +38,8 @@
 #
 import re
 
+import pytest
+
 from tests.utils.network_roles import get_network_type_from_port
 
 from tests.structures import Heat
@@ -45,8 +47,6 @@ from tests.helpers import validates, load_yaml, get_base_template_from_yaml_file
 from tests.utils.nested_files import get_nested_files
 from .utils.ports import check_parameter_format
 from tests.structures import NeutronPortProcessor
-
-VERSION = "1.3.0"
 
 RE_EXTERNAL_PARAM_SUBNET = re.compile(  # match pattern
     r"(?P<network_role>.+?)(_v6)?_subnet_id$"
@@ -75,41 +75,33 @@ fip_regx_dict = {
 
 @validates("R-38236", "R-84123", "R-76160")
 def test_internal_subnet_format(yaml_file):
-    check_parameter_format(yaml_file, fip_regx_dict, "internal", NeutronPortProcessor, "fixed_ips", "subnet")
+    check_parameter_format(
+        yaml_file,
+        fip_regx_dict,
+        "internal",
+        NeutronPortProcessor,
+        "fixed_ips",
+        "subnet",
+    )
 
 
 @validates("R-38236", "R-62802", "R-15287")
 def test_external_subnet_format(yaml_file):
-    check_parameter_format(yaml_file, fip_regx_dict, "external", NeutronPortProcessor, "fixed_ips", "subnet")
+    check_parameter_format(
+        yaml_file,
+        fip_regx_dict,
+        "external",
+        NeutronPortProcessor,
+        "fixed_ips",
+        "subnet",
+    )
 
 
 @validates("R-84123", "R-76160")
 def test_neutron_port_internal_fixed_ips_subnet_in_base(yaml_files):
-    """
-    Only check parent incremental modules, because nested file parameter
-    name may have been changed.
-
-    When
-
-      * the VNF's Heat Orchestration Template's
-        resource ``OS::Neutron::Port`` in an Incremental Module is attaching
-        to an internal network
-        that is created in the Base Module, AND
-      * an IPv4 address is being cloud assigned by OpenStack's DHCP Service AND
-      * the internal network IPv4 subnet is to be specified
-        using the property ``fixed_ips`` map property ``subnet``/``subnet_id``,
-
-    the parameter **MUST** follow the naming convention
-
-      * ``int_{network-role}_subnet_id``
-    an IPv6 address is being cloud assigned by OpenStack's DHCP Service AND
-      * ``int_{network-role}_v6_subnet_id``
-
-    Note that the parameter MUST be defined as an output parameter in
-    the base module.
-    """
-
     base_path = get_base_template_from_yaml_files(yaml_files)
+    if not base_path:
+        pytest.skip("No base module detected")
     base_heat = load_yaml(base_path)
     base_outputs = base_heat.get("outputs") or {}
     nested_template_paths = get_nested_files(yaml_files)
@@ -140,7 +132,8 @@ def test_neutron_port_internal_fixed_ips_subnet_in_base(yaml_files):
                 if param not in base_outputs:
                     errors.append(
                         (
-                            "Internal fixed_ips/subnet parameter {} is attached to port {}, but the subnet parameter "
+                            "Internal fixed_ips/subnet parameter {} is attached to "
+                            "port {}, but the subnet parameter "
                             "is not defined as an output in the base module ({})."
                         ).format(param, r_id, base_path)
                     )
