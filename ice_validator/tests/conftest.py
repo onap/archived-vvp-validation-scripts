@@ -119,10 +119,10 @@ def extract_error_msg(rep):
             # Extract everything between AssertionError and the start
             # of the assert statement expansion in the pytest report
             msg = match.group(1)
+        elif "AssertionError:" in full_msg:
+            msg = full_msg.split("AssertionError:")[1]
         else:
-            msg = str(rep.longrepr.reprcrash)
-            if "AssertionError:" in msg:
-                msg = msg.split("AssertionError:")[1]
+            msg = full_msg
     except AttributeError:
         msg = str(rep)
 
@@ -579,7 +579,7 @@ def generate_excel_report(output_dir, categories, template_path, failures):
         worksheet.write(row, 0, str(err_num), normal)
         worksheet.write(row, 1, "\n".join(failure.files), normal)
         worksheet.write(row, 2, failure.requirement_text(reqs), normal)
-        worksheet.write(row, 3, failure.error_message, normal)
+        worksheet.write(row, 3, failure.error_message.replace("\n", "\n\n"), normal)
         worksheet.write(row, 4, failure.test_id, normal)
         err_num += 1
     worksheet.autofilter(
@@ -745,7 +745,7 @@ def generate_html_report(outpath, categories, template_path, failures):
             {
                 "file_links": make_href(failure.files, template_path),
                 "test_id": failure.test_id,
-                "error_message": failure.error_message,
+                "error_message": failure.error_message.replace("\n", "<br/><br/>"),
                 "raw_output": failure.raw_output,
                 "requirements": docutils.core.publish_parts(
                     writer_name="html", source=failure.requirement_text(reqs)
