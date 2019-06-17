@@ -39,6 +39,7 @@
 """ environment file structure
 """
 import os
+from collections import Iterable
 
 from tests.structures import Heat
 from tests.utils import nested_dict
@@ -228,15 +229,21 @@ def run_check_resource_parameter(
     if kwargs.get("resource_type_inverse"):
         resource_type = "non-{}".format(resource_type)
 
+    params = (
+        ": {}".format(", ".join(invalid_parameters))
+        if isinstance(invalid_parameters, Iterable)
+        else ""
+    )
+
     assert not invalid_parameters, (
         "{} {} parameters in template {}{}"
-        " found in {} environment file: {}".format(
+        " found in {} environment file{}".format(
             resource_type,
             prop,
             filename,
             " not" if DESIRED else "",
             environment_pair.get("name"),
-            ", ".join(invalid_parameters),
+            params,
         )
     )
 
