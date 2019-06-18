@@ -36,7 +36,8 @@
 # ============LICENSE_END============================================
 #
 #
-
+namespace: org.onap.vvp
+owner: ONAP
 ui:
   app-name: VNF Validation Tool
 categories:

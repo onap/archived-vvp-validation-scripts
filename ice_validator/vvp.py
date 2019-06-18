@@ -88,6 +88,17 @@ from tkinter import (
     Checkbutton,
     IntVar,
     Toplevel,
+    Message,
+    CURRENT,
+    Text,
+    INSERT,
+    DISABLED,
+    FLAT,
+    CENTER,
+    ACTIVE,
+    LEFT,
+    Menu,
+    NORMAL,
 )
 from tkinter.scrolledtext import ScrolledText
 from typing import Optional, List, Dict, TextIO, Callable, Iterator
@@ -103,8 +114,8 @@ class ToolTip(object):
     """
 
     def __init__(self, widget, text="widget info"):
-        self.waittime = 750  # miliseconds
-        self.wraplength = 180  # pixels
+        self.waittime = 750  # milliseconds
+        self.wraplength = 300  # pixels
         self.widget = widget
         self.text = text
         self.widget.bind("<Enter>", self.enter)
@@ -113,9 +124,11 @@ class ToolTip(object):
         self.id = None
         self.tw = None
 
+    # noinspection PyUnusedLocal
     def enter(self, event=None):
         self.schedule()
 
+    # noinspection PyUnusedLocal
     def leave(self, event=None):
         self.unschedule()
         self.hidetip()
@@ -125,17 +138,18 @@ class ToolTip(object):
         self.id = self.widget.after(self.waittime, self.showtip)
 
     def unschedule(self):
-        id = self.id
+        orig_id = self.id
         self.id = None
-        if id:
-            self.widget.after_cancel(id)
+        if orig_id:
+            self.widget.after_cancel(orig_id)
 
+    # noinspection PyUnusedLocal
     def showtip(self, event=None):
         x = y = 0
         x, y, cx, cy = self.widget.bbox("insert")
         x += self.widget.winfo_rootx() + 25
         y += self.widget.winfo_rooty() + 20
-        # creates a toplevel window
+        # creates a top level window
         self.tw = Toplevel(self.widget)
         # Leaves only the label and removes the app window
         self.tw.wm_overrideredirect(True)
@@ -156,6 +170,44 @@ class ToolTip(object):
         self.tw = None
         if tw:
             tw.destroy()
+
+
+class HyperlinkManager:
+    """Adapted from http://effbot.org/zone/tkinter-text-hyperlink.htm"""
+
+    def __init__(self, text):
+        self.links = {}
+        self.text = text
+        self.text.tag_config("hyper", foreground="blue", underline=1)
+        self.text.tag_bind("hyper", "<Enter>", self._enter)
+        self.text.tag_bind("hyper", "<Leave>", self._leave)
+        self.text.tag_bind("hyper", "<Button-1>", self._click)
+        self.reset()
+
+    def reset(self):
+        self.links.clear()
+
+    def add(self, action):
+        # add an action to the manager.  returns tags to use in
+        # associated text widget
+        tag = "hyper-%d" % len(self.links)
+        self.links[tag] = action
+        return "hyper", tag
+
+    # noinspection PyUnusedLocal
+    def _enter(self, event):
+        self.text.config(cursor="hand2")
+
+    # noinspection PyUnusedLocal
+    def _leave(self, event):
+        self.text.config(cursor="")
+
+    # noinspection PyUnusedLocal
+    def _click(self, event):
+        for tag in self.text.tag_names(CURRENT):
+            if tag[:6] == "hyper-":
+                self.links[tag]()
+                return
 
 
 class QueueWriter:
@@ -227,6 +279,7 @@ def run_pytest(
                                 are encountered in the input files.  This can help
                                 prevent a large number of errors from flooding the
                                 report.
+    :param template_source:     The path or name of the template to show on the report
     """
     out_path = "{}/{}".format(PATH, OUT_DIR)
     if os.path.exists(out_path):
@@ -255,8 +308,8 @@ def run_pytest(
 class UserSettings(MutableMapping):
     FILE_NAME = "UserSettings.ini"
 
-    def __init__(self):
-        user_config_dir = appdirs.AppDirs("org.onap.vvp", "ONAP").user_config_dir
+    def __init__(self, namespace, owner):
+        user_config_dir = appdirs.AppDirs(namespace, owner).user_config_dir
         if not os.path.exists(user_config_dir):
             os.makedirs(user_config_dir, exist_ok=True)
         self._settings_path = os.path.join(user_config_dir, self.FILE_NAME)
@@ -315,7 +368,9 @@ class Config:
         else:
             with open(self.DEFAULT_FILENAME, "r") as f:
                 self._config = yaml.load(f)
-        self._user_settings = UserSettings()
+        self._user_settings = UserSettings(
+            self._config["namespace"], self._config["owner"]
+        )
         self._watched_variables = []
         self._validate()
         self._manager = multiprocessing.Manager()
@@ -331,6 +386,7 @@ class Config:
         for var in self._watched_variables:
             var.trace_add("write", self.save_settings)
 
+    # noinspection PyProtectedMember,PyUnusedLocal
     def save_settings(self, *args):
         """Save the value of all watched variables to user settings"""
         for var in self._watched_variables:
@@ -358,6 +414,53 @@ class Config:
             )
         )
 
+    @property
+    def disclaimer_text(self) -> str:
+        return self._config["ui"].get("disclaimer-text", "")
+
+    @property
+    def requirement_link_text(self) -> str:
+        return self._config["ui"].get("requirement-link-text", "")
+
+    @property
+    def requirement_link_url(self) -> str:
+        path = self._config["ui"].get("requirement-link-url", "")
+        return "file://{}".format(os.path.join(PATH, path))
+
+    @property
+    def terms(self) -> dict:
+        return self._config.get("terms", {})
+
+    @property
+    def terms_link_url(self) -> Optional[str]:
+        return self.terms.get("path")
+
+    @property
+    def terms_link_text(self):
+        return self.terms.get("popup-link-text")
+
+    @property
+    def terms_version(self) -> Optional[str]:
+        return self.terms.get("version")
+
+    @property
+    def terms_popup_title(self) -> Optional[str]:
+        return self.terms.get("popup-title")
+
+    @property
+    def terms_popup_message(self) -> Optional[str]:
+        return self.terms.get("popup-msg-text")
+
+    @property
+    def are_terms_accepted(self) -> bool:
+        version = "terms-{}".format(self.terms_version)
+        return self._user_settings.get(version, "False") == "True"
+
+    def set_terms_accepted(self):
+        version = "terms-{}".format(self.terms_version)
+        self._user_settings[version] = "True"
+        self._user_settings.save()
+
     def default_verbosity(self, levels: Dict[str, str]) -> str:
         requested_level = self._user_settings.get("verbosity") or self._config[
             "settings"
@@ -367,7 +470,7 @@ class Config:
             if key.lower().startswith(requested_level.lower()):
                 return key
         raise RuntimeError(
-            "Invalid default-verbosity level {}. Valid"
+            "Invalid default-verbosity level {}. Valid "
             "values are {}".format(requested_level, ", ".join(keys))
         )
 
@@ -438,6 +541,106 @@ class Config:
                 )
 
 
+def validate():
+    return True
+
+
+class Dialog(Toplevel):
+    """
+    Adapted from http://www.effbot.org/tkinterbook/tkinter-dialog-windows.htm
+    """
+
+    def __init__(self, parent: Frame, title=None):
+        Toplevel.__init__(self, parent)
+        self.transient(parent)
+        if title:
+            self.title(title)
+        self.parent = parent
+        self.result = None
+        body = Frame(self)
+        self.initial_focus = self.body(body)
+        body.pack(padx=5, pady=5)
+        self.buttonbox()
+        self.grab_set()
+        if not self.initial_focus:
+            self.initial_focus = self
+        self.protocol("WM_DELETE_WINDOW", self.cancel)
+        self.geometry(
+            "+%d+%d" % (parent.winfo_rootx() + 600, parent.winfo_rooty() + 400)
+        )
+        self.initial_focus.focus_set()
+        self.wait_window(self)
+
+    def body(self, master):
+        raise NotImplementedError()
+
+    # noinspection PyAttributeOutsideInit
+    def buttonbox(self):
+        box = Frame(self)
+        self.accept = Button(
+            box,
+            text="Accept",
+            width=10,
+            state=DISABLED,
+            command=self.ok,
+            default=ACTIVE,
+        )
+        self.accept.pack(side=LEFT, padx=5, pady=5)
+        self.decline = Button(
+            box, text="Decline", width=10, state=DISABLED, command=self.cancel
+        )
+        self.decline.pack(side=LEFT, padx=5, pady=5)
+        self.bind("<Return>", self.ok)
+        self.bind("<Escape>", self.cancel)
+        box.pack()
+
+    # noinspection PyUnusedLocal
+    def ok(self, event=None):
+        if not validate():
+            self.initial_focus.focus_set()  # put focus back
+            return
+        self.withdraw()
+        self.update_idletasks()
+        self.apply()
+        self.cancel()
+
+    # noinspection PyUnusedLocal
+    def cancel(self, event=None):
+        self.parent.focus_set()
+        self.destroy()
+
+    def apply(self):
+        raise NotImplementedError()
+
+    def activate_buttons(self):
+        self.accept.configure(state=NORMAL)
+        self.decline.configure(state=NORMAL)
+
+
+class TermsAndConditionsDialog(Dialog):
+    def __init__(self, parent, config: Config):
+        self.config = config
+        self.parent = parent
+        super().__init__(parent, config.terms_popup_title)
+
+    def body(self, master):
+        Label(master, text=self.config.terms_popup_message).grid(row=0, pady=5)
+        tc_link = Label(
+            master, text=self.config.terms_link_text, fg="blue", cursor="hand2"
+        )
+        ValidatorApp.underline(tc_link)
+        tc_link.bind("<Button-1>", self.open_terms)
+        tc_link.grid(row=1, pady=5)
+
+    # noinspection PyUnusedLocal
+    def open_terms(self, event):
+        webbrowser.open(self.config.terms_link_url)
+        self.activate_buttons()
+
+    def apply(self):
+        self.config.set_terms_accepted()
+
+
 class ValidatorApp:
     VERBOSITY_LEVELS = {"Less": "", "Standard (-v)": "-v", "More (-vv)": "-vv"}
 
@@ -450,7 +653,16 @@ class ValidatorApp:
         self._root.title(self.config.app_name)
         self._root.protocol("WM_DELETE_WINDOW", self.shutdown)
 
-        main_window = PanedWindow(self._root)
+        if self.config.terms_link_text:
+            menubar = Menu(self._root)
+            menubar.add_command(
+                label=self.config.terms_link_text,
+                command=lambda: webbrowser.open(self.config.terms_link_url),
+            )
+            self._root.config(menu=menubar)
+
+        parent_frame = Frame(self._root)
+        main_window = PanedWindow(parent_frame)
         main_window.pack(fill=BOTH, expand=1)
 
         control_panel = PanedWindow(
@@ -459,6 +671,10 @@ class ValidatorApp:
         actions = Frame(control_panel)
         control_panel.add(actions)
         control_panel.paneconfigure(actions, minsize=250)
+
+        if self.config.disclaimer_text or self.config.requirement_link_text:
+            self.footer = self.create_footer(parent_frame)
+        parent_frame.pack(fill=BOTH, expand=True)
 
         # profile start
         number_of_categories = len(self.config.category_names)
@@ -471,6 +687,7 @@ class ValidatorApp:
             category_name = self.config.category_names[x]
             category_value = IntVar(value=0)
             category_value._name = "category_{}".format(category_name.replace(" ", "_"))
+            # noinspection PyProtectedMember
             category_value.set(self.config.get_category_value(category_value._name))
             self.categories.append(category_value)
             category_checkbox = Checkbutton(
@@ -528,8 +745,10 @@ class ValidatorApp:
         directory_browse = Button(actions, text="...", command=self.ask_template_source)
         directory_browse.grid(row=4, column=3, pady=5, sticky=W)
 
-        validate = Button(actions, text="Validate Templates", command=self.validate)
-        validate.grid(row=5, column=1, columnspan=2, pady=5)
+        validate_button = Button(
+            actions, text="Validate Templates", command=self.validate
+        )
+        validate_button.grid(row=5, column=1, columnspan=2, pady=5)
 
         self.result_panel = Frame(actions)
         # We'll add these labels now, and then make them visible when the run completes
@@ -569,6 +788,43 @@ class ValidatorApp:
             self.halt_on_failure,
         )
         self.schedule(self.execute_pollers)
+        if self.config.terms_link_text and not self.config.are_terms_accepted:
+            TermsAndConditionsDialog(parent_frame, self.config)
+            if not self.config.are_terms_accepted:
+                self.shutdown()
+
+    def create_footer(self, parent_frame):
+        footer = Frame(parent_frame)
+        disclaimer = Message(
+            footer, text=self.config.disclaimer_text, anchor=CENTER
+        )
+        disclaimer.grid(row=0, pady=2)
+        parent_frame.bind(
+            "<Configure>", lambda e: disclaimer.configure(width=e.width - 20)
+        )
+        if self.config.requirement_link_text:
+            requirement_link = Text(
+                footer,
+                height=1,
+                bg=disclaimer.cget("bg"),
+                relief=FLAT,
+                font=disclaimer.cget("font"),
+            )
+            requirement_link.tag_configure("center", justify="center")
+            hyperlinks = HyperlinkManager(requirement_link)
+            requirement_link.insert(INSERT, "Validating: ")
+            requirement_link.insert(
+                INSERT,
+                self.config.requirement_link_text,
+                hyperlinks.add(self.open_requirements),
+            )
+            requirement_link.tag_add("center", "1.0", "end")
+            requirement_link.config(state=DISABLED)
+            requirement_link.grid(row=1, pady=2)
+            ToolTip(requirement_link, self.config.requirement_link_url)
+        footer.grid_columnconfigure(0, weight=1)
+        footer.pack(fill=BOTH, expand=True)
+        return footer
 
     def ask_template_source(self):
         if self.input_format.get() == "ZIP File":
@@ -694,9 +950,14 @@ class ValidatorApp:
         ext = ext_mapping.get(self.report_format.get().lower())
         return os.path.join(PATH, OUT_DIR, "report.{}".format(ext))
 
+    # noinspection PyUnusedLocal
     def open_report(self, event):
         """Open the report in the user's default browser"""
         webbrowser.open_new("file://{}".format(self.report_file_path))
+
+    def open_requirements(self):
+        """Open the report in the user's default browser"""
+        webbrowser.open_new(self.config.requirement_link_url)
 
     def start(self):
         """Start the event loop of the application.  This method does not return"""
