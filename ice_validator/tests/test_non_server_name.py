@@ -43,11 +43,12 @@ resource property name
 
 import collections
 
-import pytest
+import pytest, os
 
 from .structures import Heat
 from .structures import HeatProcessor
 from .helpers import validates
+from tests.utils import nested_files
 
 VERSION = "1.2.0"
 
@@ -148,11 +149,13 @@ def test_non_server_name(yaml_file):
 
 
 @validates("R-85734")
-def test_non_server_name_unique(yaml_files):
+def test_non_server_name_unique(heat_template):
     """Test name has unique value
     """
+    list_nest = nested_files.get_list_of_nested_files(heat_template, os.path.dirname(heat_template))
+    list_nest.append(heat_template)
     non_servers = {}
-    for yaml_file in yaml_files:
+    for yaml_file in list_nest:
         h = Heat(filepath=yaml_file)
         non_servers.update(get_non_servers(h))
     names = collections.defaultdict(set)
