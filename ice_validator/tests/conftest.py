@@ -650,7 +650,7 @@ def aggregate_run_results(collection_failures, test_results):
 
 
 def relative_paths(base_dir, paths):
-    return [os.path.relpath(p, base_dir) for p in paths]
+    return [os.path.relpath(p, base_dir) for p in paths if p != ""]
 
 
 # noinspection PyTypeChecker
