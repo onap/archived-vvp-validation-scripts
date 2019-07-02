@@ -494,11 +494,11 @@ class NeutronPortProcessor(HeatProcessor):
         """Returns True/False as `resource` is/not
         An OS::Nova:Port with the property binding:vnic_type
         """
-        return nested_dict.get(
-            resource, "type"
-        ) == cls.resource_type and "binding:vnic_type" in nested_dict.get(
-            resource, "properties", default={}
-        )
+        resource_properties = nested_dict.get(resource, "properties", default={})
+        if nested_dict.get(resource, "type") == cls.resource_type and resource_properties.get("binding:vnic_type", "") == "direct":
+            return True
+
+        return False
 
 
 class NovaServerProcessor(HeatProcessor):
