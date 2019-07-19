@@ -43,6 +43,10 @@ import json
 import os
 import re
 import time
+try:
+    from html import escape
+except ImportError:
+    from cgi import escape
 from collections import defaultdict
 
 import traceback
@@ -745,8 +749,9 @@ def generate_html_report(outpath, categories, template_path, failures):
             {
                 "file_links": make_href(failure.files, template_path),
                 "test_id": failure.test_id,
-                "error_message": failure.error_message.replace("\n", "<br/><br/>"),
-                "raw_output": failure.raw_output,
+                "error_message": escape(failure.error_message).replace("\n",
+                                                                       "<br/><br/>"),
+                "raw_output": escape(failure.raw_output),
                 "requirements": docutils.core.publish_parts(
                     writer_name="html", source=failure.requirement_text(reqs)
                 )["body"],
