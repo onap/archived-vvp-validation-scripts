@@ -36,15 +36,20 @@
 # ============LICENSE_END============================================
 import re
 
+import pytest
+
 from tests.helpers import validates, check_indices
 from tests.structures import Heat
-
+from tests.utils import nested_files
 
 AZ_PATTERN = re.compile(r"^(availability_zone_)(\d+)$")
 
 
 @validates("R-98450")
 def test_availability_zones_start_at_0(heat_template):
+    if nested_files.file_is_a_nested_template(heat_template):
+        pytest.skip("Test does not apply to nested files")
+
     params = Heat(heat_template).parameters
     invalid_params = check_indices(AZ_PATTERN, params, "Availability Zone Parameters")
     assert not invalid_params, ". ".join(invalid_params)

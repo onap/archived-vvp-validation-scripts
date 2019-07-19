@@ -43,6 +43,7 @@ import re
 
 import pytest
 from tests import cached_yaml as yaml
+from tests.utils import nested_files
 
 from .helpers import validates
 
@@ -54,6 +55,9 @@ def test_availability_zone_naming(yaml_file):
     """
     Make sure all availability zones are properly formatted
     """
+
+    if nested_files.file_is_a_nested_template(yaml_file):
+        pytest.skip("test does not apply to nested files")
 
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
