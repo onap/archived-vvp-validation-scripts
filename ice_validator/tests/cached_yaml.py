@@ -55,3 +55,6 @@ def load(fp):
     if abs_path not in YAML_CACHE:
         YAML_CACHE[abs_path] = yaml.safe_load(fp)
     return YAML_CACHE[abs_path]
+
+
+safe_load = load

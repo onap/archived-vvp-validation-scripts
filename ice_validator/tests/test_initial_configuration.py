@@ -80,7 +80,7 @@ def test_02_no_duplicate_keys_in_file(yaml_file):
 
     try:
         with open(yaml_file) as fh:
-            normal_yaml.load(fh)
+            normal_yaml.safe_load(fh)
     except ConstructorError as e:
         pytest.fail("{} {}".format(e.problem, e.problem_mark))
 
@@ -93,7 +93,7 @@ def test_03_all_referenced_resources_exists(yaml_file):
     actually exists in all yaml files
     """
     with open(yaml_file) as fh:
-        yml = yaml.load(fh)
+        yml = yaml.safe_load(fh)
 
     # skip if resources are not defined
     if "resources" not in yml:
