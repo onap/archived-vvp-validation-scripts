@@ -35,13 +35,16 @@
 #
 # ============LICENSE_END============================================
 #
+import contextlib
 import csv
+import io
 import json
 import os
-import subprocess
+import subprocess  #nosec
 import sys
 
 import pytest
+from flake8.main.application import Application
 
 from update_reqs import get_requirements
 
@@ -167,14 +170,24 @@ def check_non_testable_requirements_are_not_mapped():
 
 
 def check_flake8_passes():
-    result = subprocess.run(
-        ["flake8", "."],
-        encoding="utf-8",
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
+    output = io.StringIO()
+    with contextlib.redirect_stdout(output), contextlib.redirect_stderr(output):
+        app = Application()
+        app.run(["ice_validator"])
+    output.seek(0)
+    lines = [f"   {l}" for l in output.readlines()]
+    return ["flake8 errors detected:"] + lines if lines else []
+
+
+def check_bandit_passes():
+    result = subprocess.run(                                            #nosec
+        ["bandit", "-c", "bandit.yaml", "-r", ".", "-x", "./.tox/**"],  #nosec
+        encoding="utf-8",                                               #nosec
+        stdout=subprocess.PIPE,                                         #nosec
+        stderr=subprocess.PIPE,                                         #nosec
+    )                                                                   #nosec
     msgs = result.stdout.split("\n") if result.returncode != 0 else []
-    return ["flake8 errors detected:"] + [f"  {e}" for e in msgs] if msgs else []
+    return ["bandit errors detected:"] + [f"  {e}" for e in msgs] if msgs else []
 
 
 if __name__ == "__main__":
@@ -184,6 +197,7 @@ if __name__ == "__main__":
         check_testable_requirements_are_mapped,
         check_non_testable_requirements_are_not_mapped,
         check_flake8_passes,
+        check_bandit_passes,
     ]
     results = [check() for check in checks]
     errors = "\n".join("\n".join(msg) for msg in results if msg)

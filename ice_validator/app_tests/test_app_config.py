@@ -62,7 +62,7 @@ settings:
 # noinspection PyShadowingNames
 @pytest.fixture(scope="module")
 def config():
-    return vvp.Config(yaml.load(StringIO(DEFAULT_CONFIG)))
+    return vvp.Config(yaml.safe_load(StringIO(DEFAULT_CONFIG)))
 
 
 def test_app_name(config):
@@ -114,7 +114,7 @@ settings:
 
 
 def test_missing_category_fields():
-    settings = yaml.load(StringIO(MISSING_CATEGORY_FIELD))
+    settings = yaml.safe_load(StringIO(MISSING_CATEGORY_FIELD))
     with pytest.raises(RuntimeError) as e:
         vvp.Config(settings)
     assert "Missing: name" in str(e)
