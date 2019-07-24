@@ -37,15 +37,14 @@
 #
 #
 
-pytest==3.7.4
-PyYAML==3.13
-pytest-tap==2.3
-boltons==18.0.1
-xlsxwriter==1.1.2
-docutils==0.14
-requests==2.20.0
+pytest>=3.7,<3.8
+PyYAML>=5.1,<5.2
+boltons>=19.1,<19.2
+xlsxwriter==1.1.8
+docutils>=0.15,<0.16
+requests>=2.22,<2.23
 appdirs==1.4.3
-jinja2==2.10
+jinja2>=2.10,<2.11
 six==1.12.0
 pyinstaller
 mock
