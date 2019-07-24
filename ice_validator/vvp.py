@@ -367,7 +367,7 @@ class Config:
             self._config = config
         else:
             with open(self.DEFAULT_FILENAME, "r") as f:
-                self._config = yaml.load(f)
+                self._config = yaml.safe_load(f)
         self._user_settings = UserSettings(
             self._config["namespace"], self._config["owner"]
         )

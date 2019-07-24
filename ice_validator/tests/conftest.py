@@ -963,7 +963,7 @@ def hash_directory(path):
     :param path: string directory containing files
     :return: string MD5 hash code (hex)
     """
-    md5 = hashlib.md5()
+    md5 = hashlib.md5()  # nosec
     for dir_path, sub_dirs, filenames in os.walk(path):
         for filename in filenames:
             file_path = os.path.join(dir_path, filename)
