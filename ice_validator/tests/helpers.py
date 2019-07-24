@@ -218,7 +218,7 @@ def traverse(data, search_key, func, path=None):
     elif isinstance(data, list):
         for value in data:
             curr_path = path + [value]
-            if isinstance(value, dict):
+            if isinstance(value, (dict, list)):
                 traverse(value, search_key, func, curr_path)
             elif value == search_key:
                 func(curr_path, value)
