@@ -51,7 +51,7 @@ class ParameterCollector:
     def __call__(self, _, value):
         if isinstance(value, str):
             self.params.add(value)
-        elif isinstance(value, list) and len(value) >= 1:
+        elif isinstance(value, list) and len(value) >= 1 and isinstance(value[0], str):
             self.params.add(value[0])
 
 
