@@ -425,7 +425,9 @@ class Config:
     @property
     def requirement_link_url(self) -> str:
         path = self._config["ui"].get("requirement-link-url", "")
-        return "file://{}".format(os.path.join(PATH, path))
+        if not path.startswith("http"):
+            path = "file://{}".format(os.path.join(PATH, path))
+        return path
 
     @property
     def terms(self) -> dict:
