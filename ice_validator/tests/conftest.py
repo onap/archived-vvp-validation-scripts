@@ -43,6 +43,10 @@ import json
 import os
 import re
 import time
+
+from preload.preload import generate_preloads
+from tests.helpers import get_output_dir
+
 try:
     from html import escape
 except ImportError:
@@ -93,18 +97,6 @@ COLLECTION_FAILURES = []
 
 # Captures the results of every test run
 ALL_RESULTS = []
-
-
-def get_output_dir(config):
-    """
-    Retrieve the output directory for the reports and create it if necessary
-    :param config: pytest configuration
-    :return: output directory as string
-    """
-    output_dir = config.option.output_dir or DEFAULT_OUTPUT_DIR
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir, exist_ok=True)
-    return output_dir
 
 
 def extract_error_msg(rep):
@@ -350,6 +342,7 @@ def pytest_sessionfinish(session, exitstatus):
         categories_selected,
         session.config.option.report_format,
     )
+    generate_preloads(session, exitstatus)
 
 
 # noinspection PyUnusedLocal

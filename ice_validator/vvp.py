@@ -49,7 +49,6 @@ NOTE: This script does require Python 3.6+
 import appdirs
 import os
 import pytest
-import sys
 import version
 import yaml
 import contextlib
@@ -58,6 +57,8 @@ import queue
 import tempfile
 import webbrowser
 import zipfile
+import platform
+import subprocess  # nosec
 
 from collections import MutableMapping
 from configparser import ConfigParser
@@ -235,18 +236,6 @@ class QueueWriter:
         pass
 
 
-def get_plugins() -> Optional[List]:
-    """When running in a frozen bundle, plugins to be registered
-    explicitly. This method will return the required plugins to register
-    based on the run mode"""
-    if hasattr(sys, "frozen"):
-        import pytest_tap.plugin
-
-        return [pytest_tap.plugin]
-    else:
-        return None
-
-
 def run_pytest(
     template_dir: str,
     log: TextIO,
@@ -299,7 +288,7 @@ def run_pytest(
                     args.extend(("--category", category))
             if not halt_on_failure:
                 args.append("--continue-on-failure")
-            pytest.main(args=args, plugins=get_plugins())
+            pytest.main(args=args)
             result_queue.put((True, None))
         except Exception as e:
             result_queue.put((False, e))
@@ -760,6 +749,13 @@ class ValidatorApp:
         )
         self.underline(self.result_label)
         self.result_label.bind("<Button-1>", self.open_report)
+
+        self.preload_label = Label(
+            self.result_panel, text="View Preloads", fg="blue", cursor="hand2"
+        )
+        self.underline(self.preload_label)
+        self.preload_label.bind("<Button-1>", self.open_preloads)
+
         self.result_panel.grid(row=6, column=1, columnspan=2)
         control_panel.pack(fill=BOTH, expand=1)
 
@@ -775,10 +771,12 @@ class ValidatorApp:
         # room for them
         self.completion_label.pack()
         self.result_label.pack()  # Show report link
+        self.preload_label.pack()  # Show preload link
         self._root.after_idle(
             lambda: (
                 self.completion_label.pack_forget(),
                 self.result_label.pack_forget(),
+                self.preload_label.pack_forget(),
             )
         )
 
@@ -797,9 +795,7 @@ class ValidatorApp:
 
     def create_footer(self, parent_frame):
         footer = Frame(parent_frame)
-        disclaimer = Message(
-            footer, text=self.config.disclaimer_text, anchor=CENTER
-        )
+        disclaimer = Message(footer, text=self.config.disclaimer_text, anchor=CENTER)
         disclaimer.grid(row=0, pady=2)
         parent_frame.bind(
             "<Configure>", lambda e: disclaimer.configure(width=e.width - 20)
@@ -853,6 +849,7 @@ class ValidatorApp:
             self.clear_log()
             self.completion_label.pack_forget()
             self.result_label.pack_forget()
+            self.preload_label.pack_forget()
             self.task = multiprocessing.Process(
                 target=run_pytest,
                 args=(
@@ -909,6 +906,7 @@ class ValidatorApp:
             if is_success:
                 self.completion_label.pack()
                 self.result_label.pack()  # Show report link
+                self.preload_label.pack()  # Show preload link
             else:
                 self.log_panel.insert(END, str(e))
 
@@ -956,6 +954,17 @@ class ValidatorApp:
     def open_report(self, event):
         """Open the report in the user's default browser"""
         webbrowser.open_new("file://{}".format(self.report_file_path))
+
+    @staticmethod
+    def open_preloads(event):
+        """Open the report in the user's default browser"""
+        path = os.path.join(PATH, OUT_DIR, "preloads")
+        if platform.system() == "Windows":
+            os.startfile(path)  # nosec
+        elif platform.system() == "Darwin":
+            subprocess.Popen(["open", path])  # nosec
+        else:
+            subprocess.Popen(["xdg-open", path])  # nosec
 
     def open_requirements(self):
         """Open the report in the user's default browser"""

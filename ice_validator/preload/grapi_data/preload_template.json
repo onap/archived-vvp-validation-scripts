@@ -1,0 +1,44 @@
+{
+    "input": {
+        "request-information": {
+            "request-id": "robot12",
+            "order-version": "1",
+            "notification-url": "openecomp.org",
+            "order-number": "1",
+            "request-action": "PreloadVfModuleRequest"
+        },
+        "sdnc-request-header": {
+            "svc-request-id": "robot12",
+            "svc-notification-url": "http://openecomp.org:8080/adapters/rest/SDNCNotify",
+            "svc-action": "reserve"
+        },
+        "preload-vf-module-topology-information": {
+            "vnf-topology-identifier-structure": {
+                "vnf-name": "",
+                "vnf-type": ""
+            },
+            "vnf-resource-assignments": {
+                "availability-zones": {
+                    "availability-zone": []
+                },
+                "vnf-networks": {
+                    "vnf-network": []
+                }
+            },
+            "vf-module-topology": {
+                "vf-module-assignments": {
+                    "vms": {
+                        "vm": []
+                    }
+                },
+                "vf-module-topology-identifier": {
+                    "vf-module-type": "",
+                    "vf-module-name": ""
+                },
+                "vf-module-parameters": {
+                    "param": []
+                }
+            }
+        }
+    }
+}

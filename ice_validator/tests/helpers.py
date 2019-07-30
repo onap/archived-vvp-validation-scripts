@@ -47,7 +47,8 @@ from collections import defaultdict
 from boltons import funcutils
 from tests import cached_yaml as yaml
 
-VERSION = "1.1.0"
+__path__ = [os.path.dirname(os.path.abspath(__file__))]
+DEFAULT_OUTPUT_DIR = "{}/../output".format(__path__[0])
 
 
 def check_basename_ending(template_type, basename):
@@ -338,3 +339,15 @@ def get_param(property_value):
         else:
             return param
     return None
+
+
+def get_output_dir(config):
+    """
+    Retrieve the output directory for the reports and create it if necessary
+    :param config: pytest configuration
+    :return: output directory as string
+    """
+    output_dir = config.option.output_dir or DEFAULT_OUTPUT_DIR
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+    return output_dir
