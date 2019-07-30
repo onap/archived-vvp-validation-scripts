@@ -39,251 +39,276 @@
 """ environment file structure
 """
 import os
-from collections import Iterable
 
-from tests.structures import Heat
-from tests.utils import nested_dict
-from .helpers import (
-    validates,
-    categories,
-    get_environment_pair,
-    find_environment_file,
-    get_param,
-)
 import re
 import pytest
-from tests import cached_yaml as yaml
-
-VERSION = "1.0.0"
-
-# pylint: disable=invalid-name
-
-
-def check_parameter_exists(pattern, parameters):
-    if not parameters:
-        return False
-
-    for param in parameters:
-        if pattern.search(param):
-            return True
-
-    return False
+from tests.helpers import (
+    prop_iterator,
+    get_param,
+    get_environment_pair,
+    validates,
+    find_environment_file,
+    categories,
+)
+from tests.structures import Heat
+from tests.utils.nested_files import file_is_a_nested_template
 
 
-def check_param_in_env_file(environment_pair, param, DESIRED, exclude_parameter=None):
+# Whats persistent mean? It means it goes in env.
+# When adding an additional case, note the ","
+# at the end of a property to make it a tuple.
+ENV_PARAMETER_SPEC = {
+    "PLATFORM PROVIDED": [
+        {"property": ("vnf_id",), "persistent": False, "kwargs": {}},
+        {"property": ("vnf_name",), "persistent": False, "kwargs": {}},
+        {"property": ("vf_module_id",), "persistent": False, "kwargs": {}},
+        {"property": ("vf_module_index",), "persistent": False, "kwargs": {}},
+        {"property": ("vf_module_name",), "persistent": False, "kwargs": {}},
+        {"property": ("workload_context",), "persistent": False, "kwargs": {}},
+        {"property": ("environment_context",), "persistent": False, "kwargs": {}},
+        {"property": (r"^(.+?)_net_fqdn$",), "persistent": False, "kwargs": {}},
+    ],
+    "ALL": [{"property": ("name",), "persistent": False, "kwargs": {}}],
+    "OS::Nova::Server": [
+        {"property": ("image",), "persistent": True, "kwargs": {}},
+        {"property": ("flavor",), "persistent": True, "kwargs": {}},
+        {"property": ("availability_zone",), "persistent": False, "kwargs": {}},
+    ],
+    "OS::Neutron::Port": [
+        {"property": ("network",), "persistent": False, "kwargs": {}},
+        {
+            "property": ("fixed_ips", "ip_address"),
+            "persistent": False,
+            "network_type": "external",
+            "kwargs": {"exclude_parameter": re.compile(r"^(.+?)_int_(.+?)$")},
+        },
+        {
+            "property": ("fixed_ips", "ip_address"),
+            "persistent": True,
+            "network_type": "internal",
+            "kwargs": {"exclude_parameter": re.compile(r"^((?!_int_).)*$")},
+        },
+        {"property": ("fixed_ips", "subnet"), "persistent": False, "kwargs": {}},
+        {
+            "property": ("fixed_ips", "allowed_address_pairs"),
+            "persistent": False,
+            "network_type": "external",
+            "kwargs": {"exclude_parameter": re.compile(r"^(.+?)_int_(.+?)$")},
+        },
+        {
+            "property": ("fixed_ips", "allowed_address_pairs"),
+            "persistent": True,
+            "network_type": "internal",
+            "kwargs": {"exclude_parameter": re.compile(r"^((?!_int_).)*$")},
+        },
+    ],
+    "OS::ContrailV2::InterfaceRouteTable": [
+        {
+            "property": (
+                "interface_route_table_routes",
+                "interface_route_table_routes_route",
+            ),
+            "persistent": False,
+            "kwargs": {},
+        }
+    ],
+    "OS::Heat::ResourceGroup": [
+        {
+            "property": ("count",),
+            "persistent": True,
+            "kwargs": {
+                "exclude_resource": re.compile(
+                    r"^(.+?)_subint_(.+?)_port_(.+?)_subinterfaces$"
+                )
+            },
+        }
+    ],
+    "OS::ContrailV2::InstanceIp": [
+        {
+            "property": ("instance_ip_address",),
+            "persistent": False,
+            "network_type": "external",
+            "kwargs": {"exclude_resource": re.compile(r"^.*_int_.*$")},
+        },
+        {
+            "property": ("instance_ip_address",),
+            "persistent": True,
+            "network_type": "internal",
+            "kwargs": {"exclude_resource": re.compile(r"(?!.*_int_.*)")},
+        },
+        {
+            "property": ("subnet_uuid",),
+            "persistent": False,
+            "network_type": "internal",
+            "kwargs": {"exclude_resource": re.compile(r"(?!.*_int_.*)")},
+        },
+    ],
+    "OS::ContrailV2::VirtualMachineInterface": [
+        {
+            "property": (
+                "virtual_machine_interface_allowed_address_pairs",
+                "virtual_machine_interface_allowed_address_pairs_allowed_address_pair",
+                "virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip",
+                "virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip_ip_prefix",
+            ),
+            "persistent": False,
+            "network_type": "external",
+            "kwargs": {"exclude_resource": re.compile(r"(?!.*_int_.*)")},
+        }
+    ],
+}
 
-    # workaround for internal/external parameters
-    if exclude_parameter and re.match(exclude_parameter, param):
-        return False
 
-    if not environment_pair:
-        pytest.skip("No heat/env pair could be identified")
-
-    env_file = environment_pair.get("eyml")
-
-    pattern = re.compile(r"^{}$".format(param))
-
-    if "parameters" not in env_file:
-        pytest.skip("No parameters specified in the environment file")
-
-    return (
-        check_parameter_exists(pattern, env_file.get("parameters", {})) is not DESIRED
-    )
-
-
-"""
-This function supports this structure, deviations
-may or may not work without enhancement
-
-resource_id:
-    type: <resource_type>
-    properties:
-        prop0: { get_param: parameter_0 }
-        prop1:  # this is a list of dicts
-            - nested_prop_0: { get_param: parameter_1 }
-            - nested_prop_1: { get_param: [parameter_2, {index}] }
-        prop2:  # this is a dict of dicts
-            nested_prop_0: { get_param: parameter_1 }
-        prop3: { get_param: [parameter_3, 0]}
-"""
-
-
-def check_resource_parameter(
-    environment_pair,
-    prop,
-    DESIRED,
-    resource_type,
-    resource_type_inverse=False,
-    nested_prop="",
-    exclude_resource="",
-    exclude_parameter="",
-):
-    if not environment_pair:
-        pytest.skip("No heat/env pair could be identified")
-
-    env_file = environment_pair.get("eyml")
-    template_file = environment_pair.get("yyml")
-
-    if "parameters" not in env_file:
-        pytest.skip("No parameters specified in the environment file")
-
+def run_test_parameter(yaml_file, resource_type, *prop, **kwargs):
+    template_parameters = []
     invalid_parameters = []
-    if template_file:
-        for resource, resource_prop in template_file.get("resources", {}).items():
-
-            # workaround for subinterface resource groups
-            if exclude_resource and re.match(exclude_resource, resource):
-                continue
-
-            if (
-                resource_prop.get("type") == resource_type and not resource_type_inverse
-            ) or (resource_prop.get("type") != resource_type and resource_type_inverse):
-
-                pattern = False
-
-                if not resource_prop.get("properties"):
-                    continue
-
-                resource_parameter = resource_prop.get("properties").get(prop)
-
-                if not resource_parameter:
-                    continue
-                if isinstance(resource_parameter, list) and nested_prop:
-                    for param in resource_parameter:
-                        nested_param = param.get(nested_prop)
-                        if not nested_param:
-                            continue
-
-                        if isinstance(nested_param, dict):
-                            pattern = nested_param.get("get_param")
-                        else:
-                            pattern = ""
-
-                        if not pattern:
-                            continue
-
-                        if isinstance(pattern, list):
-                            pattern = pattern[0]
-
-                        if check_param_in_env_file(
-                            environment_pair,
-                            pattern,
-                            DESIRED,
-                            exclude_parameter=exclude_parameter,
-                        ):
-                            invalid_parameters.append(pattern)
-
-                elif isinstance(resource_parameter, dict):
-                    if nested_prop and nested_prop in resource_parameter:
-                        resource_parameter = resource_parameter.get(nested_prop)
-
-                    pattern = resource_parameter.get("get_param")
-                    if not pattern:
-                        continue
-
-                    if isinstance(pattern, list):
-                        pattern = pattern[0]
-
-                    if check_param_in_env_file(
-                        environment_pair,
-                        pattern,
-                        DESIRED,
-                        exclude_parameter=exclude_parameter,
-                    ):
-                        invalid_parameters.append(pattern)
+    param_spec = {}
+    parameter_spec = ENV_PARAMETER_SPEC.get(
+        resource_type
+    )  # matching spec dict on resource type
+    for spec in parameter_spec:
+        # iterating through spec dict and trying to match on property
+        if spec.get("property") == prop:
+            yep = True
+            for (
+                k,
+                v,
+            ) in (
+                kwargs.items()
+            ):  # now matching on additional kwargs passed in from test (i.e. network_type)
+                if not spec.get(k) or spec.get(k) != v:
+                    yep = False
+            if yep:
+                param_spec = spec
+                if resource_type == "PLATFORM PROVIDED":
+                    if file_is_a_nested_template(yaml_file):
+                        pytest.skip(
+                            "Not checking nested files for PLATFORM PROVIDED params"
+                        )
+                    template_parameters.append(
+                        {"resource": "", "param": param_spec.get("property")[0]}
+                    )
                 else:
-                    continue
+                    all_resources = False
+                    if resource_type == "ALL":
+                        all_resources = True
+                    template_parameters = get_template_parameters(
+                        yaml_file,
+                        resource_type,
+                        param_spec,
+                        all_resources=all_resources,
+                    )  # found the correct spec, proceeding w/ test
+                break
 
-    return set(invalid_parameters)
+    for parameter in template_parameters:
+        param = parameter.get("param")
+        persistence = param_spec.get("persistent")
+
+        if env_violation(yaml_file, param, spec.get("persistent")):
+            human_text = "must" if persistence else "must not"
+            human_text2 = "was not" if persistence else "was"
+
+            invalid_parameters.append(
+                "{} parameter {} {} be enumerated in an environment file, but "
+                "parameter {} for {} {} found.".format(
+                    resource_type, prop, human_text, param, yaml_file, human_text2
+                )
+            )
+
+    assert not invalid_parameters, "\n".join(invalid_parameters)
 
 
-def run_check_resource_parameter(
-    yaml_file, prop, DESIRED, resource_type, check_resource=True, **kwargs
-):
+def get_template_parameters(yaml_file, resource_type, spec, all_resources=False):
+    parameters = []
+
+    heat = Heat(yaml_file)
+    if all_resources:
+        resources = heat.resources
+    else:
+        resources = heat.get_resource_by_type(resource_type)
+
+    for rid, resource_props in resources.items():
+        for param in prop_iterator(resource_props, *spec.get("property")):
+            if param and get_param(param) and param_helper(spec, get_param(param), rid):
+                # this is first getting the param
+                # then checking if its actually using get_param
+                # then checking a custom helper function (mostly for internal vs external networks)
+                parameters.append({"resource": rid, "param": get_param(param)})
+
+    return parameters
+
+
+def env_violation(yaml_file, parameter, persistent):
+    # Returns True IF there's a violation, False if everything looks good.
+
     filepath, filename = os.path.split(yaml_file)
     environment_pair = get_environment_pair(yaml_file)
-
-    if not environment_pair:
-        # this is a nested file
-
-        if not check_resource:
-            # dont check env for nested files
-            # This will be tested separately for parent template
-            pytest.skip("This test doesn't apply to nested files")
-
-        environment_pair = find_environment_file(yaml_file)
-        if environment_pair:
-            with open(yaml_file, "r") as f:
-                yml = yaml.load(f)
-            environment_pair["yyml"] = yml
-        else:
+    if not environment_pair:  # this is a nested file perhaps?
+        environment_pair = find_environment_file(
+            yaml_file
+        )  # we want to check parent env
+        if not environment_pair:
             pytest.skip("unable to determine environment file for nested yaml file")
 
-    if check_resource:
-        invalid_parameters = check_resource_parameter(
-            environment_pair, prop, DESIRED, resource_type, **kwargs
-        )
-    else:
-        invalid_parameters = check_param_in_env_file(environment_pair, prop, DESIRED)
+    env_yaml = environment_pair.get("eyml")
+    parameters = env_yaml.get("parameters", {})
+    in_env = False
+    for param, value in parameters.items():
+        if re.match(parameter, parameter):
+            in_env = True
+            break
 
-    if kwargs.get("resource_type_inverse"):
-        resource_type = "non-{}".format(resource_type)
+    # confusing return. This function is looking for a violation.
+    return not persistent == in_env
 
-    params = (
-        ": {}".format(", ".join(invalid_parameters))
-        if isinstance(invalid_parameters, Iterable)
-        else ""
-    )
 
-    assert not invalid_parameters, (
-        "{} {} parameters in template {}{}"
-        " found in {} environment file{}".format(
-            resource_type,
-            prop,
-            filename,
-            " not" if DESIRED else "",
-            environment_pair.get("name"),
-            params,
-        )
-    )
+def param_helper(spec, param, rid):
+    # helper function that has some predefined additional
+    # checkers, mainly to figure out if internal/external network
+    keeper = True
+    for k, v in spec.get("kwargs").items():
+        if k == "exclude_resource" and re.match(v, rid):
+            keeper = False
+            break
+        elif k == "exclude_parameter" and re.match(v, param):
+            keeper = False
+            break
+
+    return keeper
 
 
 @validates("R-91125")
 def test_nova_server_image_parameter_exists_in_environment_file(yaml_file):
-    run_check_resource_parameter(yaml_file, "image", True, "OS::Nova::Server")
+    run_test_parameter(yaml_file, "OS::Nova::Server", "image")
 
 
 @validates("R-69431")
 def test_nova_server_flavor_parameter_exists_in_environment_file(yaml_file):
-    run_check_resource_parameter(yaml_file, "flavor", True, "OS::Nova::Server")
+    run_test_parameter(yaml_file, "OS::Nova::Server", "flavor")
 
 
 @categories("environment_file")
-@validates("R-22838")
+@validates("R-22838", "R-99812")
 def test_nova_server_name_parameter_doesnt_exist_in_environment_file(yaml_file):
-    run_check_resource_parameter(yaml_file, "name", False, "OS::Nova::Server")
+    run_test_parameter(yaml_file, "ALL", "name")
 
 
 @categories("environment_file")
 @validates("R-59568")
 def test_nova_server_az_parameter_doesnt_exist_in_environment_file(yaml_file):
-    run_check_resource_parameter(
-        yaml_file, "availability_zone", False, "OS::Nova::Server"
-    )
+    run_test_parameter(yaml_file, "OS::Nova::Server", "availability_zone")
 
 
 @categories("environment_file")
 @validates("R-20856")
 def test_nova_server_vnf_id_parameter_doesnt_exist_in_environment_file(yaml_file):
-    run_check_resource_parameter(yaml_file, "vnf_id", False, "", check_resource=False)
+    run_test_parameter(yaml_file, "PLATFORM PROVIDED", "vnf_id")
 
 
 @categories("environment_file")
 @validates("R-72871")
 def test_nova_server_vf_module_id_parameter_doesnt_exist_in_environment_file(yaml_file):
-    run_check_resource_parameter(
-        yaml_file, "vf_module_id", False, "", check_resource=False
-    )
+    run_test_parameter(yaml_file, "PLATFORM PROVIDED", "vf_module_id")
 
 
 @categories("environment_file")
@@ -291,15 +316,13 @@ def test_nova_server_vf_module_id_parameter_doesnt_exist_in_environment_file(yam
 def test_nova_server_vf_module_index_parameter_doesnt_exist_in_environment_file(
     yaml_file
 ):
-    run_check_resource_parameter(
-        yaml_file, "vf_module_index", False, "", check_resource=False
-    )
+    run_test_parameter(yaml_file, "PLATFORM PROVIDED", "vf_module_index")
 
 
 @categories("environment_file")
 @validates("R-36542")
 def test_nova_server_vnf_name_parameter_doesnt_exist_in_environment_file(yaml_file):
-    run_check_resource_parameter(yaml_file, "vnf_name", False, "", check_resource=False)
+    run_test_parameter(yaml_file, "PLATFORM PROVIDED", "vnf_name")
 
 
 @categories("environment_file")
@@ -307,9 +330,7 @@ def test_nova_server_vnf_name_parameter_doesnt_exist_in_environment_file(yaml_fi
 def test_nova_server_vf_module_name_parameter_doesnt_exist_in_environment_file(
     yaml_file
 ):
-    run_check_resource_parameter(
-        yaml_file, "vf_module_name", False, "", check_resource=False
-    )
+    run_test_parameter(yaml_file, "PLATFORM PROVIDED", "vf_module_name")
 
 
 @categories("environment_file")
@@ -317,9 +338,7 @@ def test_nova_server_vf_module_name_parameter_doesnt_exist_in_environment_file(
 def test_nova_server_workload_context_parameter_doesnt_exist_in_environment_file(
     yaml_file
 ):
-    run_check_resource_parameter(
-        yaml_file, "workload_context", False, "", check_resource=False
-    )
+    run_test_parameter(yaml_file, "PLATFORM PROVIDED", "workload_context")
 
 
 @categories("environment_file")
@@ -327,15 +346,13 @@ def test_nova_server_workload_context_parameter_doesnt_exist_in_environment_file
 def test_nova_server_environment_context_parameter_doesnt_exist_in_environment_file(
     yaml_file
 ):
-    run_check_resource_parameter(
-        yaml_file, "environment_context", False, "", check_resource=False
-    )
+    run_test_parameter(yaml_file, "PLATFORM PROVIDED", "environment_context")
 
 
 @categories("environment_file")
 @validates("R-29872")
 def test_neutron_port_network_parameter_doesnt_exist_in_environment_file(yaml_file):
-    run_check_resource_parameter(yaml_file, "network", False, "OS::Neutron::Port")
+    run_test_parameter(yaml_file, "OS::Neutron::Port", "network")
 
 
 @categories("environment_file")
@@ -343,13 +360,12 @@ def test_neutron_port_network_parameter_doesnt_exist_in_environment_file(yaml_fi
 def test_neutron_port_external_fixedips_ipaddress_parameter_doesnt_exist_in_environment_file(
     yaml_file
 ):
-    run_check_resource_parameter(
+    run_test_parameter(
         yaml_file,
-        "fixed_ips",
-        False,
         "OS::Neutron::Port",
-        nested_prop="ip_address",
-        exclude_parameter=re.compile(r"^(.+?)_int_(.+?)$"),
+        "fixed_ips",
+        "ip_address",
+        network_type="external",
     )
 
 
@@ -357,13 +373,12 @@ def test_neutron_port_external_fixedips_ipaddress_parameter_doesnt_exist_in_envi
 def test_neutron_port_internal_fixedips_ipaddress_parameter_exists_in_environment_file(
     yaml_file
 ):
-    run_check_resource_parameter(
+    run_test_parameter(
         yaml_file,
-        "fixed_ips",
-        True,
         "OS::Neutron::Port",
-        nested_prop="ip_address",
-        exclude_parameter=re.compile(r"^((?!_int_).)*$"),
+        "fixed_ips",
+        "ip_address",
+        network_type="internal",
     )
 
 
@@ -372,8 +387,8 @@ def test_neutron_port_internal_fixedips_ipaddress_parameter_exists_in_environmen
 def test_neutron_port_fixedips_subnet_parameter_doesnt_exist_in_environment_file(
     yaml_file
 ):
-    run_check_resource_parameter(
-        yaml_file, "fixed_ips", False, "OS::Neutron::Port", nested_prop="subnet"
+    run_test_parameter(
+        yaml_file, "OS::Neutron::Port", "fixed_ips", "subnet", network_type="internal"
     )
 
 
@@ -382,136 +397,72 @@ def test_neutron_port_fixedips_subnet_parameter_doesnt_exist_in_environment_file
 def test_neutron_port_external_aap_ip_parameter_doesnt_exist_in_environment_file(
     yaml_file
 ):
-    run_check_resource_parameter(
+    run_test_parameter(
         yaml_file,
-        "allowed_address_pairs",
-        False,
         "OS::Neutron::Port",
-        nested_prop="ip_address",
-        exclude_parameter=re.compile(r"^(.+?)_int_(.+?)$"),
-    )
-
-
-@categories("environment_file")
-@validates("R-99812")
-def test_non_nova_server_name_parameter_doesnt_exist_in_environment_file(yaml_file):
-    run_check_resource_parameter(
-        yaml_file, "name", False, "OS::Nova::Server", resource_type_inverse=True
+        "allowed_address_pairs",
+        "subnet",
+        network_type="external",
     )
 
 
 @categories("environment_file")
 @validates("R-92193")
 def test_network_fqdn_parameter_doesnt_exist_in_environment_file(yaml_file):
-    run_check_resource_parameter(
-        yaml_file, r"^(.+?)_net_fqdn$", False, "", check_resource=False
-    )
+    run_test_parameter(yaml_file, "PLATFORM PROVIDED", r"^(.+?)_net_fqdn$")
 
 
 @categories("environment_file")
 @validates("R-76682")
 def test_contrail_route_prefixes_parameter_doesnt_exist_in_environment_file(yaml_file):
-    run_check_resource_parameter(
+    run_test_parameter(
         yaml_file,
-        "interface_route_table_routes",
-        False,
         "OS::ContrailV2::InterfaceRouteTable",
-        nested_prop="interface_route_table_routes_route",
+        "interface_route_table_routes",
+        "interface_route_table_routes_route",
     )
 
 
 @validates("R-50011")
 def test_heat_rg_count_parameter_exists_in_environment_file(yaml_file):
-    run_check_resource_parameter(
-        yaml_file,
-        "count",
-        True,
-        "OS::Heat::ResourceGroup",
-        exclude_resource=re.compile(r"^(.+?)_subint_(.+?)_port_(.+?)_subinterfaces$"),
-    )
+    run_test_parameter(yaml_file, "OS::Heat::ResourceGroup", "count")
 
 
 @categories("environment_file")
 @validates("R-100020", "R-100040", "R-100060", "R-100080", "R-100170")
 def test_contrail_external_instance_ip_does_not_exist_in_environment_file(yaml_file):
-    run_check_resource_parameter(
+    run_test_parameter(
         yaml_file,
-        "instance_ip_address",
-        False,
         "OS::ContrailV2::InstanceIp",
-        exclude_resource=re.compile(r"^.*_int_.*$"),  # exclude internal IPs
+        "instance_ip_address",
+        network_type="external",
     )
 
 
 @validates("R-100100", "R-100120", "R-100140", "R-100160", "R-100180")
 def test_contrail_internal_instance_ip_does_exist_in_environment_file(yaml_file):
-    run_check_resource_parameter(
+    run_test_parameter(
         yaml_file,
-        "instance_ip_address",
-        True,
         "OS::ContrailV2::InstanceIp",
-        exclude_resource=re.compile(r"(?!.*_int_.*)"),  # exclude external IPs
+        "instance_ip_address",
+        network_type="internal",
     )
 
 
 @categories("environment_file")
 @validates("R-100210", "R-100230", "R-100250", "R-100270")
 def test_contrail_subnet_uuid_does_not_exist_in_environment_file(yaml_file):
-    run_check_resource_parameter(
-        yaml_file, "subnet_uuid", False, "OS::ContrailV2::InstanceIp"
-    )
+    run_test_parameter(yaml_file, "OS::ContrailV2::InstanceIp", "subnet_uuid")
 
 
 @categories("environment_file")
 @validates("R-100320", "R-100340")
 def test_contrail_vmi_aap_does_not_exist_in_environment_file(yaml_file):
-    # This test needs to check a more complex structure.  Rather than try to force
-    # that into the existing run_check_resource_parameter logic we'll just check it
-    # directly
-    pairs = get_environment_pair(yaml_file)
-    if not pairs:
-        pytest.skip("No matching env file found")
-    heat = Heat(filepath=yaml_file)
-    env_parameters = pairs["eyml"].get("parameters") or {}
-    vmis = heat.get_resource_by_type("OS::ContrailV2::VirtualMachineInterface")
-    external_vmis = {rid: data for rid, data in vmis.items() if "_int_" not in rid}
-    invalid_params = []
-    for r_id, vmi in external_vmis.items():
-        aap_value = nested_dict.get(
-            vmi,
-            "properties",
-            "virtual_machine_interface_allowed_address_pairs",
-            "virtual_machine_interface_allowed_address_pairs_allowed_address_pair",
-        )
-        if not aap_value or not isinstance(aap_value, list):
-            # Skip if aap not used or is not a list.
-            continue
-        for pair_ip in aap_value:
-            if not isinstance(pair_ip, dict):
-                continue  # Invalid Heat will be detected by another test
-            settings = (
-                pair_ip.get(
-                    "virtual_machine_interface_allowed_address"
-                    "_pairs_allowed_address_pair_ip"
-                )
-                or {}
-            )
-            if isinstance(settings, dict):
-                ip_prefix = (
-                    settings.get(
-                        "virtual_machine_interface_allowed_address"
-                        "_pairs_allowed_address_pair_ip_ip_prefix"
-                    )
-                    or {}
-                )
-                ip_prefix_param = get_param(ip_prefix)
-                if ip_prefix_param and ip_prefix_param in env_parameters:
-                    invalid_params.append(ip_prefix_param)
-
-    msg = (
-        "OS::ContrailV2::VirtualMachineInterface "
-        "virtual_machine_interface_allowed_address_pairs"
-        "_allowed_address_pair_ip_ip_prefix "
-        "parameters found in environment file {}: {}"
-    ).format(pairs.get("name"), ", ".join(invalid_params))
-    assert not invalid_params, msg
+    run_test_parameter(
+        yaml_file,
+        "OS::ContrailV2::VirtualMachineInterface",
+        "virtual_machine_interface_allowed_address_pairs",
+        "virtual_machine_interface_allowed_address_pairs_allowed_address_pair",
+        "virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip",
+        "virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip_ip_prefix",
+    )

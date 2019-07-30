@@ -606,12 +606,13 @@ class Heat(object):
             resource_type=ContrailV2VirtualMachineInterfaceProcessor.resource_type
         )
 
-    def get_all_resources(self, base_dir):
+    def get_all_resources(self, base_dir=None):
         """
         Like ``resources``,
         but this returns all the resources definitions
         defined in the template, resource groups, and nested YAML files.
         """
+        base_dir = base_dir or self.dirname
         resources = {}
         for r_id, r_data in self.resources.items():
             resources[r_id] = r_data
@@ -628,13 +629,14 @@ class Heat(object):
         """
         return _HEAT_PROCESSORS
 
-    def get_resource_by_type(self, resource_type):
+    def get_resource_by_type(self, resource_type, all_resources=False):
         """Return dict of resources whose type is `resource_type`.
         key is resource_id, value is resource.
         """
+        resources = self.get_all_resources() if all_resources else self.resources
         return {
             rid: resource
-            for rid, resource in self.resources.items()
+            for rid, resource in resources.items()
             if self.nested_get(resource, "type") == resource_type
         }
 
