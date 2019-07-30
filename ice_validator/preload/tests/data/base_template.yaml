@@ -36,32 +36,62 @@
 # ============LICENSE_END============================================
 #
 #
-namespace: org.onap.vvp
-owner: ONAP
-ui:
-  app-name: VNF Validation Tool
-categories:
-  - name: Environment File Compliance. (Required to Onboard)
-    category: environment_file
-    description:
-      Checks certain parameters are excluded from the .env file, per HOT Requirements.
-      Required for ASDC onboarding, not needed for manual Openstack testing.
-  - name: OpenStack Heat Testing (Beta)
-    category: openstack
-    description:
-      Uses the latest OpenStack Heat community version available to validate that
-      a heat template is valid OpenStack Heat. This testing is equivalent to using
-      heat template-validate from the command line.
-plugins:
-  - name: pytest_preload
-    args:
-      - param: --preload_module
-        value: preload.preload
-    frozen: False
-    enabled: True
-  - name: pytest_tap.plugin
-    frozen: True
-    enabled: True
-settings:
-  polling-freqency: 1000
-  default-verbosity: Standard
+
+heat_template_version: 2014-10-16 
+ 
+parameters: 
+ 
+    oam_net_id: 
+        type: string 
+        label: ONAP OAM Network ID 
+        description: ONAP OAM Network UUID 
+ 
+    oam_subnet_id: 
+        type: string 
+        label: ONAP OAM SUBNetwork ID 
+        description: ONAP OAM SUBNetwork UUID 
+ 
+    repo_name_0: 
+        type: string 
+        label: VNF repo Hostname 
+        description: VNF repo Hostname. 
+ 
+    repo_image_name: 
+        type: string 
+        label: Image name or ID 
+        description: Image name or ID to be used for VNF-repo instance 
+ 
+    repo_flavor_name: 
+        type: string 
+        label: Flavor 
+        description: Type of flavor to be used for VNF-AAA instance 
+ 
+ 
+resources: 
+ 
+    repo_0_oam_port_0: 
+        type: OS::Neutron::Port 
+        properties: 
+            security_groups: 
+                - default 
+            network: { get_param: oam_net_id } 
+            fixed_ips: 
+                - subnet: { get_param: oam_subnet_id } 
+ 
+    repo_server_0: 
+        type: OS::Nova::Server 
+        properties: 
+            name: { get_param: repo_name_0 } 
+            image: { get_param: repo_image_name } 
+            flavor: { get_param: repo_flavor_name } 
+            networks: 
+                - port: { get_resource: repo_0_oam_port_0 } 
+ 
+    rand_pw: 
+        type: OS::Heat::RandomString 
+        properties: 
+          length: 6 
+ 
+outputs: 
+  pass: 
+    value: { get_resource: rand_pw }

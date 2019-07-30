@@ -36,32 +36,3 @@
 # ============LICENSE_END============================================
 #
 #
-namespace: org.onap.vvp
-owner: ONAP
-ui:
-  app-name: VNF Validation Tool
-categories:
-  - name: Environment File Compliance. (Required to Onboard)
-    category: environment_file
-    description:
-      Checks certain parameters are excluded from the .env file, per HOT Requirements.
-      Required for ASDC onboarding, not needed for manual Openstack testing.
-  - name: OpenStack Heat Testing (Beta)
-    category: openstack
-    description:
-      Uses the latest OpenStack Heat community version available to validate that
-      a heat template is valid OpenStack Heat. This testing is equivalent to using
-      heat template-validate from the command line.
-plugins:
-  - name: pytest_preload
-    args:
-      - param: --preload_module
-        value: preload.preload
-    frozen: False
-    enabled: True
-  - name: pytest_tap.plugin
-    frozen: True
-    enabled: True
-settings:
-  polling-freqency: 1000
-  default-verbosity: Standard
