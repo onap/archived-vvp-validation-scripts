@@ -58,6 +58,8 @@ import queue
 import tempfile
 import webbrowser
 import zipfile
+import platform
+import subprocess
 
 from collections import MutableMapping
 from configparser import ConfigParser
@@ -256,6 +258,8 @@ def run_pytest(
     report_format: str,
     halt_on_failure: bool,
     template_source: str,
+    plugins: Optional[list],
+    plugin_args: Optional[list],
 ):
     """Runs pytest using the given ``profile`` in a background process.  All
     ``stdout`` and ``stderr`` are redirected to ``log``.  The result of the job
@@ -293,13 +297,14 @@ def run_pytest(
                 "--template-directory={}".format(template_dir),
                 "--report-format={}".format(report_format),
                 "--template-source={}".format(template_source),
+                *plugin_args,
             ]
             if categories:
                 for category in categories:
                     args.extend(("--category", category))
             if not halt_on_failure:
                 args.append("--continue-on-failure")
-            pytest.main(args=args, plugins=get_plugins())
+            pytest.main(args=args, plugins=plugins)
             result_queue.put((True, None))
         except Exception as e:
             result_queue.put((False, e))
@@ -403,6 +408,11 @@ class Config:
     def category_names(self) -> List[str]:
         """List of validation profile names for display in the UI"""
         return [category["name"] for category in self._config["categories"]]
+
+    @property
+    def plugins(self) -> List[str]:
+        """List of plugins to enable at runtime"""
+        return [plugin for plugin in self._config.get("plugins", [])]
 
     @property
     def polling_frequency(self) -> int:
@@ -541,6 +551,32 @@ class Config:
                     "Missing: {} "
                     "Categories: {}".format(",".join(missing_keys), category)
                 )
+
+    @property
+    def plugins(self):
+        plugins = []
+        args = []
+
+        config_plugins = self._config.get("plugins", [])
+        for plugin in config_plugins:
+            name = plugin.get("name")
+            frozen = plugin.get("frozen", False)
+            enabled = plugin.get("enabled", False)
+            config_args = plugin.get("args", [])
+
+            """When running in a frozen bundle, plugins to be registered
+            explicitly. This method will return the required plugins to register
+            based on the run mode"""
+            if enabled:
+                if hasattr(sys, "frozen") and frozen:
+                    plugins.append(name)
+                elif not frozen:
+                    plugins.append(name)
+
+                for arg in config_args:
+                    args.append("{}={}".format(arg.get("param"), arg.get("value")))
+
+        return plugins, args
 
 
 def validate():
@@ -760,6 +796,16 @@ class ValidatorApp:
         )
         self.underline(self.result_label)
         self.result_label.bind("<Button-1>", self.open_report)
+        
+        ### Adding Preload Info
+        self.preload_label = Label(
+            self.result_panel, text="View Preloads", fg="blue", cursor="hand2"
+        )
+        self.underline(self.preload_label)
+        self.preload_label.bind("<Button-1>", self.open_preloads)
+        ### END PRELOAD INFO
+
+
         self.result_panel.grid(row=6, column=1, columnspan=2)
         control_panel.pack(fill=BOTH, expand=1)
 
@@ -775,10 +821,12 @@ class ValidatorApp:
         # room for them
         self.completion_label.pack()
         self.result_label.pack()  # Show report link
+        self.preload_label.pack()  # Show preload link
         self._root.after_idle(
             lambda: (
                 self.completion_label.pack_forget(),
                 self.result_label.pack_forget(),
+                self.preload_label.pack_forget(),
             )
         )
 
@@ -849,10 +897,12 @@ class ValidatorApp:
         template_dir = self.resolve_template_dir()
 
         if template_dir:
+            plugins, args = self.get_plugins()
             self.kill_background_task()
             self.clear_log()
             self.completion_label.pack_forget()
             self.result_label.pack_forget()
+            self.preload_label.pack_forget()
             self.task = multiprocessing.Process(
                 target=run_pytest,
                 args=(
@@ -864,6 +914,8 @@ class ValidatorApp:
                     self.report_format.get().lower(),
                     self.halt_on_failure.get(),
                     self.template_source.get(),
+                    plugins,
+                    args,
                 ),
             )
             self.task.daemon = True
@@ -909,6 +961,7 @@ class ValidatorApp:
             if is_success:
                 self.completion_label.pack()
                 self.result_label.pack()  # Show report link
+                self.preload_label.pack()  # Show preload link
             else:
                 self.log_panel.insert(END, str(e))
 
@@ -957,6 +1010,16 @@ class ValidatorApp:
         """Open the report in the user's default browser"""
         webbrowser.open_new("file://{}".format(self.report_file_path))
 
+    def open_preloads(self, event):
+        """Open the report in the user's default browser"""
+        path = "{}/{}/preloads".format(PATH, OUT_DIR)
+        if platform.system() == "Windows":
+            os.startfile(path)
+        elif platform.system() == "Darwin":
+            subprocess.Popen(["open", path])
+        else:
+            subprocess.Popen(["xdg-open", path])
+
     def open_requirements(self):
         """Open the report in the user's default browser"""
         webbrowser.open_new(self.config.requirement_link_url)
@@ -964,6 +1027,10 @@ class ValidatorApp:
     def start(self):
         """Start the event loop of the application.  This method does not return"""
         self._root.mainloop()
+
+    def get_plugins(self) -> list:
+        plugins, args = self.config.plugins
+        return plugins, args
 
     @staticmethod
     def underline(label):

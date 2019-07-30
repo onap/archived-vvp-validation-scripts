@@ -1,0 +1,107 @@
+# -*- coding: utf8 -*-
+# ============LICENSE_START====================================================
+# org.onap.vvp/validation-scripts
+# ===================================================================
+# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
+# ===================================================================
+#
+# Unless otherwise specified, all software contained herein is licensed
+# under the Apache License, Version 2.0 (the "License");
+# you may not use this software except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#             http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+#
+# Unless otherwise specified, all documentation contained herein is licensed
+# under the Creative Commons License, Attribution 4.0 Intl. (the "License");
+# you may not use this documentation except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#             https://creativecommons.org/licenses/by/4.0/
+#
+# Unless required by applicable law or agreed to in writing, documentation
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# ============LICENSE_END============================================
+#
+#
+
+heat_template_version: 2014-10-16 
+ 
+parameters: 
+ 
+    oam_net_id: 
+        type: string 
+        label: ECOMP/ONAP OAM Network ID 
+        description: ECOMP/ONAP OAM Network UUID 
+ 
+    oam_subnet_id: 
+        type: string 
+        label: ECOMP/ONAP OAM SUBNetwork ID 
+        description: ECOMP/ONAP OAM SUBNetwork UUID 
+ 
+    repo_name_0: 
+        type: string 
+        label: VNF repo Hostname 
+        description: VNF repo Hostname. 
+ 
+    repo_image_name: 
+        type: string 
+        label: Image name or ID 
+        description: Image name or ID to be used for VNF-repo instance 
+ 
+    repo_flavor_name: 
+        type: string 
+        label: Flavor 
+        description: Type of flavor to be used for VNF-AAA instance 
+ 
+ 
+resources: 
+ 
+    repo_0_oam_port_0: 
+        type: OS::Neutron::Port 
+        properties: 
+            security_groups: 
+                - default 
+            network: { get_param: oam_net_id } 
+            fixed_ips: 
+                - subnet: { get_param: oam_subnet_id } 
+ 
+    repo_server_0: 
+        type: OS::Nova::Server 
+        properties: 
+            name: { get_param: repo_name_0 } 
+            image: { get_param: repo_image_name } 
+            flavor: { get_param: repo_flavor_name } 
+            networks: 
+                - port: { get_resource: repo_0_oam_port_0 } 
+            user_data_format: RAW 
+            user_data: 
+              str_replace: 
+                template: | 
+                  #!/bin/sh 
+ 
+                  #ROOT_PW="@ROOT_PW@" 
+                  usermod -p $(echo @ROOT_PW@ | openssl passwd -1 -stdin) attcloud 
+                params: 
+                  "@ROOT_PW@": {get_resource: rand_pw} 
+ 
+    rand_pw: 
+        type: OS::Heat::RandomString 
+        properties: 
+          length: 6 
+ 
+outputs: 
+  pass: 
+    value: { get_resource: rand_pw }
