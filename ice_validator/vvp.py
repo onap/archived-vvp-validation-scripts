@@ -49,7 +49,6 @@ NOTE: This script does require Python 3.6+
 import appdirs
 import os
 import pytest
-import sys
 import version
 import yaml
 import contextlib
@@ -58,6 +57,8 @@ import queue
 import tempfile
 import webbrowser
 import zipfile
+import platform
+import subprocess  # nosec
 
 from collections import MutableMapping
 from configparser import ConfigParser
@@ -102,6 +103,8 @@ from tkinter import (
 )
 from tkinter.scrolledtext import ScrolledText
 from typing import Optional, List, Dict, TextIO, Callable, Iterator
+
+import preload
 
 VERSION = version.VERSION
 PATH = os.path.dirname(os.path.realpath(__file__))
@@ -235,18 +238,6 @@ class QueueWriter:
         pass
 
 
-def get_plugins() -> Optional[List]:
-    """When running in a frozen bundle, plugins to be registered
-    explicitly. This method will return the required plugins to register
-    based on the run mode"""
-    if hasattr(sys, "frozen"):
-        import pytest_tap.plugin
-
-        return [pytest_tap.plugin]
-    else:
-        return None
-
-
 def run_pytest(
     template_dir: str,
     log: TextIO,
@@ -299,7 +290,7 @@ def run_pytest(
                     args.extend(("--category", category))
             if not halt_on_failure:
                 args.append("--continue-on-failure")
-            pytest.main(args=args, plugins=get_plugins())
+            pytest.main(args=args)
             result_queue.put((True, None))
         except Exception as e:
             result_queue.put((False, e))
@@ -507,6 +498,27 @@ class Config:
         return ["CSV", "Excel", "HTML"]
 
     @property
+    def preload_formats(self):
+        excluded = self._config.get("excluded-preloads", [])
+        formats = (cls.format_name() for cls in preload.get_generator_plugins())
+        return [f for f in formats if f not in excluded]
+
+    @property
+    def default_preload_format(self):
+        default = self._user_settings.get("preload_format")
+        if default and default in self.preload_formats:
+            return default
+        else:
+            return self.preload_formats[0]
+
+    @staticmethod
+    def get_subdir_for_preload(preload_format):
+        for gen in preload.get_generator_plugins():
+            if gen.format_name() == preload_format:
+                return gen.output_sub_dir()
+        return ""
+
+    @property
     def default_input_format(self):
         requested_default = self._user_settings.get("input_format") or self._config[
             "settings"
@@ -699,45 +711,67 @@ class ValidatorApp:
             category_checkbox.grid(row=x + 1, column=1, columnspan=2, sticky="w")
 
         settings_frame = LabelFrame(actions, text="Settings")
+        settings_row = 1
         settings_frame.grid(row=3, column=1, columnspan=3, pady=10, sticky="we")
         verbosity_label = Label(settings_frame, text="Verbosity:")
-        verbosity_label.grid(row=1, column=1, sticky=W)
+        verbosity_label.grid(row=settings_row, column=1, sticky=W)
         self.verbosity = StringVar(self._root, name="verbosity")
         self.verbosity.set(self.config.default_verbosity(self.VERBOSITY_LEVELS))
         verbosity_menu = OptionMenu(
             settings_frame, self.verbosity, *tuple(self.VERBOSITY_LEVELS.keys())
         )
         verbosity_menu.config(width=25)
-        verbosity_menu.grid(row=1, column=2, columnspan=3, sticky=E, pady=5)
+        verbosity_menu.grid(row=settings_row, column=2, columnspan=3, sticky=E, pady=5)
+        settings_row += 1
+
+        if self.config.preload_formats:
+            preload_format_label = Label(settings_frame, text="Preload Template:")
+            preload_format_label.grid(row=settings_row, column=1, sticky=W)
+            self.preload_format = StringVar(self._root, name="preload_format")
+            self.preload_format.set(self.config.default_preload_format)
+            preload_format_menu = OptionMenu(
+                settings_frame, self.preload_format, *self.config.preload_formats
+            )
+            preload_format_menu.config(width=25)
+            preload_format_menu.grid(
+                row=settings_row, column=2, columnspan=3, sticky=E, pady=5
+            )
+            settings_row += 1
 
         report_format_label = Label(settings_frame, text="Report Format:")
-        report_format_label.grid(row=2, column=1, sticky=W)
+        report_format_label.grid(row=settings_row, column=1, sticky=W)
         self.report_format = StringVar(self._root, name="report_format")
         self.report_format.set(self.config.default_report_format)
         report_format_menu = OptionMenu(
             settings_frame, self.report_format, *self.config.report_formats
         )
         report_format_menu.config(width=25)
-        report_format_menu.grid(row=2, column=2, columnspan=3, sticky=E, pady=5)
+        report_format_menu.grid(
+            row=settings_row, column=2, columnspan=3, sticky=E, pady=5
+        )
+        settings_row += 1
 
         input_format_label = Label(settings_frame, text="Input Format:")
-        input_format_label.grid(row=3, column=1, sticky=W)
+        input_format_label.grid(row=settings_row, column=1, sticky=W)
         self.input_format = StringVar(self._root, name="input_format")
         self.input_format.set(self.config.default_input_format)
         input_format_menu = OptionMenu(
             settings_frame, self.input_format, *self.config.input_formats
         )
         input_format_menu.config(width=25)
-        input_format_menu.grid(row=3, column=2, columnspan=3, sticky=E, pady=5)
+        input_format_menu.grid(
+            row=settings_row, column=2, columnspan=3, sticky=E, pady=5
+        )
+        settings_row += 1
 
         self.halt_on_failure = BooleanVar(self._root, name="halt_on_failure")
         self.halt_on_failure.set(self.config.default_halt_on_failure)
         halt_on_failure_label = Label(settings_frame, text="Halt on Basic Failures:")
-        halt_on_failure_label.grid(row=4, column=1, sticky=E, pady=5)
+        halt_on_failure_label.grid(row=settings_row, column=1, sticky=E, pady=5)
         halt_checkbox = Checkbutton(
             settings_frame, offvalue=False, onvalue=True, variable=self.halt_on_failure
         )
-        halt_checkbox.grid(row=4, column=2, columnspan=2, sticky=W, pady=5)
+        halt_checkbox.grid(row=settings_row, column=2, columnspan=2, sticky=W, pady=5)
 
         directory_label = Label(actions, text="Template Location:")
         directory_label.grid(row=4, column=1, pady=5, sticky=W)
@@ -760,6 +794,13 @@ class ValidatorApp:
         )
         self.underline(self.result_label)
         self.result_label.bind("<Button-1>", self.open_report)
+
+        self.preload_label = Label(
+            self.result_panel, text="View Preloads", fg="blue", cursor="hand2"
+        )
+        self.underline(self.preload_label)
+        self.preload_label.bind("<Button-1>", self.open_preloads)
+
         self.result_panel.grid(row=6, column=1, columnspan=2)
         control_panel.pack(fill=BOTH, expand=1)
 
@@ -775,10 +816,12 @@ class ValidatorApp:
         # room for them
         self.completion_label.pack()
         self.result_label.pack()  # Show report link
+        self.preload_label.pack()  # Show preload link
         self._root.after_idle(
             lambda: (
                 self.completion_label.pack_forget(),
                 self.result_label.pack_forget(),
+                self.preload_label.pack_forget(),
             )
         )
 
@@ -789,6 +832,8 @@ class ValidatorApp:
             self.report_format,
             self.halt_on_failure,
         )
+        if self.config.preload_formats:
+            self.config.watch(self.preload_format)
         self.schedule(self.execute_pollers)
         if self.config.terms_link_text and not self.config.are_terms_accepted:
             TermsAndConditionsDialog(parent_frame, self.config)
@@ -797,9 +842,7 @@ class ValidatorApp:
 
     def create_footer(self, parent_frame):
         footer = Frame(parent_frame)
-        disclaimer = Message(
-            footer, text=self.config.disclaimer_text, anchor=CENTER
-        )
+        disclaimer = Message(footer, text=self.config.disclaimer_text, anchor=CENTER)
         disclaimer.grid(row=0, pady=2)
         parent_frame.bind(
             "<Configure>", lambda e: disclaimer.configure(width=e.width - 20)
@@ -853,6 +896,7 @@ class ValidatorApp:
             self.clear_log()
             self.completion_label.pack_forget()
             self.result_label.pack_forget()
+            self.preload_label.pack_forget()
             self.task = multiprocessing.Process(
                 target=run_pytest,
                 args=(
@@ -909,6 +953,8 @@ class ValidatorApp:
             if is_success:
                 self.completion_label.pack()
                 self.result_label.pack()  # Show report link
+                if hasattr(self, "preload_format"):
+                    self.preload_label.pack()  # Show preload link
             else:
                 self.log_panel.insert(END, str(e))
 
@@ -956,6 +1002,21 @@ class ValidatorApp:
     def open_report(self, event):
         """Open the report in the user's default browser"""
         webbrowser.open_new("file://{}".format(self.report_file_path))
+
+    def open_preloads(self, event):
+        """Open the report in the user's default browser"""
+        path = os.path.join(
+            PATH,
+            OUT_DIR,
+            "preloads",
+            self.config.get_subdir_for_preload(self.preload_format.get()),
+        )
+        if platform.system() == "Windows":
+            os.startfile(path)  # nosec
+        elif platform.system() == "Darwin":
+            subprocess.Popen(["open", path])  # nosec
+        else:
+            subprocess.Popen(["xdg-open", path])  # nosec
 
     def open_requirements(self):
         """Open the report in the user's default browser"""
