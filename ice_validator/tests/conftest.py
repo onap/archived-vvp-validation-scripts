@@ -1045,12 +1045,11 @@ def generate_rst_table(output_dir, data):
     rst_path = os.path.join(output_dir, "rst.csv")
     with open(rst_path, "w", newline="") as f:
         out = csv.writer(f)
-        out.writerow(("Requirement ID", "Requirement", "Test Module", "Test Name"))
+        out.writerow(("Requirement ID", "Test Module", "Test Name"))
         for req_id, metadata in data.items():
             out.writerow(
                 (
                     metadata["full_title"],
-                    metadata["description"],
                     metadata["test_case"],
                     metadata["validated_by"],
                 )
