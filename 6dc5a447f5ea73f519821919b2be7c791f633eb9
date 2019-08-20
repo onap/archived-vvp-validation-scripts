@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9eea06fc_d01c3f6f",
+        "filename": "ice_validator/tests/utils/vm_types.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-08-20T14:49:57Z",
+      "side": 1,
+      "message": "Please adhere to PEP-8 code style (methods and functions should use unscores not camel case)",
+      "revId": "6dc5a447f5ea73f519821919b2be7c791f633eb9",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fd011b0b_4ba6cb8d",
+        "filename": "ice_validator/tests/utils/vm_types.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-08-20T14:49:57Z",
+      "side": 1,
+      "message": "this method should return a boolean (True or False) not a string representation.\n\nWe should probably give this a more descriptive name (ex: is_nova_server)",
+      "revId": "6dc5a447f5ea73f519821919b2be7c791f633eb9",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
