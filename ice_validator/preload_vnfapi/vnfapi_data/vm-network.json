@@ -1,0 +1,12 @@
+{
+    "network-role": "",
+    "network-role-tag": "",
+    "ip-count": 0,
+    "ip-count-ipv6": 0,
+    "floating-ip": "",
+    "floating-ip-v6": "",
+    "network-ips": [],
+    "network-ips-v6": [],
+    "network-macs": [],
+    "interface-route-prefixes": []
+}

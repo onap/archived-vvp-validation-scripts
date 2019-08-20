@@ -1,0 +1,33 @@
+{
+    "network-role": "",
+    "network-information-items": {
+        "network-information-item": [
+            {
+                "ip-version": "4",
+                "use-dhcp": "N",
+                "ip-count": 0,
+                "network-ips": {
+                    "network-ip": []
+                }
+            },
+            {
+                "ip-version": "6",
+                "use-dhcp": "N",
+                "ip-count": 0,
+                "network-ips": {
+                    "network-ip": []
+                }
+            }
+        ]
+    },
+    "mac-addresses": {
+        "mac-address": []
+    },
+    "floating-ips": {
+        "floating-ip-v4": [],
+        "floating-ip-v6": []
+    },
+    "interface-route-prefixes": {
+        "interface-route-prefix": []
+    }
+}

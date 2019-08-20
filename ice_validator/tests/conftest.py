@@ -43,6 +43,10 @@ import json
 import os
 import re
 import time
+
+from preload import create_preloads
+from tests.helpers import get_output_dir
+
 try:
     from html import escape
 except ImportError:
@@ -93,18 +97,6 @@ COLLECTION_FAILURES = []
 
 # Captures the results of every test run
 ALL_RESULTS = []
-
-
-def get_output_dir(config):
-    """
-    Retrieve the output directory for the reports and create it if necessary
-    :param config: pytest configuration
-    :return: output directory as string
-    """
-    output_dir = config.option.output_dir or DEFAULT_OUTPUT_DIR
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir, exist_ok=True)
-    return output_dir
 
 
 def extract_error_msg(rep):
@@ -350,6 +342,12 @@ def pytest_sessionfinish(session, exitstatus):
         categories_selected,
         session.config.option.report_format,
     )
+
+
+def pytest_terminal_summary(terminalreporter, exitstatus):
+    # Ensures all preload information and warnings appear after
+    # test results
+    create_preloads(terminalreporter.config, exitstatus)
 
 
 # noinspection PyUnusedLocal
@@ -749,8 +747,9 @@ def generate_html_report(outpath, categories, template_path, failures):
             {
                 "file_links": make_href(failure.files, template_path),
                 "test_id": failure.test_id,
-                "error_message": escape(failure.error_message).replace("\n",
-                                                                       "<br/><br/>"),
+                "error_message": escape(failure.error_message).replace(
+                    "\n", "<br/><br/>"
+                ),
                 "raw_output": escape(failure.raw_output),
                 "requirements": docutils.core.publish_parts(
                     writer_name="html", source=failure.requirement_text(reqs)

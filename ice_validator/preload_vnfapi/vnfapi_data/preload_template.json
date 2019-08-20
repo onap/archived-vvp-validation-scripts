@@ -1,0 +1,30 @@
+{
+    "input": {
+        "request-information": {
+            "request-id": "robot12",
+            "order-version": "1",
+            "notification-url": "openecomp.org",
+            "order-number": "1",
+            "request-action": "PreloadVNFRequest"
+        },
+        "sdnc-request-header": {
+            "svc-request-id": "robot12",
+            "svc-notification-url": "http://openecomp.org:8080/adapters/rest/SDNCNotify",
+            "svc-action": "reserve"
+        },
+        "vnf-topology-information": {
+            "vnf-topology-identifier": {
+                "vnf-name": "",
+                "vnf-type": "",
+                "generic-vnf-type": "",
+                "generic-vnf-name": ""
+            },
+            "vnf-assignments": {
+                "availability-zones": [],
+                "vnf-networks": [],
+                "vnf-vms": []
+            },
+            "vnf-parameters": []
+        }
+    }
+}
