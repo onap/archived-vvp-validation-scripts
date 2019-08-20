@@ -4,6 +4,8 @@
 # ===================================================================
 # Copyright © 2019 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
+# Modifications Copyright (C) 2019 IBM.
+# ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
 # under the Apache License, Version 2.0 (the "License");
@@ -52,11 +54,7 @@ def get_vm_types_for_resource(resource):
     """
     if not isinstance(resource, dict):
         return set()
-    if "type" not in resource:
-        return set()
-    if resource["type"] != "OS::Nova::Server":
-        return set()
-    if "properties" not in resource:
+    if (returnSetConditionCheck(resource) == "true"):
         return set()
 
     key_values = ["name", "flavor", "image"]
@@ -83,7 +81,12 @@ def get_vm_types_for_resource(resource):
                 vm_types.append(m.group(1))
 
     return set(vm_types)
+  
 
+def returnSetConditionCheck(resource):
+    if ("type" not in resource or "properties" not in resource or resource["type"] != "OS::Nova::Server"):
+        return "true"
+      
 
 def get_vm_type_for_nova_server(resource):
     """
