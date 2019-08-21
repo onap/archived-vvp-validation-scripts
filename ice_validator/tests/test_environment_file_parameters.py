@@ -268,10 +268,11 @@ def env_violation(yaml_file, parameter, persistent):
     env_yaml = environment_pair.get("eyml")
     parameters = env_yaml.get("parameters", {})
     in_env = False
-    for param, value in parameters.items():
-        if re.match(parameter, parameter):
-            in_env = True
-            break
+    if parameters: # env file can be just parameters:
+        for param, value in parameters.items():
+            if re.match(parameter, param):
+                in_env = True
+                break
 
     # confusing return. This function is looking for a violation.
     return not persistent == in_env
@@ -481,3 +482,4 @@ def test_contrail_vmi_aap_does_not_exist_in_environment_file(yaml_file):
         "virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip",
         "virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip_ip_prefix",
     )
+
