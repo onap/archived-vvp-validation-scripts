@@ -268,10 +268,11 @@ def env_violation(yaml_file, parameter, persistent):
     env_yaml = environment_pair.get("eyml")
     parameters = env_yaml.get("parameters", {})
     in_env = False
-    for param, value in parameters.items():
-        if re.match(parameter, parameter):
-            in_env = True
-            break
+    if parameters:  # env file can be just parameters:
+        for param, value in parameters.items():
+            if re.match(parameter, param):
+                in_env = True
+                break
 
     # confusing return. This function is looking for a violation.
     return not persistent == in_env
