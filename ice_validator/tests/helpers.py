@@ -42,7 +42,9 @@
 
 import os
 import re
+import zipfile
 from collections import defaultdict
+from typing import Set
 
 from boltons import funcutils
 from tests import cached_yaml as yaml
@@ -356,3 +358,59 @@ def get_output_dir(config):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir, exist_ok=True)
     return output_dir
+
+
+def first(seq, predicate, default=None):
+    """
+    Return the first item in sequence that satisfies the callable, predicate, or
+    returns the default if not found.
+
+    :param seq:         iterable sequence of objects
+    :param predicate:   callable that accepts one item from the sequence
+    :param default:     value to return if not found (default is None)
+    :return:            default value if no item satisfies the predicate
+    """
+    return next((i for i in seq if predicate(i)), default)
+
+
+def check(predicate, message):
+    """
+    Raise a RuntimeError with the provided message if predicate is False.
+
+    Example:
+        check(path.is_file(), "{} must be a file".format(path.as_posix()))
+
+    :param predicate:   boolean condition
+    :param message:     message
+    """
+    if not predicate:
+        raise RuntimeError(message)
+
+
+def unzip(zip_path, target_dir):
+    """
+    Extracts a Zip archive located at zip_path to target_dir (which will be
+    created if it already exists)
+
+    :param zip_path:    path to valid zip file
+    :param target_dir:  directory to unzip zip_path
+    """
+    check(zipfile.is_zipfile(zip_path), "{} is not a valid zipfile or does not exist".format(zip_path))
+    archive = zipfile.ZipFile(zip_path)
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir, exist_ok=True)
+    archive.extractall(path=target_dir)
+
+
+def remove(sequence, exclude, key=None):
+    """
+    Remove a copy of sequence that items occur in exclude.
+
+    :param sequence: sequence of objects
+    :param exclude:  objects to excluded (must support ``in`` check)
+    :param key:      optional function to extract key from item in sequence
+    :return:         list of items not in the excluded
+    """
+    key_func = key if key else lambda x: x
+    result = (s for s in sequence if key_func(s) not in exclude)
+    return set(result) if isinstance(sequence, Set) else list(result)

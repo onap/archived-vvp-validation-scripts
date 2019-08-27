@@ -49,3 +49,4 @@ six==1.12.0
 pyinstaller
 mock
 openstack-heat
+cached-property>=1.5,<1.6

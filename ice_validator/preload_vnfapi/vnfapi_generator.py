@@ -40,35 +40,14 @@
 import json
 import os
 
-from preload import (
-    AbstractPreloadGenerator,
+from preload.generator import (
     get_json_template,
     get_or_create_template,
-    replace,
+    AbstractPreloadGenerator,
 )
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(THIS_DIR, "vnfapi_data")
-
-
-def add_fixed_ips(network_template, port):
-    for ip in port.fixed_ips:
-        if ip.ip_version == 4:
-            network_template["network-ips"].append({"ip-address": replace(ip.param)})
-            network_template["ip-count"] += 1
-        else:
-            network_template["network-ips-v6"].append({"ip-address": replace(ip.param)})
-            network_template["ip-count-ipv6"] += 1
-
-
-def add_floating_ips(network_template, network):
-    # only one floating IP is really supported, in the preload model
-    # so for now we'll just use the last one.  We might revisit this
-    # and if multiple floating params exist, then come up with an
-    # approach to pick just one
-    for ip in network.floating_ips:
-        key = "floating-ip" if ip.ip_version == 4 else "floating-ip-v6"
-        network_template[key] = replace(ip.param)
 
 
 def get_or_create_network_template(network_role, vm_networks):
@@ -94,12 +73,34 @@ class VnfApiPreloadGenerator(AbstractPreloadGenerator):
     def output_sub_dir(cls):
         return "vnfapi"
 
-    def generate_module(self, vnf_module):
+    def generate_module(self, vnf_module, output_dir):
         preload = get_json_template(DATA_DIR, "preload_template")
         self._populate(preload, vnf_module)
-        outfile = "{}/{}.json".format(self.output_dir, vnf_module.vnf_name)
+        outfile = "{}/{}.json".format(output_dir, vnf_module.vnf_name)
         with open(outfile, "w") as f:
             json.dump(preload, f, indent=4)
+
+    def add_floating_ips(self, network_template, network):
+        # only one floating IP is really supported, in the preload model
+        # so for now we'll just use the last one.  We might revisit this
+        # and if multiple floating params exist, then come up with an
+        # approach to pick just one
+        for ip in network.floating_ips:
+            key = "floating-ip" if ip.ip_version == 4 else "floating-ip-v6"
+            network_template[key] = self.replace(ip.param, single=True)
+
+    def add_fixed_ips(self, network_template, port):
+        for ip in port.fixed_ips:
+            if ip.ip_version == 4:
+                network_template["network-ips"].append(
+                    {"ip-address": self.replace(ip.param, single=True)}
+                )
+                network_template["ip-count"] += 1
+            else:
+                network_template["network-ips-v6"].append(
+                    {"ip-address": self.replace(ip.param, single=True)}
+                )
+                network_template["ip-count-ipv6"] += 1
 
     def _populate(self, preload, vnf_module):
         self._add_availability_zones(preload, vnf_module)
@@ -107,24 +108,23 @@ class VnfApiPreloadGenerator(AbstractPreloadGenerator):
         self._add_vms(preload, vnf_module)
         self._add_parameters(preload, vnf_module)
 
-    @staticmethod
-    def _add_availability_zones(preload, vnf_module):
+    def _add_availability_zones(self, preload, vnf_module):
         zones = preload["input"]["vnf-topology-information"]["vnf-assignments"][
             "availability-zones"
         ]
         for zone in vnf_module.availability_zones:
-            zones.append({"availability-zone": replace(zone)})
+            zones.append({"availability-zone": self.replace(zone, single=True)})
 
-    @staticmethod
-    def _add_vnf_networks(preload, vnf_module):
+    def _add_vnf_networks(self, preload, vnf_module):
         networks = preload["input"]["vnf-topology-information"]["vnf-assignments"][
             "vnf-networks"
         ]
         for network in vnf_module.networks:
             network_data = {
                 "network-role": network.network_role,
-                "network-name": replace(
-                    "network name for {}".format(network.name_param)
+                "network-name": self.replace(
+                    network.name_param,
+                    "VALUE FOR: network name for {}".format(network.name_param),
                 ),
             }
             for subnet in network.subnet_params:
@@ -132,8 +132,7 @@ class VnfApiPreloadGenerator(AbstractPreloadGenerator):
                 network_data[key] = subnet
             networks.append(network_data)
 
-    @staticmethod
-    def _add_vms(preload, vnf_module):
+    def _add_vms(self, preload, vnf_module):
         vm_list = preload["input"]["vnf-topology-information"]["vnf-assignments"][
             "vnf-vms"
         ]
@@ -141,7 +140,9 @@ class VnfApiPreloadGenerator(AbstractPreloadGenerator):
             vm_template = get_json_template(DATA_DIR, "vm")
             vm_template["vm-type"] = vm.vm_type
             vm_template["vm-count"] = vm.vm_count
-            vm_template["vm-names"]["vm-name"].extend(map(replace, vm.names))
+            for name in vm.names:
+                value = self.replace(name, single=True)
+                vm_template["vm-names"]["vm-name"].append(value)
             vm_list.append(vm_template)
             vm_networks = vm_template["vm-networks"]
             for port in vm.ports:
@@ -150,11 +151,15 @@ class VnfApiPreloadGenerator(AbstractPreloadGenerator):
                 network_template["network-role"] = role
                 network_template["network-role-tag"] = role
                 network_template["use-dhcp"] = "Y" if port.uses_dhcp else "N"
-                add_fixed_ips(network_template, port)
-                add_floating_ips(network_template, port)
+                self.add_fixed_ips(network_template, port)
+                self.add_floating_ips(network_template, port)
 
-    @staticmethod
-    def _add_parameters(preload, vnf_module):
+    def _add_parameters(self, preload, vnf_module):
         params = preload["input"]["vnf-topology-information"]["vnf-parameters"]
         for key, value in vnf_module.preload_parameters.items():
-            params.append({"vnf-parameter-name": key, "vnf-parameter-value": value})
+            params.append(
+                {
+                    "vnf-parameter-name": key,
+                    "vnf-parameter-value": self.replace(key, value),
+                }
+            )

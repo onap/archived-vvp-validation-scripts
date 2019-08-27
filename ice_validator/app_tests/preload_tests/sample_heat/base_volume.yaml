@@ -1,0 +1,47 @@
+heat_template_version: '2013-05-23'
+
+description: nsadkfl
+
+parameters:
+
+  vnf_name:
+    type: string
+    label: VF name
+    description: Unique name for this VF instance.
+
+  volume_size:
+    type: number
+    description: Size in GB
+    constraints:
+      - range: { min: 100, max: 400 }
+
+resources:
+
+  db_vol0:
+    type: OS::Cinder::Volume
+    properties:
+      name:
+        str_replace:
+          template: VNF_NAME_db_vol0
+          params:
+            VNF_NAME: {get_param: vnf_name}
+      volume_type: "solidfire"
+      volume_size: { get_param: volume_size }
+
+  db_vol1:
+    type: OS::Cinder::Volume
+    properties:
+      name:
+        str_replace:
+          template: VNF_NAME_db_vol1
+          params:
+            VNF_NAME: {get_param: vnf_name}
+      volume_type: "solidfire"
+      volume_size: { get_param: volume_size }
+
+outputs:
+  db_vol0_id:
+    value: { get_resource: db_vol0 }
+
+  db_vol1_id:
+    value: { get_resource: db_vol1 }

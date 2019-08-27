@@ -58,7 +58,7 @@ def get_template_dir(metafunc):
     or, during --self-test, the directory whos name matches
     the current tests module name
     """
-    if metafunc.config.getoption("template_dir") is None:
+    if metafunc.config.getoption("template_dir", None) is None:
         return path.join(
             path.dirname(metafunc.module.__file__),
             "fixtures",
@@ -155,7 +155,7 @@ def get_filenames_lists(
     """
     extensions = [".yaml", ".yml", ".env"] if extensions is None else extensions
     filenames_lists = []
-    if metafunc.config.getoption("self_test"):
+    if metafunc.config.getoption("self_test", None):
         filenames_lists.append(
             list_template_dir(
                 metafunc, extensions, exclude_nested, template_type, ["pass"]

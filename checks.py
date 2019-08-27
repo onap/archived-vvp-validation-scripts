@@ -52,6 +52,16 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 CURRENT_NEEDS_PATH = os.path.join(THIS_DIR, "ice_validator/heat_requirements.json")
 
 
+def run_pytest(*args, msg="pytest failed"):
+    original_dir = os.getcwd()
+    try:
+        os.chdir(os.path.join(THIS_DIR, "ice_validator"))
+        if pytest.main(list(args)) != 0:
+            return [msg]
+    finally:
+        os.chdir(original_dir)
+
+
 class Traceability:
 
     PATH = os.path.join(THIS_DIR, "ice_validator/output/traceability.csv")
@@ -145,18 +155,14 @@ def check_requirements_up_to_date():
     return None
 
 
+def check_app_tests_pass():
+    return run_pytest("tests", "--self-test",
+                      msg="app_tests failed. Run pytest app_tests and fix errors.")
+
+
 def check_self_test_pass():
-    """
-    Run pytest self-test and ensure it passes
-    :return:
-    """
-    original_dir = os.getcwd()
-    try:
-        os.chdir(os.path.join(THIS_DIR, "ice_validator"))
-        if pytest.main(["tests", "--self-test"]) != 0:
-            return ["VVP self-test failed. Run pytest --self-test and fix errors."]
-    finally:
-        os.chdir(original_dir)
+    return run_pytest("tests", "--self-test",
+                      msg="self-test failed. Run pytest --self-test and fix errors.")
 
 
 def check_testable_requirements_are_mapped():

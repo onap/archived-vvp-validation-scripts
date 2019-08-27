@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2017 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -34,23 +34,55 @@
 # limitations under the License.
 #
 # ============LICENSE_END============================================
-#
-#
-namespace: org.onap.vvp
-owner: ONAP
-ui:
-  app-name: VNF Validation Tool
-categories:
-  - name: Environment File Compliance. (Required to Onboard)
-    category: environment_file
-    description:
-      Checks certain parameters are excluded from the .env file, per HOT Requirements.
-      Required for ASDC onboarding, not needed for manual Openstack testing.
-  - name: OpenStack Heat Testing (Beta)
-    category: openstack
-    description:
-      Uses the latest OpenStack Heat community version available to validate that
-      a heat template is valid OpenStack Heat. This testing is equivalent to using
-      heat template-validate from the command line.
-settings:
-  polling-freqency: 1000
+from pathlib import Path
+
+import pytest
+
+from tests.helpers import check, first, unzip, remove
+
+THIS_DIR = Path(__file__).parent
+
+
+def test_check_fail():
+    with pytest.raises(RuntimeError, match="pre-condition failed"):
+        check(False, "pre-condition failed")
+
+
+def test_check_pass():
+    check(True, "pre-condition failed")
+
+
+def test_first_found():
+    result = first(range(1, 10), lambda x: x % 4 == 0)
+    assert result == 4
+
+
+def test_first_not_found():
+    result = first(range(1, 3), lambda x: x % 4 == 0)
+    assert result is None
+
+
+def test_first_custom_default():
+    result = first(range(1, 3), lambda x: x % 4 == 0, default="not found")
+    assert result == "not found"
+
+
+def test_unzip_success(tmpdir):
+    test_zip = THIS_DIR / "test_data.zip"
+    target_dir = tmpdir.join("sub-dir")
+    unzip(test_zip, target_dir)
+    assert "data.txt" in (p.basename for p in target_dir.listdir())
+
+
+def test_unzip_not_found(tmpdir):
+    test_zip = THIS_DIR / "test_data1.zip"
+    with pytest.raises(RuntimeError, match="not a valid zipfile"):
+        unzip(test_zip, tmpdir)
+
+
+def test_remove_with_no_key():
+    assert remove([1, 2, 3, 4], [3]) == [1, 2, 4]
+
+
+def test_remove_with_key():
+    assert remove(["a", "b", "c", "d"], ["A"], lambda s: s.upper()) == ["b", "c", "d"]

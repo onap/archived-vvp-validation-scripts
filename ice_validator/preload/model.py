@@ -34,28 +34,28 @@
 # limitations under the License.
 #
 # ============LICENSE_END============================================
-import importlib
-import inspect
-import json
 import os
-import pkgutil
 import shutil
 from abc import ABC, abstractmethod
-from itertools import chain
-from typing import Set
 
+from preload.generator import yield_by_count
+from preload.environment import PreloadEnvironment
 from tests.helpers import (
     get_param,
     get_environment_pair,
     prop_iterator,
     get_output_dir,
     is_base_module,
+    remove,
 )
 from tests.parametrizers import parametrize_heat_templates
 from tests.structures import NeutronPortProcessor, Heat
 from tests.test_environment_file_parameters import get_preload_excluded_parameters
 from tests.utils import nested_dict
 from tests.utils.vm_types import get_vm_type_for_nova_server
+from config import Config, get_generator_plugins
+
+CHANGE = "CHANGEME"
 
 
 # This is only used to fake out parametrizers
@@ -82,129 +82,6 @@ def get_heat_templates(config):
     else:
         return
     return heat_templates
-
-
-def get_json_template(template_dir, template_name):
-    template_name = template_name + ".json"
-    with open(os.path.join(template_dir, template_name)) as f:
-        return json.loads(f.read())
-
-
-def remove(sequence, exclude, key=None):
-    """
-    Remove a copy of sequence that items occur in exclude.
-
-    :param sequence: sequence of objects
-    :param exclude:  objects to excluded (must support ``in`` check)
-    :param key:      optional function to extract key from item in sequence
-    :return:         list of items not in the excluded
-    """
-    key_func = key if key else lambda x: x
-    result = (s for s in sequence if key_func(s) not in exclude)
-    return set(result) if isinstance(sequence, Set) else list(result)
-
-
-def get_or_create_template(template_dir, key, value, sequence, template_name):
-    """
-    Search a sequence of dicts where a given key matches value.  If
-    found, then it returns that item.  If not, then it loads the
-    template identified by template_name, adds it ot the sequence, and
-    returns the template
-    """
-    for item in sequence:
-        if item[key] == value:
-            return item
-    new_template = get_json_template(template_dir, template_name)
-    sequence.append(new_template)
-    return new_template
-
-
-def replace(param):
-    """
-    Optionally used by the preload generator to wrap items in the preload
-    that need to be replaced by end users
-    :param param: p
-    """
-    return "VALUE FOR: {}".format(param) if param else ""
-
-
-class AbstractPreloadGenerator(ABC):
-    """
-    All preload generators must inherit from this class and implement the
-    abstract methods.
-
-    Preload generators are automatically discovered at runtime via a plugin
-    architecture.  The system path is scanned looking for modules with the name
-    preload_*, then all non-abstract classes that inherit from AbstractPreloadGenerator
-    are registered as preload plugins
-
-    Attributes:
-        :param vnf:             Instance of Vnf that contains the preload data
-        :param base_output_dir: Base directory to house the preloads.  All preloads
-                                must be written to a subdirectory under this directory
-    """
-
-    def __init__(self, vnf, base_output_dir):
-        self.vnf = vnf
-        self.base_output_dir = base_output_dir
-        os.makedirs(self.output_dir, exist_ok=True)
-
-    @classmethod
-    @abstractmethod
-    def format_name(cls):
-        """
-        String name to identify the format (ex: VN-API, GR-API)
-        """
-        raise NotImplementedError()
-
-    @classmethod
-    @abstractmethod
-    def output_sub_dir(cls):
-        """
-        String sub-directory name that will appear under ``base_output_dir``
-        """
-        raise NotImplementedError()
-
-    @classmethod
-    @abstractmethod
-    def supports_output_passing(cls):
-        """
-        Some preload methods allow automatically mapping output parameters in the
-        base module to the input parameter of other modules.  This means these
-        that the incremental modules do not need these base module outputs in their
-        preloads.
-
-        At this time, VNF-API does not support output parameter passing, but
-        GR-API does.
-
-        If this is true, then the generator will call Vnf#filter_output_params
-        after the preload module for the base module has been created
-        """
-        raise NotImplementedError()
-
-    @abstractmethod
-    def generate_module(self, module):
-        """
-        Create the preloads and write them to ``self.output_dir``.  This
-        method is responsible for generating the content of the preload and
-        writing the file to disk.
-        """
-        raise NotImplementedError()
-
-    @property
-    def output_dir(self):
-        return os.path.join(self.base_output_dir, self.output_sub_dir())
-
-    def generate(self):
-        # handle the base module first
-        print("\nGenerating {} preloads".format(self.format_name()))
-        self.generate_module(self.vnf.base_module)
-        print("... generated template for {}".format(self.vnf.base_module))
-        if self.supports_output_passing():
-            self.vnf.filter_base_outputs()
-        for mod in self.vnf.incremental_modules:
-            self.generate_module(mod)
-            print("... generated for {}".format(mod))
 
 
 class FilterBaseOutputs(ABC):
@@ -364,20 +241,6 @@ class Vnf:
             mod.filter_output_params(self.base_output_params)
 
 
-def yield_by_count(sequence):
-    """
-    Iterates through sequence and yields each item according to its __count__
-    attribute.  If an item has a __count__ of it will be returned 3 times
-    before advancing to the next item in the sequence.
-
-    :param sequence: sequence of dicts (must contain __count__)
-    :returns:        generator of tuple key, value pairs
-    """
-    for key, value in sequence.items():
-        for i in range(value["__count__"]):
-            yield (key, value)
-
-
 def env_path(heat_path):
     """
     Create the path to the env file for the give heat path.
@@ -452,6 +315,49 @@ class VnfModule(FilterBaseOutputs):
         )
 
     @property
+    def label(self):
+        """
+        Label for the VF module that will appear in the CSAR
+        """
+        return self.vnf_name
+
+    @property
+    def env_specs(self):
+        """Return available Environment Spec definitions"""
+        return Config().env_specs
+
+    @property
+    def env_template(self):
+        """
+        Returns a a template .env file that can be completed to enable
+        preload generation.
+        """
+        params = {}
+        params["vnf-name"] = CHANGE
+        params["vnf-type"] = CHANGE
+        params["vf-module-model-name"] = CHANGE
+        params["vf_module_name"] = CHANGE
+        for network in self.networks:
+            params[network.name_param] = CHANGE
+            for param in set(network.subnet_params):
+                params[param] = CHANGE
+        for vm in self.virtual_machine_types:
+            for name in set(vm.names):
+                params[name] = CHANGE
+            for ip in vm.floating_ips:
+                params[ip.param] = CHANGE
+            for ip in vm.fixed_ips:
+                params[ip.param] = CHANGE
+        excluded = get_preload_excluded_parameters(
+            self.template_file, persistent_only=True
+        )
+        for name, value in self.parameters.items():
+            if name in excluded:
+                continue
+            params[name] = value
+        return {"parameters": params}
+
+    @property
     def preload_parameters(self):
         """
         Subset of parameters from the env file that can be overridden in
@@ -505,11 +411,18 @@ def create_preloads(config, exitstatus):
     preload_dir = os.path.join(get_output_dir(config), "preloads")
     if os.path.exists(preload_dir):
         shutil.rmtree(preload_dir)
+    env_directory = config.getoption("env_dir")
+    preload_env = PreloadEnvironment(env_directory) if env_directory else None
+    plugins = get_generator_plugins()
+    available_formats = [p.format_name() for p in plugins]
+    selected_formats = config.getoption("preload_formats") or available_formats
     heat_templates = get_heat_templates(config)
     vnf = None
-    for gen_class in get_generator_plugins():
+    for plugin_class in plugins:
+        if plugin_class.format_name() not in selected_formats:
+            continue
         vnf = Vnf(heat_templates)
-        generator = gen_class(vnf, preload_dir)
+        generator = plugin_class(vnf, preload_dir, preload_env)
         generator.generate()
     if vnf and vnf.uses_contrail:
         print(
@@ -522,31 +435,3 @@ def create_preloads(config, exitstatus):
             "\nWARNING: Heat violations detected. Preload templates may be\n"
             "incomplete."
         )
-
-
-def is_preload_generator(class_):
-    """
-    Returns True if the class is an implementation of AbstractPreloadGenerator
-    """
-    return (
-        inspect.isclass(class_)
-        and not inspect.isabstract(class_)
-        and issubclass(class_, AbstractPreloadGenerator)
-    )
-
-
-def get_generator_plugins():
-    """
-    Scan the system path for modules that are preload plugins and discover
-    and return the classes that implement AbstractPreloadGenerator in those
-    modules
-    """
-    preload_plugins = (
-        importlib.import_module(name)
-        for finder, name, ispkg in pkgutil.iter_modules()
-        if name.startswith("preload_")
-    )
-    members = chain.from_iterable(
-        inspect.getmembers(mod, is_preload_generator) for mod in preload_plugins
-    )
-    return [m[1] for m in members]

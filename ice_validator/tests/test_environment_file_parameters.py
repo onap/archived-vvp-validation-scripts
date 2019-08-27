@@ -218,16 +218,22 @@ def run_test_parameter(yaml_file, resource_type, *prop, **kwargs):
     assert not invalid_parameters, "\n".join(invalid_parameters)
 
 
-def get_preload_excluded_parameters(yaml_file):
+def get_preload_excluded_parameters(yaml_file, persistent_only=False, env_spec=None):
     """
     Returns set of all parameters that should not be included in the preload's
     vnf parameters/tag-values section.
+
+    if persistent_only only parameters that are marked as persistent will
+    be excluded
     """
+    env_spec = env_spec or ENV_PARAMETER_SPEC
     results = []
-    for resource_type, specs in ENV_PARAMETER_SPEC.items():
+    for resource_type, specs in env_spec.items():
         # apply to all resources if not in the format of an OpenStack resource
         all_resources = "::" not in resource_type
         for spec in specs:
+            if persistent_only and not spec.get("persistent"):
+                continue
             results.extend(get_template_parameters(yaml_file, resource_type,
                                                    spec, all_resources))
     return {item["param"] for item in results}

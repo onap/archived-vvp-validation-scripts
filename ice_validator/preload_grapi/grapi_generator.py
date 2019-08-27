@@ -37,11 +37,10 @@
 import json
 import os
 
-from preload import (
-    AbstractPreloadGenerator,
-    get_or_create_template,
+from preload.generator import (
     get_json_template,
-    replace,
+    get_or_create_template,
+    AbstractPreloadGenerator,
 )
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -58,30 +57,6 @@ def get_or_create_network_template(network, vm_networks):
     )
 
 
-def add_fixed_ips(network_template, fixed_ips, uses_dhcp):
-    items = network_template["network-information-items"]["network-information-item"]
-    ipv4s = next(item for item in items if item["ip-version"] == "4")
-    ipv6s = next(item for item in items if item["ip-version"] == "6")
-    if uses_dhcp:
-        ipv4s["use-dhcp"] = "Y"
-        ipv6s["use-dhcp"] = "Y"
-    for ip in fixed_ips:
-        target = ipv4s if ip.ip_version == 4 else ipv6s
-        ips = target["network-ips"]["network-ip"]
-        if ip.param not in ips:
-            ips.append(replace(ip.param))
-        target["ip-count"] += 1
-
-
-def add_floating_ips(network_template, floating_ips):
-    for ip in floating_ips:
-        key = "floating-ip-v4" if ip.ip_version == 4 else "floating-ip-v6"
-        ips = network_template["floating-ips"][key]
-        value = replace(ip.param)
-        if value not in ips:
-            ips.append(value)
-
-
 class GrApiPreloadGenerator(AbstractPreloadGenerator):
     @classmethod
     def supports_output_passing(cls):
@@ -95,13 +70,37 @@ class GrApiPreloadGenerator(AbstractPreloadGenerator):
     def output_sub_dir(cls):
         return "grapi"
 
-    def generate_module(self, vnf_module):
+    def generate_module(self, vnf_module, output_dir):
         template = get_json_template(DATA_DIR, "preload_template")
         self._populate(template, vnf_module)
         vnf_name = vnf_module.vnf_name
-        outfile = "{}/{}.json".format(self.output_dir, vnf_name)
+        outfile = "{}/{}.json".format(output_dir, vnf_name)
         with open(outfile, "w") as f:
             json.dump(template, f, indent=4)
+
+    def add_floating_ips(self, network_template, floating_ips):
+        for ip in floating_ips:
+            key = "floating-ip-v4" if ip.ip_version == 4 else "floating-ip-v6"
+            ips = network_template["floating-ips"][key]
+            value = self.replace(ip.param, single=True)
+            if value not in ips:
+                ips.append(value)
+
+    def add_fixed_ips(self, network_template, fixed_ips, uses_dhcp):
+        items = network_template["network-information-items"][
+            "network-information-item"
+        ]
+        ipv4s = next(item for item in items if item["ip-version"] == "4")
+        ipv6s = next(item for item in items if item["ip-version"] == "6")
+        if uses_dhcp:
+            ipv4s["use-dhcp"] = "Y"
+            ipv6s["use-dhcp"] = "Y"
+        for ip in fixed_ips:
+            target = ipv4s if ip.ip_version == 4 else ipv6s
+            ips = target["network-ips"]["network-ip"]
+            if ip.param not in ips:
+                ips.append(self.replace(ip.param, single=True))
+            target["ip-count"] += 1
 
     def _populate(self, preload, vnf_module):
         self._add_vnf_metadata(preload)
@@ -110,8 +109,7 @@ class GrApiPreloadGenerator(AbstractPreloadGenerator):
         self._add_parameters(preload, vnf_module)
         self._add_vnf_networks(preload, vnf_module)
 
-    @staticmethod
-    def _add_vms(preload, vnf_module):
+    def _add_vms(self, preload, vnf_module):
         vms = preload["input"]["preload-vf-module-topology-information"][
             "vf-module-topology"
         ]["vf-module-assignments"]["vms"]["vm"]
@@ -119,58 +117,67 @@ class GrApiPreloadGenerator(AbstractPreloadGenerator):
             vm_template = get_json_template(DATA_DIR, "vm")
             vms.append(vm_template)
             vm_template["vm-type"] = vm.vm_type
-            vm_template["vm-names"]["vm-name"].extend(map(replace, vm.names))
+            for name in vm.names:
+                value = self.replace(name, single=True)
+                vm_template["vm-names"]["vm-name"].append(value)
             vm_template["vm-count"] = vm.vm_count
             vm_networks = vm_template["vm-networks"]["vm-network"]
             for port in vm.ports:
                 role = port.network.network_role
                 network_template = get_or_create_network_template(role, vm_networks)
                 network_template["network-role"] = role
-                add_fixed_ips(network_template, port.fixed_ips, port.uses_dhcp)
-                add_floating_ips(network_template, port.floating_ips)
+                self.add_fixed_ips(network_template, port.fixed_ips, port.uses_dhcp)
+                self.add_floating_ips(network_template, port.floating_ips)
 
-    @staticmethod
-    def _add_availability_zones(preload, vnf_module):
+    def _add_availability_zones(self, preload, vnf_module):
         zones = preload["input"]["preload-vf-module-topology-information"][
             "vnf-resource-assignments"
         ]["availability-zones"]["availability-zone"]
-        zones.extend(map(replace, vnf_module.availability_zones))
+        for zone in vnf_module.availability_zones:
+            value = self.replace(zone, single=True)
+            zones.append(value)
 
-    @staticmethod
-    def _add_parameters(preload, vnf_module):
+    def _add_parameters(self, preload, vnf_module):
         params = [
-            {"name": key, "value": value}
+            {"name": key, "value": self.replace(key, value)}
             for key, value in vnf_module.preload_parameters.items()
         ]
         preload["input"]["preload-vf-module-topology-information"][
             "vf-module-topology"
         ]["vf-module-parameters"]["param"].extend(params)
 
-    @staticmethod
-    def _add_vnf_networks(preload, vnf_module):
+    def _add_vnf_networks(self, preload, vnf_module):
         networks = preload["input"]["preload-vf-module-topology-information"][
             "vnf-resource-assignments"
         ]["vnf-networks"]["vnf-network"]
         for network in vnf_module.networks:
             network_data = {
                 "network-role": network.network_role,
-                "network-name": replace("network name of {}".format(network.name_param)),
+                "network-name": self.replace(
+                    network.name_param,
+                    "VALUE FOR: network name of {}".format(network.name_param),
+                ),
             }
             if network.subnet_params:
                 network_data["subnets-data"] = {"subnet-data": []}
                 subnet_data = network_data["subnets-data"]["subnet-data"]
                 for subnet_param in network.subnet_params:
-                    subnet_data.append({"subnet-id": replace(subnet_param)})
+                    subnet_data.append(
+                        {"subnet-id": self.replace(subnet_param, single=True)}
+                    )
             networks.append(network_data)
 
-    @staticmethod
-    def _add_vnf_metadata(preload):
+    def _add_vnf_metadata(self, preload):
         topology = preload["input"]["preload-vf-module-topology-information"]
         vnf_meta = topology["vnf-topology-identifier-structure"]
-        vnf_meta["vnf-name"] = replace("vnf_name")
-        vnf_meta["vnf-type"] = replace("Concatenation of "
-                                       "<Service Name>/<VF Instance Name> "
-                                       "MUST MATCH SDC")
+        vnf_meta["vnf-name"] = self.replace("vnf_name")
+        vnf_meta["vnf-type"] = self.replace(
+            "vnf-type",
+            "VALUE FOR: Concatenation of <Service Name>/"
+            "<VF Instance Name> MUST MATCH SDC",
+        )
         module_meta = topology["vf-module-topology"]["vf-module-topology-identifier"]
-        module_meta["vf-module-name"] = replace("vf_module_name")
-        module_meta["vf-module-type"] = replace("<vfModuleModelName> from CSAR or SDC")
+        module_meta["vf-module-name"] = self.replace("vf_module_name")
+        module_meta["vf-module-type"] = self.replace(
+            "vf-module-model-name", "VALUE FOR: <vfModuleModelName> from CSAR or SDC"
+        )

@@ -1,0 +1,156 @@
+heat_template_version: 2015-04-30
+
+description: Base Module of Sample VNF
+
+parameters:
+
+  # ONAP Assigned Parameters
+  workload_context:
+    type: string
+    description: Unique ID for this VNF instance
+
+  environment_context:
+    type: string
+    description: Unique ID for this VNF instance
+
+  vnf_id:
+    type: string
+    description: Unique ID for this VNF instance
+
+  vf_module_id:
+    type: string
+    description: Unique ID for this VNF module instance
+
+  vf_module_index:
+    type: number
+    description: Index of this VF Module
+
+  vnf_name:
+    type: string
+    description: Unique name for this VNF instance
+
+
+  # Availability Zones
+  availability_zone_0:
+    type: string
+    description: Primary Availability Zone
+
+
+  # External Networks
+  ha_net_id:
+    type: string
+    description:  High Availability Network
+
+  int_private_net_id:
+    type: string
+    description: Private network
+
+  int_private_subnet_id:
+    type: string
+    description: Private network subnet
+  
+  # Server Inputs: Loadbalancer
+  lb_names:
+    type: comma_delimited_list
+    description: Load Balancer Names
+
+  lb_image_name:
+    type: string
+    description: Loadbalancer VM Image
+
+  lb_flavor_name:
+    type: string
+    description: Loadbalancer VM Flavor
+
+  lb_ha_floating_ip:
+    type: string
+    description: Floating HA IP for LB
+
+  lb_ha_floating_v6_ip:
+    type: string
+    description: Floating HA IP for LB
+
+  # Server Inputs: Services
+  svc_0_names:
+    type: comma_delimited_list
+    description: Service VM Names
+
+  svc_1_names:
+    type: comma_delimited_list
+    description: Service VM Names
+
+  svc_2_names:
+    type: comma_delimited_list
+    description: Service VM Names
+
+  svc_image_name:
+    type: string
+    description: Service VM Image
+
+  svc_flavor_name:
+    type: string
+    description: Service VM Flavor
+
+  svc_count:
+    type: number
+    description: Number of instances of Service to create
+
+resources:
+
+          
+  lb_server_1:
+    type: OS::Nova::Server
+    properties:
+      image: { get_param: lb_image_name }
+      flavor: { get_param: lb_flavor_name }
+      name: { get_param: [lb_names, {get_param: vf_module_index}] }
+      metadata:
+        vnf_id: { get_param: vnf_id }
+        vf_module_id: { get_param: vf_module_id }
+        vf_module_index: { get_param: vf_module_index }
+        vnf_name: { get_param: vnf_name }
+        workload_context: { get_param: workload_context }
+        environment_context: { get_param: environment_context }
+      networks:
+        - port: { get_resource: lb_1_int_private_port_0 }
+        - port: { get_resource: lb_1_ha_port_0 }
+      user_data: { get_file: user.data }
+      availability_zone: { get_param: availability_zone_0 }
+
+  lb_1_ha_port_0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: ha_net_id }
+      allowed_address_pairs:
+        - ip_address: {get_param: lb_ha_floating_ip }
+        - ip_address: {get_param: lb_ha_floating_v6_ip }
+
+  lb_1_int_private_port_0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: int_private_net_id }
+      fixed_ips: 
+        - subnet_id: { get_param: int_private_subnet_id }
+  
+  svc_resource_group_1:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: svc_count }
+      resource_def:
+        type: nested_svc.yaml
+        properties:
+          workload_context: {get_param: workload_context}
+          environment_context: {get_param: environment_context}
+          vnf_id: {get_param: vnf_id}
+          vf_module_id: {get_param: vf_module_id}
+          vnf_name: {get_param: vnf_name}         
+          availability_zone_0: {get_param: availability_zone_0}
+          svc_names:
+          - {get_param: [svc_0_names, {get_param: vf_module_index}]}
+          - {get_param: [svc_1_names, {get_param: vf_module_index}]}
+          - {get_param: [svc_2_names, {get_param: vf_module_index}]}
+          svc_image_name: {get_param: svc_image_name}
+          svc_flavor_name: {get_param: svc_flavor_name}
+          int_private_net_id: {get_param: int_private_net_id}
+          int_private_subnet_id: {get_param: int_private_subnet_id}
+          index: "%index%"

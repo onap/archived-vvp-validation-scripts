@@ -96,3 +96,4 @@ ENV/
 
 .idea/
 ice_validator/output/
+sample_env/grapi/*

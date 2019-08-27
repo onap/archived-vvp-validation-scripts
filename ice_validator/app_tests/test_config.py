@@ -34,19 +34,23 @@
 # limitations under the License.
 #
 # ============LICENSE_END============================================
-#
-#
 
+import uuid
 from io import StringIO
 
 import pytest
 import yaml
 
+from config import Config, get_generator_plugin_names, to_uri
 import vvp
 
+
 DEFAULT_CONFIG = """
+namespace: {namespace}
+owner: onap-test
 ui:
   app-name: VNF Validation Tool
+  requirement-link-url: http://requirement.url.com
 categories:
   - name: Environment File Compliance. (Required to Onboard)
     category: environment_file
@@ -55,14 +59,23 @@ categories:
       Required for ASDC onboarding, not needed for manual Openstack testing.
 settings:
   polling-freqency: 1000
-  default-verbosity: Standard
+  env-specs:
+  - tests.test_environment_file_parameters.ENV_PARAMETER_SPEC
+terms:
+    version: 1.0.0
+    path: path/to/terms.txt
+    popup-title: Terms and Conditions
+    popup-link-text: View Terms and Conditions
+    popup-msg-text: Review and Accept the Terms
 """
 
 
 # noinspection PyShadowingNames
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def config():
-    return vvp.Config(yaml.safe_load(StringIO(DEFAULT_CONFIG)))
+    unique = str(uuid.uuid4())
+    data = DEFAULT_CONFIG.format(namespace=unique)
+    return Config(yaml.safe_load(StringIO(data)))
 
 
 def test_app_name(config):
@@ -87,10 +100,6 @@ def test_get_category_when_other(config):
     )
 
 
-def test_default_verbosity(config):
-    assert config.default_verbosity(vvp.ValidatorApp.VERBOSITY_LEVELS) == "Standard (-v)"
-
-
 def test_queues(config):
     assert config.log_queue.empty(), "Log should start empty"
     config.log_file.write("Test")
@@ -102,6 +111,8 @@ def test_queues(config):
 
 
 MISSING_CATEGORY_FIELD = """
+namespace: org.onap.test
+owner: onap-test
 ui:
   app-name: VNF Validation Tool
 categories:
@@ -116,7 +127,7 @@ settings:
 def test_missing_category_fields():
     settings = yaml.safe_load(StringIO(MISSING_CATEGORY_FIELD))
     with pytest.raises(RuntimeError) as e:
-        vvp.Config(settings)
+        Config(settings)
     assert "Missing: name" in str(e)
 
 
@@ -140,3 +151,119 @@ def test_default_input_format(config):
 def test_input_formats(config):
     assert "Directory (Uncompressed)" in config.input_formats
     assert "ZIP File" in config.input_formats
+
+
+def test_env_specs(config):
+    specs = config.env_specs
+    assert len(specs) == 1
+    assert "ALL" in specs[0]
+
+
+def test_get_generator_plugin_names(config):
+    names = get_generator_plugin_names()
+    assert "VNF-API" in names
+    assert "GR-API" in names
+
+
+def test_preload_formats(config):
+    formats = config.preload_formats
+    assert all(format in formats for format in ("VNF-API", "GR-API"))
+
+
+def test_requirement_link_http(config):
+    assert config.requirement_link_url == "http://requirement.url.com"
+
+
+def test_to_uri_relative_path():
+    assert to_uri("path/").startswith("file://")
+    assert to_uri("path/").endswith("/path")
+
+
+def test_to_uri_relative_http():
+    assert to_uri("http://url.com") == "http://url.com"
+
+
+def test_to_uri_absolute_path():
+    assert to_uri("/path/one").startswith("file:///")
+    assert to_uri("/path/one").endswith("/path/one")
+
+
+def test_requirement_link_path(config):
+    config._config["ui"]["requirement-link-url"] = "path/to/reqs.txt"
+    url = config.requirement_link_url
+    assert url.startswith("file://")
+    assert "path/to/reqs.txt" in url
+
+
+def test_terms_version(config):
+    assert config.terms_version == "1.0.0"
+
+
+def test_terms_popup_title(config):
+    assert config.terms_popup_title == "Terms and Conditions"
+
+
+def test_terms_popup_message(config):
+    assert config.terms_popup_message == "Review and Accept the Terms"
+
+
+def test_terms_link_url_default(config):
+    config._config["terms"]["path"] = None
+    assert config.terms_link_url is None
+
+
+def test_terms_acceptance(config):
+    assert not config.are_terms_accepted
+    config.set_terms_accepted()
+    assert config.are_terms_accepted
+
+
+def test_terms_link_url_path(config):
+    assert config.terms_link_url.startswith("file://")
+    assert config.terms_link_url.endswith("/path/to/terms.txt")
+
+
+def test_terms_link_text(config):
+    assert config.terms_link_text == "View Terms and Conditions"
+
+
+def test_default_halt_on_failure(config):
+    assert config.default_halt_on_failure
+
+
+def test_get_subdir_for_preload(config):
+    assert config.get_subdir_for_preload("VNF-API") == "vnfapi"
+
+
+def test_default_preload_format(config):
+    assert config.default_preload_format in ("VNF-API", "GR-API", "Excel")
+
+
+def test_category_description(config):
+    assert "Checks certain parameters" in config.get_description(
+        "Environment File Compliance. (Required to Onboard)"
+    )
+
+
+def test_get_category_by_name(config):
+    assert (
+        config.get_category("Environment File Compliance. (Required to Onboard)")
+        == "environment_file"
+    )
+
+
+def test_cached_category_setting(config):
+    assert (
+        config.get_category_value("Environment File Compliance. (Required to Onboard)")
+        == 0
+    )
+
+
+def test_disclaimer_text(config):
+    assert config.disclaimer_text == ""
+
+
+def test_requirement_link_text(config):
+    url_text = "Requirement URL"
+    config._config["ui"]["requirement-link-text"] = url_text
+    assert config.requirement_link_text == url_text

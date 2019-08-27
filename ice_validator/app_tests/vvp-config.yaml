@@ -36,7 +36,8 @@
 # ============LICENSE_END============================================
 #
 #
-
+namespace: org.onap.test
+owner: onap-test
 ui:
   app-name: VNF Validation Tool
 categories:
@@ -48,3 +49,5 @@ categories:
 settings:
   polling-freqency: 1000
   default-verbosity: Standard
+  env-specs:
+    - tests.test_environment_file_parameters.ENV_PARAMETER_SPEC

@@ -1,0 +1,376 @@
+heat_template_version: 2015-04-30
+
+description: Base Module of Sample VNF
+
+parameters:
+
+  # ONAP Assigned Parameters
+  workload_context:
+    type: string
+    description: Unique ID for this VNF instance
+
+  environment_context:
+    type: string
+    description: Unique ID for this VNF instance
+
+  vnf_id:
+    type: string
+    description: Unique ID for this VNF instance
+
+  vf_module_id:
+    type: string
+    description: Unique ID for this VNF module instance
+
+  vf_module_index:
+    type: number
+    description: Index of this VF Module
+
+  vnf_name:
+    type: string
+    description: Unique name for this VNF instance
+
+
+  # Availability Zones
+  availability_zone_0:
+    type: string
+    description: Primary Availability Zone
+
+  availability_zone_1:
+    type: string
+    description: Secondary Availability Zone
+
+
+  # External Networks
+  oam_net_id:
+    type: string
+    description: Operations, Administration, and Management Network
+
+  oam_subnet_id:
+    type: string
+    description: Subnet for OAM Network
+
+  ha_net_id:
+    type: string
+    description:  High Availability Network
+  
+  ctrl_net_id:
+    type: string
+    description: Control Plane network
+
+  ctrl_subnet_id:
+    type: string
+    description: Subnet for High Availability Network
+
+
+  # Server Inputs: Database
+  db_name_0:
+    type: string
+    description: Primary DB Server Name
+
+  db_name_1:
+    type: string
+    description: Secondary DB 
+
+  db_image_name:
+    type: string
+    description: Database VM Image Name
+
+  db_flavor_name:
+    type: string
+    description: Database VM Flavor Name
+
+  db_ha_floating_v6_ip:
+    type: string
+    description: Database Floating IPv6 Address for HA
+  
+  db_ha_floating_ip:
+    type: string
+    description: Database Floating IPv4 Address for HA
+
+  db_oam_ip_0:
+      type: string
+      description: Fixed IPv4 Address for OAM
+
+  db_oam_ip_1:
+      type: string
+      description: Fixed IPv4 Address for OAM
+
+  db_vol0_id:
+    type: string
+    description: Volume ID for DB in AZ 0
+
+  db_vol1_id:
+    type: string
+    description: Volume ID for DB in AZ 1
+
+
+  # Server Inputs: Loadbalancer
+  lb_name_0:
+    type: string
+    description: Load Balancer Name
+
+  lb_image_name:
+    type: string
+    description: Loadbalancer VM Image
+
+  lb_flavor_name:
+    type: string
+    description: Loadbalancer VM Flavor
+
+  lb_ha_floating_ip:
+    type: string
+    description: Floating HA IP for LB
+
+
+  lb_ha_floating_v6_ip:
+    type: string
+    description: Floating HA IP for LB
+
+
+  # Server Inputs: Webservice Controller Plane Interface (mgmt)
+  mgmt_name_0:
+    type: string
+    description: List of Management VM Names
+
+  mgmt_image_name:
+    type: string
+    description: Management VM Image
+
+  mgmt_flavor_name:
+    type: string
+    description: Management VM Flavor
+
+  mgmt_ctrl_ip_0:
+    type: string
+    description: IP to web service for control plane
+
+  mgmt_ctrl_v6_ip_0:
+    type: string
+    description: IP to web service for control plane
+
+
+  # Server Inputs: Services
+  svc_names:
+    type: comma_delimited_list
+    description: Service VM Names
+
+  svc_image_name:
+    type: string
+    description: Service VM Image
+
+  svc_flavor_name:
+    type: string
+    description: Service VM Flavor
+
+  svc_count:
+    type: number
+    description: Number of instances of Service to create
+
+resources:
+
+  int_private_network:
+    type: OS::Neutron::Net
+
+  int_private_subnet:
+      type: OS::Neutron::Subnet
+      properties:
+          name:
+            str_replace:
+              template: $VNF_NAME-private_subnet
+              params:
+                $VNF_NAME: { get_param: vnf_name }
+          network: { get_resource: int_private_network }
+
+  db_server_0:
+    type: OS::Nova::Server
+    properties:
+      image: { get_param: db_image_name }
+      flavor: { get_param: db_flavor_name }
+      name: { get_param: db_name_0 }
+      metadata:
+        vnf_id: { get_param: vnf_id }
+        vf_module_id: { get_param: vf_module_id }
+        vf_module_index: { get_param: vf_module_index }
+        vnf_name: { get_param: vnf_name }
+        workload_context: { get_param: workload_context }
+        environment_context: { get_param: environment_context }
+      networks:
+        - port: { get_resource: db_0_int_private_port_0 }
+        - port: { get_resource: db_0_ha_port_0 }
+        - port: { get_resource: db_0_oam_port_0 }
+      user_data: { get_file: user.data }
+      availability_zone: { get_param: availability_zone_0 }
+
+  db_server_1:
+    type: OS::Nova::Server
+    properties:
+      image: { get_param: db_image_name }
+      flavor: { get_param: db_flavor_name }
+      name: { get_param: db_name_1 }
+      metadata:
+        vnf_id: { get_param: vnf_id}
+        vf_module_id: { get_param: vf_module_id }
+        vnf_name: { get_param: vnf_name }
+        workload_context: { get_param: workload_context }
+        environment_context: { get_param: environment_context }
+      networks:
+        - port: {get_resource: db_1_int_private_port_0}
+        - port: {get_resource: db_1_ha_port_0}
+        - port: { get_resource: db_1_oam_port_0 }
+      availability_zone: { get_param: availability_zone_1 }
+
+  db_0_oam_port_0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: oam_net_id }
+      fixed_ips: 
+        - subnet_id: { get_param: oam_subnet_id }
+          ip_address: { get_param: db_oam_ip_0 }
+
+  db_0_ha_port_0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: ha_net_id }
+      allowed_address_pairs:
+        - ip_address: {get_param: db_ha_floating_ip }
+        - ip_address: {get_param: db_ha_floating_v6_ip }
+
+  db_0_int_private_port_0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: int_private_network }
+      fixed_ips: 
+        - subnet_id: { get_resource: int_private_subnet }
+
+  db_1_oam_port_0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: oam_net_id }
+      fixed_ips: 
+        - subnet_id: { get_param: oam_subnet_id }
+          ip_address: { get_param: db_oam_ip_1 }
+
+  db_1_ha_port_0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: ha_net_id }
+      allowed_address_pairs:
+        - ip_address: {get_param: db_ha_floating_ip }
+        - ip_address: {get_param: db_ha_floating_v6_ip }
+
+  db_1_int_private_port_0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: int_private_network }
+      fixed_ips: 
+        - subnet_id: { get_resource: int_private_subnet }
+
+
+  db_volume_attachment_0:
+    type: OS::Cinder::VolumeAttachment
+    properties:
+      volume_id: { get_param: db_vol0_id }
+      server: { get_resource: db_server_0 }
+
+  db_volume_attachment_1:
+    type: OS::Cinder::VolumeAttachment
+    properties:
+      volume_id: { get_param: db_vol1_id }
+      server: { get_resource: db_server_1 }
+
+  mgmt_server_0:
+    type: OS::Nova::Server
+    properties:
+      image: { get_param: mgmt_image_name }
+      flavor: { get_param: mgmt_flavor_name }
+      name: { get_param: mgmt_name_0 }
+      metadata:
+        vnf_id: { get_param: vnf_id }
+        vf_module_id: { get_param: vf_module_id }
+        vf_module_index: { get_param: vf_module_index }
+        vnf_name: { get_param: vnf_name }
+        workload_context: { get_param: workload_context }
+        environment_context: { get_param: environment_context }
+      networks:
+        - port: { get_resource: mgmt_0_int_private_port_0 }
+        - port: { get_resource: mgmt_0_ctrl_port_0 }
+      user_data: { get_file: user.data }
+      availability_zone: { get_param: availability_zone_0 }
+
+  mgmt_0_int_private_port_0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: int_private_network }
+      fixed_ips: 
+        - subnet_id: { get_resource: int_private_subnet }
+
+  mgmt_0_ctrl_port_0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: ctrl_net_id }
+      fixed_ips:
+        - subnet: { get_param: ctrl_subnet_id }
+        - ip_address: { get_param: mgmt_ctrl_ip_0 }
+        - ip_address: { get_param: mgmt_ctrl_v6_ip_0}
+          
+  lb_server_0:
+    type: OS::Nova::Server
+    properties:
+      image: { get_param: lb_image_name }
+      flavor: { get_param: lb_flavor_name }
+      name: { get_param: lb_name_0 }
+      metadata:
+        vnf_id: { get_param: vnf_id }
+        vf_module_id: { get_param: vf_module_id }
+        vf_module_index: { get_param: vf_module_index }
+        vnf_name: { get_param: vnf_name }
+        workload_context: { get_param: workload_context }
+        environment_context: { get_param: environment_context }
+      networks:
+        - port: { get_resource: lb_0_int_private_port_0 }
+        - port: { get_resource: lb_0_ha_port_0 }
+      user_data: { get_file: user.data }
+      availability_zone: { get_param: availability_zone_0 }
+
+  lb_0_ha_port_0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: ha_net_id }
+      allowed_address_pairs:
+        - ip_address: {get_param: lb_ha_floating_ip }
+        - ip_address: {get_param: lb_ha_floating_v6_ip }
+
+  lb_0_int_private_port_0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: int_private_network }
+      fixed_ips: 
+        - subnet_id: { get_resource: int_private_subnet }
+  
+  svc_resource_group_0:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: svc_count }
+      resource_def:
+        type: nested_svc.yaml
+        properties:
+          workload_context: {get_param: workload_context}
+          environment_context: {get_param: environment_context}
+          vnf_id: {get_param: vnf_id}
+          vf_module_id: {get_param: vf_module_id}
+          vnf_name: {get_param: vnf_name}         
+          availability_zone_0: {get_param: availability_zone_0}
+          svc_names: {get_param: svc_names}
+          svc_image_name: {get_param: svc_image_name}
+          svc_flavor_name: {get_param: svc_flavor_name}
+          index: "%index%"
+          int_private_net_id: {get_resource: int_private_network}
+          int_private_subnet_id: {get_resource: int_private_subnet}
+
+outputs:
+
+  int_private_subnet_id:
+    value: { get_resource: int_private_subnet }
+
+  int_private_net_id:
+    value: { get_resource: int_private_network }

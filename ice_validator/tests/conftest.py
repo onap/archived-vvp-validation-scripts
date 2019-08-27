@@ -44,7 +44,8 @@ import os
 import re
 import time
 
-from preload import create_preloads
+from preload.model import create_preloads
+from config import get_generator_plugin_names
 from tests.helpers import get_output_dir
 
 try:
@@ -826,6 +827,23 @@ def pytest_addoption(parser):
         dest="test_categories",
         action="append",
         help="optional category of test to execute",
+    )
+
+    parser.addoption(
+        "--env-directory",
+        dest="env_dir",
+        action="store",
+        help="optional directory of .env files for preload generation"
+    )
+
+    parser.addoption(
+        "--preload-format",
+        dest="preload_formats",
+        action="append",
+        help=(
+            "Preload format to create (multiple allowed). If not provided "
+            "then all available formats will be created: {}"
+        ).format(", ".join(get_generator_plugin_names()))
     )
 
 
