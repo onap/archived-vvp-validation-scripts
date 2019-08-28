@@ -52,11 +52,7 @@ def get_vm_types_for_resource(resource):
     """
     if not isinstance(resource, dict):
         return set()
-    if "type" not in resource:
-        return set()
-    if resource["type"] != "OS::Nova::Server":
-        return set()
-    if "properties" not in resource:
+    if get_check_type_property_for_nova_server(resource):
         return set()
 
     key_values = ["name", "flavor", "image"]
@@ -83,6 +79,12 @@ def get_vm_types_for_resource(resource):
                 vm_types.append(m.group(1))
 
     return set(vm_types)
+
+
+def get_check_type_property_for_nova_server(resource):
+
+    if ("type" not in resource or "properties" not in resource or resource["type"] != "OS::Nova::Server"):
+        return True
 
 
 def get_vm_type_for_nova_server(resource):
