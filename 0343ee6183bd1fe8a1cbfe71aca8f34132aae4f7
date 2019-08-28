@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b7a4602_73d818f5",
+        "filename": "ice_validator/tests/utils/vm_types.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-08-28T17:26:02Z",
+      "side": 1,
+      "message": "Generally speaking a function or method that returns a boolean would be named to start with something like is_, has_, are_, etc.  That implies the return type and makes the intent of the code clearer.\n\nFor something like this, I\u0027d favor is_nova_server and flipping the conditions below to check if the resource is a valid Nova server.\n\nThe check here would be..\n\nif not is_nova_server():\n   return set()",
+      "revId": "0343ee6183bd1fe8a1cbfe71aca8f34132aae4f7",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2dee0e61_732099db",
+        "filename": "ice_validator/tests/utils/vm_types.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-08-28T17:26:02Z",
+      "side": 1,
+      "message": "Returning True for a negative condition is a little hard to understand.  In other words returning True if the server is not a Nova server can be a little confusing.\n\nI\u0027d recommend returning True if the server *is* a Nova Server.\n\nIt\u0027s also not typical to return True vs. just returning the result of the boolean operation.  In this method you return True if the condition evaluates to True, but None if it doesn\u0027t which could lead to problems down the road.\n\nInstead, you could simplify this as such...\n\ndef is_nova_server(resource):\n    return \"properties\" in resource and resource.get(\"type\") !\u003d \"OS::Nova::Server\"",
+      "revId": "0343ee6183bd1fe8a1cbfe71aca8f34132aae4f7",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
