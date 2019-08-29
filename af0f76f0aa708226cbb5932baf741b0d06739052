@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7d05ef13_92c6552e",
+        "filename": "ice_validator/tests/utils/vm_types.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-08-29T13:42:00Z",
+      "side": 1,
+      "message": "these should be and not or conditions. \n\nreturn \"type\" in resource and \"properties\" in resource and resource.get(\"type\") \u003d\u003d \"OS::Nova::Server\"",
+      "range": {
+        "startLine": 86,
+        "startChar": 26,
+        "endLine": 86,
+        "endChar": 29
+      },
+      "revId": "af0f76f0aa708226cbb5932baf741b0d06739052",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "958f96a9_029a4a48",
+        "filename": "ice_validator/tests/utils/vm_types.py",
+        "patchSetId": 5
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-08-29T13:42:00Z",
+      "side": 1,
+      "message": "No need to explicitly return True.  Just return the result of the boolean evaluation (see prior comment)",
+      "revId": "af0f76f0aa708226cbb5932baf741b0d06739052",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
