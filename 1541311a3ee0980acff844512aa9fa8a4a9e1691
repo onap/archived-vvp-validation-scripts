@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "74b25b48_e1af4c25",
+        "filename": "ice_validator/tests/utils/vm_types.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-08-29T14:40:04Z",
+      "side": 1,
+      "message": "You didn\u0027t change the ORs to AND in the conditional though",
+      "revId": "1541311a3ee0980acff844512aa9fa8a4a9e1691",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
