@@ -613,14 +613,12 @@ def aggregate_results(outcomes, r_id=None):
     :return: 'ERROR', 'PASS', 'FAIL', or 'SKIP'
              (see aggregate_requirement_adherence for more detail)
     """
-    if not outcomes:
+    if not outcomes or "PASS" in outcomes:
         return "PASS"
     elif "ERROR" in outcomes:
         return "ERROR"
     elif "FAIL" in outcomes:
         return "FAIL"
-    elif "PASS" in outcomes:
-        return "PASS"
     elif {"SKIP"} == outcomes:
         return "SKIP"
     else:
