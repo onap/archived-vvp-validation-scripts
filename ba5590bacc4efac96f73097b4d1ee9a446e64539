@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c76b9851_529d2610",
+        "filename": "ice_validator/tests/conftest.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 616,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-08-30T13:36:15Z",
+      "side": 1,
+      "message": "I think we should ignore this warning from Sonar.  This change is not equivalent to the old code.\n\nWe should only return PASS if there are no failures (\"FAIL\") or errors (\"ERROR\") in outcomes.   This change would make the outcome be \"PASS\" if any test passes.  I can\u0027t think of a good way to satisfy the Sonar warning without making it more complicated. \n\nI\u0027d recommend abandoning this change, and pursuing other Sonar fixes.  I don\u0027t think we need to address all recommendations by Sonar.",
+      "revId": "ba5590bacc4efac96f73097b4d1ee9a446e64539",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
