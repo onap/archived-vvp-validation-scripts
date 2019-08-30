@@ -36,14 +36,20 @@
 # ============LICENSE_END============================================
 #
 #
-
+import os
+from pathlib import Path
 from threading import Thread
 
+from config import Config
+from tests.helpers import load_yaml
 from vvp import ValidatorApp, VERSION
 
 
 def test_app_starts():
-    app = ValidatorApp()
+    os.environ["DISPLAY"] = ":0.0"
+    data = load_yaml(str(Path(__file__).parent / "vvp-config.yaml"))
+    config = Config(data)
+    app = ValidatorApp(config)
     assert "VNF Validation Tool" in app.title
     assert VERSION in app.title
     app_thread = Thread(target=app.start, args=())

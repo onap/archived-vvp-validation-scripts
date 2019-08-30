@@ -31,7 +31,7 @@
         <sonar.python.coverage.reportPath>coverage.xml</sonar.python.coverage.reportPath>
         <sonar.language>py</sonar.language>
         <sonar.pluginName>python</sonar.pluginName>
-        <sonar.inclusions>ice_validator/tests/**.py</sonar.inclusions>
+        <sonar.inclusions>ice_validator/**.py</sonar.inclusions>
   </properties>
 
   <build>
