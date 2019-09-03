@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d25c88f6_555b5d59",
+        "filename": "ice_validator/tests/helpers.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-09-03T16:12:48Z",
+      "side": 1,
+      "message": "No need to change, but as a suggestion for the future.  You can actually combine multiple isinstance checks like this:\n\nisinstance(parameter, (int, float))\n\nThis will return True if parameter is an int or a float.",
+      "revId": "083e8d0575d80d5d539a4ef83d8f4800074b7bcd",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
