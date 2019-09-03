@@ -305,9 +305,7 @@ def parameter_type_to_heat_type(parameter):
         parameter_type = "string"
     elif isinstance(parameter, dict):
         parameter_type = "json"
-    elif isinstance(parameter, int):
-        parameter_type = "number"
-    elif isinstance(parameter, float):
+    elif isinstance(parameter, int) or isinstance(parameter, float):
         parameter_type = "number"
     elif isinstance(parameter, bool):
         parameter_type = "boolean"
