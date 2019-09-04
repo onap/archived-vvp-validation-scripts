@@ -61,21 +61,21 @@ def test_vm_type_assignments_on_nova_servers_only_use_get_param(yaml_file):
     for k, v in yml["resources"].items():
         if not isinstance(v, dict):
             continue
-        if "properties" not in v:
-            continue
-        if "type" not in v:
-            continue
-        if v["type"] != "OS::Nova::Server":
+         if not is_nova_server(v):
             continue
 
         for k2, v2 in v["properties"].items():
             if k2 in key_values:
-                if not isinstance(v2, dict):
+                if not isinstance(v2, dict) or "get_param" not in v2:
                     invalid_nova_servers.add(k)
-                elif "get_param" not in v2:
-                    invalid_nova_servers.add(k)
+                
     msg = (
         "These OS::Nova::Server resources do not derive one or more of "
         + "their {} properties via get_param: {}"
     ).format(", ".join(key_values), ", ".join(invalid_nova_servers))
     assert not invalid_nova_servers, msg
+
+
+def is_nova_server(v):
+
+    return "type" in v and "properties" in v and v["type"] == "OS::Nova::Server"
