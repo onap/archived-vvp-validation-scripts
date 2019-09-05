@@ -270,13 +270,13 @@ resources:
     type: OS::Cinder::VolumeAttachment
     properties:
       volume_id: { get_param: db_vol0_id }
-      server: { get_resource: db_server_0 }
+      instance_uuid: { get_resource: db_server_0 }
 
   db_volume_attachment_1:
     type: OS::Cinder::VolumeAttachment
     properties:
       volume_id: { get_param: db_vol1_id }
-      server: { get_resource: db_server_1 }
+      instance_uuid: { get_resource: db_server_1 }
 
   mgmt_server_0:
     type: OS::Nova::Server

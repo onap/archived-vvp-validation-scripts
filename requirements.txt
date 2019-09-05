@@ -50,3 +50,4 @@ pyinstaller
 mock
 openstack-heat
 cached-property>=1.5,<1.6
+bandit

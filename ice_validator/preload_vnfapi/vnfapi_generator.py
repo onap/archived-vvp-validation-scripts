@@ -76,9 +76,29 @@ class VnfApiPreloadGenerator(AbstractPreloadGenerator):
     def generate_module(self, vnf_module, output_dir):
         preload = get_json_template(DATA_DIR, "preload_template")
         self._populate(preload, vnf_module)
-        outfile = "{}/{}.json".format(output_dir, vnf_module.vnf_name)
+        incomplete = "_incomplete" if self.module_incomplete else ""
+        outfile = "{}/{}{}.json".format(output_dir, vnf_module.vnf_name, incomplete)
         with open(outfile, "w") as f:
             json.dump(preload, f, indent=4)
+
+    def _populate(self, preload, vnf_module):
+        self._add_vnf_metadata(preload)
+        self._add_availability_zones(preload, vnf_module)
+        self._add_vnf_networks(preload, vnf_module)
+        self._add_vms(preload, vnf_module)
+        self._add_parameters(preload, vnf_module)
+
+    def _add_vnf_metadata(self, preload):
+        vnf_meta = preload["input"]["vnf-topology-information"]["vnf-topology-identifier"]
+        vnf_meta["vnf-name"] = self.replace("vnf_name")
+        vnf_meta["generic-vnf-type"] = self.replace(
+            "vnf-type",
+            "VALUE FOR: Concatenation of <Service Name>/"
+            "<VF Instance Name> MUST MATCH SDC",
+        )
+        vnf_meta["vnf-type"] = self.replace(
+            "vf-module-model-name", "VALUE FOR: <vfModuleModelName> from CSAR or SDC"
+        )
 
     def add_floating_ips(self, network_template, network):
         # only one floating IP is really supported, in the preload model
@@ -101,12 +121,6 @@ class VnfApiPreloadGenerator(AbstractPreloadGenerator):
                     {"ip-address": self.replace(ip.param, single=True)}
                 )
                 network_template["ip-count-ipv6"] += 1
-
-    def _populate(self, preload, vnf_module):
-        self._add_availability_zones(preload, vnf_module)
-        self._add_vnf_networks(preload, vnf_module)
-        self._add_vms(preload, vnf_module)
-        self._add_parameters(preload, vnf_module)
 
     def _add_availability_zones(self, preload, vnf_module):
         zones = preload["input"]["vnf-topology-information"]["vnf-assignments"][

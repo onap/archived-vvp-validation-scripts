@@ -37,6 +37,7 @@
 from pathlib import Path
 
 import pytest
+from mock import mock
 
 from preload.environment import CloudServiceArchive, PreloadEnvironment
 
@@ -72,6 +73,10 @@ def test_csar_vf_module_model_name(csar):
 
 def test_csar_get_vf_module_resource_name(csar):
     assert csar.get_vf_module_resource_name("base_vIECCF") == "stark_vccf_vf"
+
+
+def test_csar_get_vnf_type(csar):
+    assert csar.get_vnf_type("base_vIECCF") == "stark_vccf_svc/stark_vccf_vf"
 
 
 def test_csar_get_vf_module_resource_name_not_found(csar):
@@ -178,3 +183,14 @@ def test_preload_environment_defaults_in_module_env(env):
         "common": "ABC",
         "my_ip": "192.168.0.1",
     }
+
+
+def test_preload_environment_uses_csar(env, monkeypatch):
+    csar = mock.MagicMock(spec=CloudServiceArchive)
+    csar.get_vnf_type = mock.Mock(return_value="stark_vccf_svc/stark_vccf_vf")
+    csar.get_vf_module_model_name = mock.Mock(return_value="model_name")
+    env = env.get_environment("env_three")
+    monkeypatch.setattr(env, "csar", csar)
+    mod = env.get_module("base")
+    assert mod["vnf-type"] == "stark_vccf_svc/stark_vccf_vf"
+    assert mod["vf-module-model-name"] == "model_name"

@@ -74,7 +74,8 @@ class GrApiPreloadGenerator(AbstractPreloadGenerator):
         template = get_json_template(DATA_DIR, "preload_template")
         self._populate(template, vnf_module)
         vnf_name = vnf_module.vnf_name
-        outfile = "{}/{}.json".format(output_dir, vnf_name)
+        incomplete = "_incomplete" if self.module_incomplete else ""
+        outfile = "{}/{}{}.json".format(output_dir, vnf_name, incomplete)
         with open(outfile, "w") as f:
             json.dump(template, f, indent=4)
 

@@ -90,6 +90,15 @@ class CloudServiceArchive:
             if props.get("type") == "org.openecomp.groups.VfModule"
         }
 
+    def get_vnf_type(self, module):
+        """
+        Concatenation of service and VF instance name
+        """
+        service_name = self.service_name
+        instance_name = self.get_vf_module_resource_name(module)
+        if service_name and instance_name:
+            return "{}/{}".format(service_name, instance_name)
+
     @property
     def vf_module_resource_names(self):
         """
@@ -125,8 +134,9 @@ class CloudServiceArchive:
         def_dir = csar_dir / "Definitions"
         check(
             def_dir.exists(),
-            f"CSAR is invalid. {csar_dir.as_posix()} does not contain a "
-            f"Definitions directory.",
+            "CSAR is invalid. {} does not contain a Definitions directory.".format(
+                csar_dir.as_posix()
+            ),
         )
         return yaml_files(def_dir)
 
@@ -165,9 +175,6 @@ class CloudServiceArchive:
 
 
 class PreloadEnvironment:
-    """
-    A
-    """
 
     def __init__(self, env_dir, parent=None):
         self.base_dir = Path(env_dir)
@@ -228,6 +235,13 @@ class PreloadEnvironment:
         for m in (parent_module, self.defaults, module):
             if m:
                 result.update(m)
+        if self.csar:
+            vnf_type = self.csar.get_vnf_type(name)
+            if vnf_type:
+                result["vnf-type"] = vnf_type
+            model_name = self.csar.get_vf_module_model_name(name)
+            if model_name:
+                result["vf-module-model-name"] = model_name
         return result
 
     @property

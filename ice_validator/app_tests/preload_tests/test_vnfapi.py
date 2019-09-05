@@ -82,12 +82,12 @@ def preload(pytestconfig, session_dir):
 
 @pytest.fixture(scope="session")
 def base(preload):
-    return load_module(preload, "base.json")
+    return load_module(preload, "base_incomplete.json")
 
 
 @pytest.fixture(scope="session")
 def incremental(preload):
-    return load_module(preload, "incremental.json")
+    return load_module(preload, "incremental_incomplete.json")
 
 
 def test_base_azs(base):
@@ -187,7 +187,7 @@ def test_incremental_networks(incremental):
 
 
 def test_preload_env_population(preload):
-    base_path = THIS_DIR / "sample_env/preloads/vnfapi/base.json"
+    base_path = THIS_DIR / "sample_env/preloads/vnfapi/base_incomplete.json"
     data = load_json(base_path)
     azs = data["input"]["vnf-topology-information"]["vnf-assignments"][
         "availability-zones"

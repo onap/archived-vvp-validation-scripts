@@ -38,8 +38,21 @@
 import json
 import os
 from abc import ABC, abstractmethod
+from collections import OrderedDict
 
 import yaml
+
+
+def represent_ordered_dict(dumper, data):
+    value = []
+
+    for item_key, item_value in data.items():
+        node_key = dumper.represent_data(item_key)
+        node_value = dumper.represent_data(item_value)
+
+        value.append((node_key, node_value))
+
+    return yaml.nodes.MappingNode(u'tag:yaml.org,2002:map', value)
 
 
 def get_json_template(template_dir, template_name):
@@ -109,6 +122,7 @@ class AbstractPreloadGenerator(ABC):
         self.current_module_env = {}
         self.base_output_dir = base_output_dir
         self.env_cache = {}
+        self.module_incomplete = False
 
     @classmethod
     @abstractmethod
@@ -163,9 +177,19 @@ class AbstractPreloadGenerator(ABC):
 
     def replace(self, param_name, alt_message=None, single=False):
         value = self.get_param(param_name, single)
+        value = None if value == "CHANGEME" else value
         if value:
             return value
-        return alt_message or replace(param_name)
+        else:
+            self.module_incomplete = True
+            return alt_message or replace(param_name)
+
+    def start_module(self, module, env):
+        """Initialize/reset the environment for the module"""
+        self.current_module = module
+        self.current_module_env = env
+        self.module_incomplete = False
+        self.env_cache = {}
 
     def generate_environments(self, module):
         """
@@ -179,9 +203,7 @@ class AbstractPreloadGenerator(ABC):
         print("\nGenerating Preloads for {}".format(module))
         print("-" * 50)
         print("... generating blank template")
-        self.current_module = module
-        self.current_module_env = {}
-        self.env_cache = {}
+        self.start_module(module, {})
         blank_preload_dir = self.make_preload_dir(self.base_output_dir)
         self.generate_module(module, blank_preload_dir)
         self.generate_preload_env(module, blank_preload_dir)
@@ -193,12 +215,8 @@ class AbstractPreloadGenerator(ABC):
                         env.name, output_dir
                     )
                 )
-                self.env_cache = {}
-                self.current_module = module
-                self.current_module_env = env.get_module(module.label)
+                self.start_module(module, env.get_module(module.label))
                 self.generate_module(module, output_dir)
-        self.current_module = None
-        self.current_module_env = None
 
     def make_preload_dir(self, base_dir):
         path = os.path.join(base_dir, self.output_sub_dir())
@@ -206,17 +224,23 @@ class AbstractPreloadGenerator(ABC):
             os.makedirs(path, exist_ok=True)
         return path
 
-    def generate_preload_env(self, module, blank_preload_dir):
+    @staticmethod
+    def generate_preload_env(module, blank_preload_dir):
         """
         Create a .env template suitable for completing and using for
         preload generation from env files.
         """
+        yaml.add_representer(OrderedDict, represent_ordered_dict)
         output_dir = os.path.join(blank_preload_dir, "preload_env")
-        output_file = os.path.join(output_dir, "{}.env".format(module.vnf_name))
+        env_file = os.path.join(output_dir, "{}.env".format(module.vnf_name))
+        defaults_file = os.path.join(output_dir, "defaults.yaml")
         if not os.path.exists(output_dir):
             os.makedirs(output_dir, exist_ok=True)
-        with open(output_file, "w") as f:
+        with open(env_file, "w") as f:
             yaml.dump(module.env_template, f)
+        if not os.path.exists(defaults_file):
+            with open(defaults_file, "w") as f:
+                yaml.dump({"vnf_name": "CHANGEME"}, f)
 
     def get_param(self, param_name, single):
         """

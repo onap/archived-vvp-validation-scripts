@@ -87,12 +87,12 @@ def preload(pytestconfig, session_dir):
 
 @pytest.fixture(scope="session")
 def base(preload):
-    return load_module(preload, "base.json")
+    return load_module(preload, "base_incomplete.json")
 
 
 @pytest.fixture(scope="session")
 def incremental(preload):
-    return load_module(preload, "incremental.json")
+    return load_module(preload, "incremental_incomplete.json")
 
 
 def test_base_fields(base):
@@ -235,9 +235,17 @@ def test_incremental_networks(incremental):
 
 
 def test_preload_env_population(preload):
-    base_path = THIS_DIR / "sample_env/preloads/grapi/base.json"
+    base_path = THIS_DIR / "sample_env/preloads/grapi/base_incomplete.json"
     data = load_json(base_path)
     azs = data["input"]["preload-vf-module-topology-information"][
         "vnf-resource-assignments"
     ]["availability-zones"]["availability-zone"]
     assert azs == ["az0", "az1"]
+
+
+def test_preload_env_population_missing_value(preload):
+    base_path = THIS_DIR / "sample_env/preloads/grapi/base_incomplete.json"
+    data = load_json(base_path)
+    vnf_name = data["input"]["preload-vf-module-topology-information"][
+        "vnf-topology-identifier-structure"]["vnf-name"]
+    assert vnf_name == "VALUE FOR: vnf_name"

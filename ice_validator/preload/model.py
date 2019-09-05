@@ -37,6 +37,7 @@
 import os
 import shutil
 from abc import ABC, abstractmethod
+from collections import OrderedDict
 
 from preload.generator import yield_by_count
 from preload.environment import PreloadEnvironment
@@ -332,11 +333,13 @@ class VnfModule(FilterBaseOutputs):
         Returns a a template .env file that can be completed to enable
         preload generation.
         """
-        params = {}
-        params["vnf-name"] = CHANGE
+        params = OrderedDict()
+        params["vnf_name"] = CHANGE
         params["vnf-type"] = CHANGE
         params["vf-module-model-name"] = CHANGE
         params["vf_module_name"] = CHANGE
+        for az in self.availability_zones:
+            params[az] = CHANGE
         for network in self.networks:
             params[network.name_param] = CHANGE
             for param in set(network.subnet_params):

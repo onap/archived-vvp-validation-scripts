@@ -26,7 +26,7 @@ resources:
           params:
             VNF_NAME: {get_param: vnf_name}
       volume_type: "solidfire"
-      volume_size: { get_param: volume_size }
+      size: { get_param: volume_size }
 
   db_vol1:
     type: OS::Cinder::Volume
@@ -37,7 +37,7 @@ resources:
           params:
             VNF_NAME: {get_param: vnf_name}
       volume_type: "solidfire"
-      volume_size: { get_param: volume_size }
+      size: { get_param: volume_size }
 
 outputs:
   db_vol0_id:
