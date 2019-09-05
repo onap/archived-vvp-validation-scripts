@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2a168a12_4563afa4",
+        "filename": "ice_validator/tests/test_nova_servers_vm_types_use_get_param.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-09-05T13:32:35Z",
+      "side": 1,
+      "message": "This is the same method that was created in the prior review. This may be a recurring pattern as you resolve the Sonar items.\n\nSince this test was written, we have added some useful utilities in helpers.py, utils/*, and structure.py\n\nRather than repeat the definition of the same method, I would recommend re-writing methods written in this method to use structures.py\u0027s Heat class.\n\nExample:\n\nheat \u003d Heat(yaml_file)\nfor r_id, props in heat.nova_server_resources:\n    # then the logic of the check\n\nThis will simplify the overall method and address the Sonar fix without duplicating any code.",
+      "revId": "cb502d54646b308918f24ef9c6fe63c422a78772",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
