@@ -52,7 +52,7 @@ def represent_ordered_dict(dumper, data):
 
         value.append((node_key, node_value))
 
-    return yaml.nodes.MappingNode(u'tag:yaml.org,2002:map', value)
+    return yaml.nodes.MappingNode(u"tag:yaml.org,2002:map", value)
 
 
 def get_json_template(template_dir, template_name):

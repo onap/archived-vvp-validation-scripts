@@ -89,7 +89,9 @@ class VnfApiPreloadGenerator(AbstractPreloadGenerator):
         self._add_parameters(preload, vnf_module)
 
     def _add_vnf_metadata(self, preload):
-        vnf_meta = preload["input"]["vnf-topology-information"]["vnf-topology-identifier"]
+        vnf_meta = preload["input"]["vnf-topology-information"][
+            "vnf-topology-identifier"
+        ]
         vnf_meta["vnf-name"] = self.replace("vnf_name")
         vnf_meta["generic-vnf-type"] = self.replace(
             "vnf-type",

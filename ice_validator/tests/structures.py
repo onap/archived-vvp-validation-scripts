@@ -495,7 +495,10 @@ class NeutronPortProcessor(HeatProcessor):
         An OS::Nova:Port with the property binding:vnic_type
         """
         resource_properties = nested_dict.get(resource, "properties", default={})
-        if nested_dict.get(resource, "type") == cls.resource_type and resource_properties.get("binding:vnic_type", "") == "direct":
+        if (
+            nested_dict.get(resource, "type") == cls.resource_type
+            and resource_properties.get("binding:vnic_type", "") == "direct"
+        ):
             return True
 
         return False
@@ -785,10 +788,12 @@ class Resource(object):
             try:
                 return int(count_value)
             except (ValueError, TypeError):
-                print((
-                    "WARNING: Invalid value for count parameter {}. Expected "
-                    "an integer, but got {}. Defaulting to 1"
-                ).format(count_param, count_value))
+                print(
+                    (
+                        "WARNING: Invalid value for count parameter {}. Expected "
+                        "an integer, but got {}. Defaulting to 1"
+                    ).format(count_param, count_value)
+                )
         return 1
 
     @property

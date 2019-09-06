@@ -247,5 +247,6 @@ def test_preload_env_population_missing_value(preload):
     base_path = THIS_DIR / "sample_env/preloads/grapi/base_incomplete.json"
     data = load_json(base_path)
     vnf_name = data["input"]["preload-vf-module-topology-information"][
-        "vnf-topology-identifier-structure"]["vnf-name"]
+        "vnf-topology-identifier-structure"
+    ]["vnf-name"]
     assert vnf_name == "VALUE FOR: vnf_name"

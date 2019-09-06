@@ -393,7 +393,10 @@ def unzip(zip_path, target_dir):
     :param zip_path:    path to valid zip file
     :param target_dir:  directory to unzip zip_path
     """
-    check(zipfile.is_zipfile(zip_path), "{} is not a valid zipfile or does not exist".format(zip_path))
+    check(
+        zipfile.is_zipfile(zip_path),
+        "{} is not a valid zipfile or does not exist".format(zip_path),
+    )
     archive = zipfile.ZipFile(zip_path)
     if not os.path.exists(target_dir):
         os.makedirs(target_dir, exist_ok=True)

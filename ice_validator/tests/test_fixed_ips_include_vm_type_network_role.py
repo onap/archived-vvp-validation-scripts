@@ -87,9 +87,23 @@ fip_regx_dict = {
 
 @validates("R-40971", "R-35735", "R-23503", "R-71577", "R-04697", "R-34037")
 def test_external_fip_format(yaml_file):
-    check_parameter_format(yaml_file, fip_regx_dict, "external", NeutronPortProcessor, "fixed_ips", "ip_address")
+    check_parameter_format(
+        yaml_file,
+        fip_regx_dict,
+        "external",
+        NeutronPortProcessor,
+        "fixed_ips",
+        "ip_address",
+    )
 
 
 @validates("R-27818", "R-29765", "R-85235", "R-78380", "R-34037")
 def test_internal_fip_format(yaml_file):
-    check_parameter_format(yaml_file, fip_regx_dict, "internal", NeutronPortProcessor, "fixed_ips", "ip_address")
+    check_parameter_format(
+        yaml_file,
+        fip_regx_dict,
+        "internal",
+        NeutronPortProcessor,
+        "fixed_ips",
+        "ip_address",
+    )

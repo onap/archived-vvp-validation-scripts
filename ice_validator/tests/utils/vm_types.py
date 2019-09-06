@@ -83,7 +83,11 @@ def get_vm_types_for_resource(resource):
 
 def is_nova_server(resource):
 
-    return "type" in resource and "properties" in resource and resource.get("type") == "OS::Nova::Server"
+    return (
+        "type" in resource
+        and "properties" in resource
+        and resource.get("type") == "OS::Nova::Server"
+    )
 
 
 def get_vm_type_for_nova_server(resource):

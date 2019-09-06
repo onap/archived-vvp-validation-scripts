@@ -36,7 +36,7 @@
 #
 import os
 import platform
-import subprocess #nosec
+import subprocess  # nosec
 import sys
 import tempfile
 from urllib import request
@@ -44,12 +44,12 @@ from urllib import request
 PREBUILT_DOWNLOAD_SITE = "https://download.lfd.uci.edu/pythonlibs/n5jyqt7p/"
 PREBUILT_WIN_LIBS = [
     "yappi-1.0-cp{python_version}-cp{python_version}m-{arch}.whl",
-    "setproctitle-1.1.10-cp{python_version}-cp{python_version}m-{arch}.whl"
+    "setproctitle-1.1.10-cp{python_version}-cp{python_version}m-{arch}.whl",
 ]
 
 
 def is_windows():
-    return os.name == 'nt'
+    return os.name == "nt"
 
 
 def python_version():
@@ -62,7 +62,7 @@ def system_architecture():
 
 
 def download_url(url):
-    resp = request.urlopen(url) #nosec
+    resp = request.urlopen(url)  # nosec
     return resp.read()
 
 
@@ -81,15 +81,16 @@ def install_prebuilt_binaries_on_windows():
         return
     temp_dir = tempfile.mkdtemp()
     for lib in PREBUILT_WIN_LIBS:
-        filename = lib.format(python_version=python_version(),
-                              arch=system_architecture())
+        filename = lib.format(
+            python_version=python_version(), arch=system_architecture()
+        )
         url = PREBUILT_DOWNLOAD_SITE + filename
         print(f"Downloading {url}")
         contents = download_url(url)
         file_path = os.path.join(temp_dir, filename)
         write_file(contents, file_path, mode="wb")
         print("Download complete. Installing dependency.")
-        subprocess.call(["pip", "install", file_path]) #nosec
+        subprocess.call(["pip", "install", file_path])  # nosec
 
 
 if __name__ == "__main__":

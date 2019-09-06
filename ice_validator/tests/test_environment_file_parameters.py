@@ -234,8 +234,9 @@ def get_preload_excluded_parameters(yaml_file, persistent_only=False, env_spec=N
         for spec in specs:
             if persistent_only and not spec.get("persistent"):
                 continue
-            results.extend(get_template_parameters(yaml_file, resource_type,
-                                                   spec, all_resources))
+            results.extend(
+                get_template_parameters(yaml_file, resource_type, spec, all_resources)
+            )
     return {item["param"] for item in results}
 
 

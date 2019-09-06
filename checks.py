@@ -40,7 +40,7 @@ import csv
 import io
 import json
 import os
-import subprocess  #nosec
+import subprocess  # nosec
 import sys
 
 import pytest
@@ -156,13 +156,19 @@ def check_requirements_up_to_date():
 
 
 def check_app_tests_pass():
-    return run_pytest("tests", "--self-test",
-                      msg="app_tests failed. Run pytest app_tests and fix errors.")
+    return run_pytest(
+        "tests",
+        "--self-test",
+        msg="app_tests failed. Run pytest app_tests and fix errors.",
+    )
 
 
 def check_self_test_pass():
-    return run_pytest("tests", "--self-test",
-                      msg="self-test failed. Run pytest --self-test and fix errors.")
+    return run_pytest(
+        "tests",
+        "--self-test",
+        msg="self-test failed. Run pytest --self-test and fix errors.",
+    )
 
 
 def check_testable_requirements_are_mapped():
@@ -186,12 +192,12 @@ def check_flake8_passes():
 
 
 def check_bandit_passes():
-    result = subprocess.run(                                            #nosec
-        ["bandit", "-c", "bandit.yaml", "-r", ".", "-x", "./.tox/**"],  #nosec
-        encoding="utf-8",                                               #nosec
-        stdout=subprocess.PIPE,                                         #nosec
-        stderr=subprocess.PIPE,                                         #nosec
-    )                                                                   #nosec
+    result = subprocess.run(  # nosec
+        ["bandit", "-c", "bandit.yaml", "-r", ".", "-x", "./.tox/**"],  # nosec
+        encoding="utf-8",  # nosec
+        stdout=subprocess.PIPE,  # nosec
+        stderr=subprocess.PIPE,  # nosec
+    )  # nosec
     msgs = result.stdout.split("\n") if result.returncode != 0 else []
     return ["bandit errors detected:"] + [f"  {e}" for e in msgs] if msgs else []
 

@@ -175,7 +175,6 @@ class CloudServiceArchive:
 
 
 class PreloadEnvironment:
-
     def __init__(self, env_dir, parent=None):
         self.base_dir = Path(env_dir)
         self.parent = parent

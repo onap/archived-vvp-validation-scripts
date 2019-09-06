@@ -139,9 +139,7 @@ def test_contrail_servicehealthcheck_resource_id(yaml_file):
     **MUST**
     contain the ``{vm-type}``.
     """
-    run_test(
-        yaml_file, ContrailV2ServiceHealthCheckProcessor, get_vm_types, "vm_type"
-    )
+    run_test(yaml_file, ContrailV2ServiceHealthCheckProcessor, get_vm_types, "vm_type")
 
 
 @validates("R-16437")

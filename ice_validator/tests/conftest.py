@@ -833,7 +833,7 @@ def pytest_addoption(parser):
         "--env-directory",
         dest="env_dir",
         action="store",
-        help="optional directory of .env files for preload generation"
+        help="optional directory of .env files for preload generation",
     )
 
     parser.addoption(
@@ -843,7 +843,7 @@ def pytest_addoption(parser):
         help=(
             "Preload format to create (multiple allowed). If not provided "
             "then all available formats will be created: {}"
-        ).format(", ".join(get_generator_plugin_names()))
+        ).format(", ".join(get_generator_plugin_names())),
     )
 
 

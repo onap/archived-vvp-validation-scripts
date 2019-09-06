@@ -100,13 +100,13 @@ sid_regx_dict = {
         "string": {
             "readable": "{network-role}_subnet_id or {network-role}_v6_subnet_id",
             "machine": RE_EXTERNAL_PARAM_SID,
-        },
+        }
     },
     "internal": {
         "string": {
             "readable": "int_{network-role}_subnet_id or int_{network-role}_v6_subnet_id",
             "machine": RE_INTERNAL_PARAM_SID,
-        },
+        }
     },
     "parameter_to_resource_comparisons": ["network_role"],
 }
@@ -114,22 +114,46 @@ sid_regx_dict = {
 
 @validates("R-100000", "R-100010", "R-100030", "R-100050", "R-100070")
 def test_contrail_external_instance_ip_address_parameter(yaml_file):
-    check_parameter_format(yaml_file, iip_regx_dict, "external", ContrailV2InstanceIpProcessor, "instance_ip_address")
+    check_parameter_format(
+        yaml_file,
+        iip_regx_dict,
+        "external",
+        ContrailV2InstanceIpProcessor,
+        "instance_ip_address",
+    )
 
 
 @validates("R-100000", "R-100090", "R-100110", "R-100130", "R-100150")
 def test_contrail_internal_instance_ip_address_parameter(yaml_file):
-    check_parameter_format(yaml_file, iip_regx_dict, "internal", ContrailV2InstanceIpProcessor, "instance_ip_address")
+    check_parameter_format(
+        yaml_file,
+        iip_regx_dict,
+        "internal",
+        ContrailV2InstanceIpProcessor,
+        "instance_ip_address",
+    )
 
 
 @validates("R-100190", "R-100200", "R-100220")
 def test_contrail_external_instance_subnet_id_parameter(yaml_file):
-    check_parameter_format(yaml_file, sid_regx_dict, "external", ContrailV2InstanceIpProcessor, "subnet_uuid")
+    check_parameter_format(
+        yaml_file,
+        sid_regx_dict,
+        "external",
+        ContrailV2InstanceIpProcessor,
+        "subnet_uuid",
+    )
 
 
 @validates("R-100190", "R-100240", "R-100260")
 def test_contrail_internal_instance_subnet_id_parameter(yaml_file):
-    check_parameter_format(yaml_file, sid_regx_dict, "internal", ContrailV2InstanceIpProcessor, "subnet_uuid")
+    check_parameter_format(
+        yaml_file,
+        sid_regx_dict,
+        "internal",
+        ContrailV2InstanceIpProcessor,
+        "subnet_uuid",
+    )
 
 
 @validates("R-100240", "R-100260")
@@ -150,10 +174,12 @@ def test_contrail_incremental_module_internal_subnet_usage(yaml_files):
             if not subnet_param:
                 continue
             if subnet_param not in base_outputs:
-                errors.append((
-                    "Resource ({}) is designated as an internal IP, but its "
-                    "subnet_uuid parameter ({}) does not refer to subnet in "
-                    "this template nor is it defined in the output section "
-                    "of the base module ({})"
-                ).format(r_id, subnet_param, os.path.basename(base_path)))
+                errors.append(
+                    (
+                        "Resource ({}) is designated as an internal IP, but its "
+                        "subnet_uuid parameter ({}) does not refer to subnet in "
+                        "this template nor is it defined in the output section "
+                        "of the base module ({})"
+                    ).format(r_id, subnet_param, os.path.basename(base_path))
+                )
     assert not errors, ". ".join(errors)

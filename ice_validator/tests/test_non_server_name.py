@@ -151,7 +151,9 @@ def test_non_server_name(yaml_file):
 def test_non_server_name_unique(heat_template):
     """Test name has unique value
     """
-    list_nest = nested_files.get_list_of_nested_files(heat_template, os.path.dirname(heat_template))
+    list_nest = nested_files.get_list_of_nested_files(
+        heat_template, os.path.dirname(heat_template)
+    )
     list_nest.append(heat_template)
     non_servers = {}
     for yaml_file in list_nest:

@@ -81,7 +81,12 @@ def check_nested_parameter_doesnt_change(yaml_file, nresource_type, *nprops):
             r = Resource(resource_id=resource_id, resource=resource)
             properties = r.get_nested_properties()
             resources = r.get_nested_yaml(base_dir).get("resources", {})
-            for nrid, nresource_dict in resources.items():  # iterate through nested file until found target r type
+            for (
+                nrid,
+                nresource_dict,
+            ) in (
+                resources.items()
+            ):  # iterate through nested file until found target r type
 
                 if (
                     nresource_dict.get("type")
@@ -89,10 +94,19 @@ def check_nested_parameter_doesnt_change(yaml_file, nresource_type, *nprops):
                 ):
                     continue
 
-                for nparam in prop_iterator(nresource_dict, *nprops):  # get iterator of all target parameters
-                    if nparam and "get_param" in nparam:  # iterator yields None if parameter isn't found
+                for nparam in prop_iterator(
+                    nresource_dict, *nprops
+                ):  # get iterator of all target parameters
+                    if (
+                        nparam and "get_param" in nparam
+                    ):  # iterator yields None if parameter isn't found
                         nparam = nparam.get("get_param")
-                        for k1, v1 in properties.items():  # found nparam, now comparing to parent template
+                        for (
+                            k1,
+                            v1,
+                        ) in (
+                            properties.items()
+                        ):  # found nparam, now comparing to parent template
                             if isinstance(v1, dict) and "get_param" in v1:
                                 parameter = v1.get("get_param")
                                 # k1: nested resource parameter definition
@@ -105,7 +119,9 @@ def check_nested_parameter_doesnt_change(yaml_file, nresource_type, *nprops):
                                 if isinstance(parameter, list):
                                     parameter = parameter[0]
 
-                                if k1 != nparam:  # we only care about the parameter we found in nested template
+                                if (
+                                    k1 != nparam
+                                ):  # we only care about the parameter we found in nested template
                                     continue
 
                                 if k1 != parameter:
@@ -128,6 +144,7 @@ def check_nested_parameter_doesnt_change(yaml_file, nresource_type, *nprops):
 # @validates("R-708564")
 # def test_parameter_name_doesnt_change_in_nested_template(yaml_file):
 #    check_nested_parameter_doesnt_change(yaml_file)
+
 
 @validates("R-708564")
 def test_server_name_parameter_name_doesnt_change_in_nested_template(heat_template):
@@ -257,7 +274,7 @@ def test_vmi_aap_parameter_name_doesnt_change_in_nested_template(heat_template):
         "virtual_machine_interface_allowed_address_pairs",
         "virtual_machine_interface_allowed_address_pairs_allowed_address_pair",
         "virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip",
-        "virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip_ip_prefix"
+        "virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip_ip_prefix",
     )
 
 
