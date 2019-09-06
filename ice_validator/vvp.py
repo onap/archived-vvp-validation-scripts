@@ -477,7 +477,7 @@ class ValidatorApp:
         settings_row += 1
 
         self.create_preloads = BooleanVar(self._root, name="create_preloads")
-        self.create_preloads.set(0)
+        self.create_preloads.set(self.config.default_create_preloads)
         create_preloads_label = Label(
             settings_frame,
             text="Create Preload from Env Files:",
@@ -507,8 +507,9 @@ class ValidatorApp:
         env_dir_label = Label(actions, text="Env Files:")
         env_dir_label.grid(row=5, column=1, pady=5, sticky=W)
         self.env_dir = StringVar(self._root, name="env_dir")
+        env_dir_state = NORMAL if self.create_preloads.get() else DISABLED
         self.env_dir_entry = Entry(
-            actions, width=40, textvariable=self.env_dir, state=DISABLED
+            actions, width=40, textvariable=self.env_dir, state=env_dir_state
         )
         self.env_dir_entry.grid(row=5, column=2, pady=5, sticky=W)
         env_dir_browse = Button(actions, text="...", command=self.ask_env_dir_source)
@@ -563,9 +564,9 @@ class ValidatorApp:
             self.input_format,
             self.report_format,
             self.halt_on_failure,
+            self.preload_format,
+            self.create_preloads,
         )
-        if self.config.preload_formats:
-            self.config.watch(self.preload_format)
         self.schedule(self.execute_pollers)
         if self.config.terms_link_text and not self.config.are_terms_accepted:
             TermsAndConditionsDialog(parent_frame, self.config)

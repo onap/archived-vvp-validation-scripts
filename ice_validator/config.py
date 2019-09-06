@@ -226,6 +226,10 @@ class Config:
         return self._user_settings.get("report_format", "HTML")
 
     @property
+    def default_create_preloads(self):
+        return self._user_settings.get("create_preloads", 0)
+
+    @property
     def report_formats(self):
         return ["CSV", "Excel", "HTML"]
 
