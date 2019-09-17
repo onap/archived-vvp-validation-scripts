@@ -51,5 +51,5 @@ mock
 openstack-heat
 cached-property>=1.5,<1.6
 bandit
-black
+black ; python_version>="3.6"
 pre-commit
