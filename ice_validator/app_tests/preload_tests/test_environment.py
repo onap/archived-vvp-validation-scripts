@@ -56,27 +56,27 @@ def env():
 
 
 def test_csar_service_name(csar):
-    assert csar.service_name == "stark_vccf_svc"
+    assert csar.service_name == "stark_0917_vlb_svc"
 
 
 def test_csar_str_and_repr(csar):
-    assert str(csar) == "CSAR (path=test.csar, name=stark_vccf_svc)"
-    assert repr(csar) == "CSAR (path=test.csar, name=stark_vccf_svc)"
+    assert str(csar) == "CSAR (path=test.csar, name=stark_0917_vlb_svc)"
+    assert repr(csar) == "CSAR (path=test.csar, name=stark_0917_vlb_svc)"
 
 
 def test_csar_vf_module_model_name(csar):
     assert (
-        csar.get_vf_module_model_name("base_vIECCF")
-        == "StarkVccfVf..base_vIECCF..module-0"
+        csar.get_vf_module_model_name("vdns")
+        == "Stark0917VlbVf..vdns..module-3"
     )
 
 
 def test_csar_get_vf_module_resource_name(csar):
-    assert csar.get_vf_module_resource_name("base_vIECCF") == "stark_vccf_vf"
+    assert csar.get_vf_module_resource_name("vdns") == "stark_0917_vlb_vf"
 
 
 def test_csar_get_vnf_type(csar):
-    assert csar.get_vnf_type("base_vIECCF") == "stark_vccf_svc/stark_vccf_vf"
+    assert csar.get_vnf_type("vdns") == "stark_0917_vlb_svc/stark_0917_vlb_vf"
 
 
 def test_csar_get_vf_module_resource_name_not_found(csar):
@@ -84,12 +84,12 @@ def test_csar_get_vf_module_resource_name_not_found(csar):
 
 
 def test_preload_environment_global_csar(env):
-    assert env.csar.service_name == "stark_vccf_svc"
+    assert env.csar.service_name == "stark_0917_vlb_svc"
 
 
 def test_preload_environment_nest_env_csar_inherit(env):
     env_two = env.get_environment("env_two")
-    assert env_two.csar.service_name == "stark_vccf_svc"
+    assert env_two.csar.service_name == "stark_0917_vlb_svc"
 
 
 def test_preload_environment_nest_env_csar_override(env):

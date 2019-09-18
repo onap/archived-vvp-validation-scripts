@@ -168,7 +168,7 @@ class CloudServiceArchive:
         return self._service.get("metadata", {}).get("name")
 
     def __repr__(self):
-        return f"CSAR (path={self.csar_path.name}, name={self.service_name})"
+        return "CSAR (path={}, name={})".format(self.csar_path.name, self.service_name)
 
     def __str__(self):
         return repr(self)
@@ -277,4 +277,4 @@ class PreloadEnvironment:
         return self.base_dir.name
 
     def __repr__(self):
-        return f"PreloadEnvironment(name={self.name})"
+        return "PreloadEnvironment(name={})".format(self.name)
