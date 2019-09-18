@@ -412,3 +412,11 @@ def remove(sequence, exclude, key=None):
     key_func = key if key else lambda x: x
     result = (s for s in sequence if key_func(s) not in exclude)
     return set(result) if isinstance(sequence, Set) else list(result)
+
+
+def is_nova_server(resource):
+    """
+    checks resource is a nova server
+    """
+    return isinstance(resource, dict) and "type" in resource and "properties" in resource and resource.get("type") == "OS::Nova::Server"
+
