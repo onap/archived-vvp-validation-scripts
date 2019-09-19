@@ -225,7 +225,7 @@ class PreloadEnvironment:
         return [e for e in all_envs if e.is_leaf]
 
     def get_module(self, name):
-        name = name if name.lower().endswith(".env") else f"{name}.env".lower()
+        name = name if name.lower().endswith(".env") else "{}.env".format(name).lower()
         if name not in self.module_names:
             return {}
         result = {}

@@ -82,7 +82,7 @@ class Traceability:
         """
         testable_mappings = [m for m in self.mappings if m[self.IS_TESTABLE] == "True"]
         return [
-            f"Missing test for {m[self.REQ_ID]}"
+            f"WARN: Missing test for {m[self.REQ_ID]}"
             for m in testable_mappings
             if not m[self.TEST_NAME]
         ]
@@ -137,22 +137,20 @@ def check_requirements_up_to_date():
     """
     Checks if the requirements file packaged with VVP has meaningful differences
     to the requirements file published from VNFRQTS.
-    :return: list of errors found
     """
-    msg = ["heat_requirements.json is out-of-date. Run update_reqs.py to update."]
+    msg = "WARN: heat_requirements.json is out-of-date. Run update_reqs.py to update."
     latest_needs = json.load(get_requirements())
     with open(CURRENT_NEEDS_PATH, "r") as f:
         current_needs = json.load(f)
     latest_reqs = select_items(in_scope, current_version(latest_needs))
     current_reqs = select_items(in_scope, current_version(current_needs))
     if set(latest_reqs.keys()) != set(current_reqs.keys()):
-        return msg
-    if not all(
+        print(msg)
+    elif not all(
         latest["description"] == current_reqs[r_id]["description"]
         for r_id, latest in latest_reqs.items()
     ):
-        return msg
-    return None
+        print(msg)
 
 
 def check_app_tests_pass():
@@ -173,7 +171,7 @@ def check_self_test_pass():
 
 def check_testable_requirements_are_mapped():
     tracing = Traceability()
-    return tracing.unmapped_requirement_errors()
+    print("\n".join(tracing.unmapped_requirement_errors()))
 
 
 def check_non_testable_requirements_are_not_mapped():
@@ -199,14 +197,15 @@ def check_bandit_passes():
         stderr=subprocess.PIPE,  # nosec
     )  # nosec
     msgs = result.stdout.split("\n") if result.returncode != 0 else []
-    return ["bandit errors detected:"] + [f"  {e}" for e in msgs] if msgs else []
+    return (
+        ["bandit errors detected:"] + ["  {}".format(e) for e in msgs] if msgs else []
+    )
 
 
 if __name__ == "__main__":
+
     checks = [
         check_self_test_pass,
-        check_requirements_up_to_date,
-        check_testable_requirements_are_mapped,
         check_non_testable_requirements_are_not_mapped,
         check_flake8_passes,
         check_bandit_passes,
@@ -214,4 +213,6 @@ if __name__ == "__main__":
     results = [check() for check in checks]
     errors = "\n".join("\n".join(msg) for msg in results if msg)
     print(errors or "Everything looks good!")
+    check_requirements_up_to_date()
+    check_testable_requirements_are_mapped()
     sys.exit(1 if errors else 0)
