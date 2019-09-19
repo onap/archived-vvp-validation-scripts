@@ -59,13 +59,13 @@ from tests.utils.nested_files import file_is_a_nested_template
 # at the end of a property to make it a tuple.
 ENV_PARAMETER_SPEC = {
     "PLATFORM PROVIDED": [
-        {"property": ("vnf_id",), "persistent": False, "kwargs": {}},
-        {"property": ("vnf_name",), "persistent": False, "kwargs": {}},
-        {"property": ("vf_module_id",), "persistent": False, "kwargs": {}},
-        {"property": ("vf_module_index",), "persistent": False, "kwargs": {}},
-        {"property": ("vf_module_name",), "persistent": False, "kwargs": {}},
-        {"property": ("workload_context",), "persistent": False, "kwargs": {}},
-        {"property": ("environment_context",), "persistent": False, "kwargs": {}},
+        {"property": ("metadata", "vnf_id",), "persistent": False, "kwargs": {}},
+        {"property": ("metadata", "vnf_name",), "persistent": False, "kwargs": {}},
+        {"property": ("metadata", "vf_module_id",), "persistent": False, "kwargs": {}},
+        {"property": ("metadata", "vf_module_index",), "persistent": False, "kwargs": {}},
+        {"property": ("metadata", "vf_module_name",), "persistent": False, "kwargs": {}},
+        {"property": ("metadata", "workload_context",), "persistent": False, "kwargs": {}},
+        {"property": ("metadata", "environment_context",), "persistent": False, "kwargs": {}},
         {"property": (r"^(.+?)_net_fqdn$",), "persistent": False, "kwargs": {}},
     ],
     "ALL": [{"property": ("name",), "persistent": False, "kwargs": {}}],
@@ -90,13 +90,13 @@ ENV_PARAMETER_SPEC = {
         },
         {"property": ("fixed_ips", "subnet"), "persistent": False, "kwargs": {}},
         {
-            "property": ("fixed_ips", "allowed_address_pairs"),
+            "property": ("allowed_address_pairs", "ip_address"),
             "persistent": False,
             "network_type": "external",
             "kwargs": {"exclude_parameter": re.compile(r"^(.+?)_int_(.+?)$")},
         },
         {
-            "property": ("fixed_ips", "allowed_address_pairs"),
+            "property": ("allowed_address_pairs", "ip_address"),
             "persistent": True,
             "network_type": "internal",
             "kwargs": {"exclude_parameter": re.compile(r"^((?!_int_).)*$")},
@@ -234,21 +234,26 @@ def get_preload_excluded_parameters(yaml_file, persistent_only=False, env_spec=N
         for spec in specs:
             if persistent_only and not spec.get("persistent"):
                 continue
-            results.extend(
-                get_template_parameters(yaml_file, resource_type, spec, all_resources)
-            )
-    return {item["param"] for item in results}
+            results.extend(get_template_parameters(yaml_file, resource_type,
+                                                   spec, all_resources, nested_resources=True))
+    results = {item["param"] for item in results}
+    for param in Heat(yaml_file).parameters:
+        # AZs often are manipulated and passed into nested templates making
+        # them difficult to detect by looking for the assignment.  We'll
+        # just extract them from the parameters if they are there to be safe
+        if re.match(r"availability_zone_\d+", param):
+            results.add(param)
+    return results
 
 
-def get_template_parameters(yaml_file, resource_type, spec, all_resources=False):
+def get_template_parameters(yaml_file, resource_type, spec, all_resources=False, nested_resources=False):
     parameters = []
 
     heat = Heat(yaml_file)
     if all_resources:
-        resources = heat.resources
+        resources = heat.resources if not nested_resources else heat.get_all_resources()
     else:
-        resources = heat.get_resource_by_type(resource_type)
-
+        resources = heat.get_resource_by_type(resource_type, all_resources=nested_resources)
     for rid, resource_props in resources.items():
         for param in prop_iterator(resource_props, *spec.get("property")):
             if param and get_param(param) and param_helper(spec, get_param(param), rid):
@@ -256,7 +261,6 @@ def get_template_parameters(yaml_file, resource_type, spec, all_resources=False)
                 # then checking if its actually using get_param
                 # then checking a custom helper function (mostly for internal vs external networks)
                 parameters.append({"resource": rid, "param": get_param(param)})
-
     return parameters
 
 

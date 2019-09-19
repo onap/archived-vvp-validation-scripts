@@ -130,7 +130,7 @@ resources:
     properties:
       network: { get_param: int_private_net_id }
       fixed_ips: 
-        - subnet_id: { get_param: int_private_subnet_id }
+        - subnet: { get_param: int_private_subnet_id }
   
   svc_resource_group_1:
     type: OS::Heat::ResourceGroup

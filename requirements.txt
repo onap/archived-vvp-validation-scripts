@@ -53,3 +53,4 @@ cached-property>=1.5,<1.6
 bandit
 black ; python_version>="3.6"
 pre-commit
+flake8
