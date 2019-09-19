@@ -258,6 +258,7 @@ class AbstractPreloadGenerator(ABC):
         if not value:
             value = self.current_module_env.get(param_name)
             if isinstance(value, list):
+                value = value.copy()
                 value.reverse()
             self.env_cache[param_name] = value
         if value and single and isinstance(value, list):
