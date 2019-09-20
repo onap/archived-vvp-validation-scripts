@@ -22,6 +22,30 @@
       "revId": "4df6d9471826c7c1fd0835b11d39cee34250524a",
       "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6be048b5_05467814",
+        "filename": "ice_validator/tests/test_incremental_module.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-09-20T14:40:49Z",
+      "side": 1,
+      "message": "yes, but that particular way won\u0027t work.  It would have to be heat.get_resources_by_type(\"OS::Nova::Server\", all_resources\u003dTrue).  I\u0027ll make the change",
+      "parentUuid": "5ac649f3_69e230eb",
+      "range": {
+        "startLine": 50,
+        "startChar": 18,
+        "endLine": 50,
+        "endChar": 40
+      },
+      "revId": "4df6d9471826c7c1fd0835b11d39cee34250524a",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
     }
   ]
 }
