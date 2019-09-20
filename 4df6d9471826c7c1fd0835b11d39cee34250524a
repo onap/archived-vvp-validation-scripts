@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5ac649f3_69e230eb",
+        "filename": "ice_validator/tests/test_incremental_module.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 3013
+      },
+      "writtenOn": "2019-09-20T14:30:53Z",
+      "side": 1,
+      "message": "Should this be heat.get_all_resources().nova_server_resources? So that it checks resources in the nested templates as well.",
+      "range": {
+        "startLine": 50,
+        "startChar": 18,
+        "endLine": 50,
+        "endChar": 40
+      },
+      "revId": "4df6d9471826c7c1fd0835b11d39cee34250524a",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
