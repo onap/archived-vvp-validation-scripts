@@ -163,8 +163,14 @@ def test_base_vm_types(base):
 def test_base_parameters(base):
     params = base["input"]["vnf-topology-information"]["vnf-parameters"]
     assert params == [
-        {"vnf-parameter-name": "svc_image_name", "vnf-parameter-value": "svc_image"},
-        {"vnf-parameter-name": "svc_flavor_name", "vnf-parameter-value": "svc_flavor"},
+        {
+            "vnf-parameter-name": "db_vol0_id",
+            "vnf-parameter-value": "VALUE FOR: db_vol0_id",
+        },
+        {
+            "vnf-parameter-name": "db_vol1_id",
+            "vnf-parameter-value": "VALUE FOR: db_vol1_id",
+        },
     ]
 
 

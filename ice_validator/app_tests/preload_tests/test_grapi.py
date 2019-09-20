@@ -211,8 +211,8 @@ def test_base_parameters(base):
         "vf-module-topology"
     ]["vf-module-parameters"]["param"]
     assert params == [
-        {"name": "svc_image_name", "value": "svc_image"},
-        {"name": "svc_flavor_name", "value": "svc_flavor"},
+        {"name": "db_vol0_id", "value": "VALUE FOR: db_vol0_id"},
+        {"name": "db_vol1_id", "value": "VALUE FOR: db_vol1_id"},
     ]
 
 

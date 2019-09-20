@@ -56,6 +56,8 @@ from tests.utils import nested_dict
 from tests.utils.vm_types import get_vm_type_for_nova_server
 from config import Config, get_generator_plugins
 
+from tests.test_environment_file_parameters import ENV_PARAMETER_SPEC
+
 CHANGE = "CHANGEME"
 
 
@@ -260,7 +262,8 @@ class VnfModule(FilterBaseOutputs):
         self.heat = Heat(filepath=template_file, envpath=env_path(template_file))
         env_pair = get_environment_pair(self.template_file)
         env_yaml = env_pair.get("eyml") if env_pair else {}
-        self.parameters = env_yaml.get("parameters") or {}
+        self.parameters = {key: "" for key in self.heat.parameters}
+        self.parameters.update(env_yaml.get("parameters") or {})
         self.networks = []
         self.virtual_machine_types = self._create_vm_types()
         self._add_networks()
@@ -325,7 +328,18 @@ class VnfModule(FilterBaseOutputs):
     @property
     def env_specs(self):
         """Return available Environment Spec definitions"""
-        return Config().env_specs
+        try:
+            return Config().env_specs
+        except FileNotFoundError:
+            return [ENV_PARAMETER_SPEC]
+
+    @property
+    def platform_provided_params(self):
+        result = set()
+        for spec in self.env_specs:
+            for props in spec["PLATFORM PROVIDED"]:
+                result.add(props["property"][-1])
+        return result
 
     @property
     def env_template(self):
@@ -334,7 +348,6 @@ class VnfModule(FilterBaseOutputs):
         preload generation.
         """
         params = OrderedDict()
-        params["vnf_name"] = CHANGE
         params["vnf-type"] = CHANGE
         params["vf-module-model-name"] = CHANGE
         params["vf_module_name"] = CHANGE
@@ -354,10 +367,11 @@ class VnfModule(FilterBaseOutputs):
         excluded = get_preload_excluded_parameters(
             self.template_file, persistent_only=True
         )
+        excluded.update(self.platform_provided_params)
         for name, value in self.parameters.items():
             if name in excluded:
                 continue
-            params[name] = value
+            params[name] = value if value else CHANGE
         return {"parameters": params}
 
     @property
@@ -370,7 +384,8 @@ class VnfModule(FilterBaseOutputs):
         :return: dict of parameters suitable for the preload
         """
         excluded = get_preload_excluded_parameters(self.template_file)
-        return {k: v for k, v in self.parameters.items() if k not in excluded}
+        params = {k: v for k, v in self.parameters.items() if k not in excluded}
+        return params
 
     def _get_vm_type(self, vm_type):
         for vm in self.virtual_machine_types:

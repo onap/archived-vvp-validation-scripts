@@ -224,7 +224,7 @@ resources:
     properties:
       network: { get_param: oam_net_id }
       fixed_ips: 
-        - subnet_id: { get_param: oam_subnet_id }
+        - subnet: { get_param: oam_subnet_id }
           ip_address: { get_param: db_oam_ip_0 }
 
   db_0_ha_port_0:
@@ -240,14 +240,14 @@ resources:
     properties:
       network: { get_resource: int_private_network }
       fixed_ips: 
-        - subnet_id: { get_resource: int_private_subnet }
+        - subnet: { get_resource: int_private_subnet }
 
   db_1_oam_port_0:
     type: OS::Neutron::Port
     properties:
       network: { get_param: oam_net_id }
       fixed_ips: 
-        - subnet_id: { get_param: oam_subnet_id }
+        - subnet: { get_param: oam_subnet_id }
           ip_address: { get_param: db_oam_ip_1 }
 
   db_1_ha_port_0:
@@ -263,7 +263,7 @@ resources:
     properties:
       network: { get_resource: int_private_network }
       fixed_ips: 
-        - subnet_id: { get_resource: int_private_subnet }
+        - subnet: { get_resource: int_private_subnet }
 
 
   db_volume_attachment_0:
@@ -302,7 +302,7 @@ resources:
     properties:
       network: { get_resource: int_private_network }
       fixed_ips: 
-        - subnet_id: { get_resource: int_private_subnet }
+        - subnet: { get_resource: int_private_subnet }
 
   mgmt_0_ctrl_port_0:
     type: OS::Neutron::Port
@@ -345,7 +345,7 @@ resources:
     properties:
       network: { get_resource: int_private_network }
       fixed_ips: 
-        - subnet_id: { get_resource: int_private_subnet }
+        - subnet: { get_resource: int_private_subnet }
   
   svc_resource_group_0:
     type: OS::Heat::ResourceGroup
