@@ -37,6 +37,6 @@
 #
 #
 
-VERSION = "5.0.0"
+VERSION = "5.0.1"
 BRANCH = "master"
 RELEASE = "elalto"

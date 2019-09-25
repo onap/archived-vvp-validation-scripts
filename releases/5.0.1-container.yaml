@@ -1,0 +1,8 @@
+distribution_type: 'container'
+container_release_tag: '5.0.1'
+project: 'vvp'
+log_dir: 'vvp-validation-scripts-master-docker-java-daily/259/'
+ref: f5190cf61981eff1eb59157d4d2f8bd06acb3570
+containers:
+    - name: 'vvp/validation-scripts'
+      version: '5.0.0-20190925T142421Z'
