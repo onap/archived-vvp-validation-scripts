@@ -89,16 +89,12 @@ def validate_metadata(metadata, parameters):
     Return error message string or None if no errors.
     """
     for value in metadata.values():
-        if isinstance(value, dict):
-            if "get_param" in value:
-                if value["get_param"] == "workload_context":
-                    wc = parameters.get("workload_context", {})
-                    if wc.get("type") == "string":
-                        break
-                    else:
-                        return (
-                            'must have parameter "workload_context"' ' of type "string"'
-                        )
-                    break
+        if isinstance(value, dict) and "get_param" in value and value["get_param"] == "workload_context":
+            wc = parameters.get("workload_context", {})
+            if wc.get("type") == "string":
+                break
+            else:
+                return 'must have parameter "workload_context"' ' of type "string"'
+                break
     else:
         return None
