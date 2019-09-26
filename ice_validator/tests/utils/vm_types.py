@@ -50,8 +50,6 @@ def get_vm_types_for_resource(resource):
     - If more than one vm_type is detected all vm_types will
     be returned
     """
-    if not isinstance(resource, dict):
-        return set()
     if not is_nova_server(resource):
         return set()
 
@@ -83,11 +81,7 @@ def get_vm_types_for_resource(resource):
 
 def is_nova_server(resource):
 
-    return (
-        "type" in resource
-        and "properties" in resource
-        and resource.get("type") == "OS::Nova::Server"
-    )
+    return isinstance(resource, dict) and "type" in resource and "properties" in resource and resource.get("type") == "OS::Nova::Server"
 
 
 def get_vm_type_for_nova_server(resource):
