@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "69910469_3d309935",
+        "filename": "releases/5.0.1-container.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 481
+      },
+      "writtenOn": "2019-09-27T08:52:39Z",
+      "side": 1,
+      "message": "Why are we releasing these images as 5.0.1?\nThe job tagged them with 5.0.0 \nMy recommendation is releasing these as 5.0.0 and then generate new ones with 5.0.1 after merging the version bump changes",
+      "range": {
+        "startLine": 2,
+        "startChar": 0,
+        "endLine": 2,
+        "endChar": 30
+      },
+      "revId": "98d0ad9d7acce3dfd52b2e7cec5c79dcedd70330",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
