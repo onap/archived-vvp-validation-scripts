@@ -45,7 +45,7 @@ import pytest
 from tests import cached_yaml as yaml
 from tests.utils import nested_files
 
-from .helpers import validates
+from .helpers import validates, is_nova_server
 
 VERSION = "1.1.0"
 
@@ -69,23 +69,15 @@ def test_availability_zone_naming(yaml_file):
     invalid_availability_zones = set()
 
     for k1, v1 in yml["resources"].items():
-        if not isinstance(v1, dict):
-            continue
-        if "properties" not in v1:
-            continue
-        if "type" not in v1:
+        if not is_nova_server(v1):
             continue
 
         if v1["type"] == "OS::Nova::Server":
             for k2, v2 in v1["properties"].items():
-                if k2 != "availability_zone":
-                    continue
-                if "str_replace" in v2:
+                if k2 != "availability_zone" or "str_replace" in v2 or not isinstance(v2["get_param"], str):
                     continue
                 if "get_param" not in v2:
                     invalid_availability_zones.add(k1)
-                    continue
-                if not isinstance(v2["get_param"], str):
                     continue
                 if not re.match(r"availability_zone_\d+", v2["get_param"]):
                     invalid_availability_zones.add(v2["get_param"])
