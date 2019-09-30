@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab3f0c24_3e5d4df7",
+        "filename": "ice_validator/tests/test_availability_zone.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-09-30T19:23:37Z",
+      "side": 1,
+      "message": "This check is redundant because we already know it\u0027s a Nova Server (it was covered by the is_nova_server check)",
+      "revId": "a80c8f51e96e44b73c7b18fc8a34d7f5d58562cf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "55751b81_7786b840",
+        "filename": "ice_validator/tests/test_availability_zone.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-09-30T19:23:37Z",
+      "side": 1,
+      "message": "This will get a KeyError if get_param is not in v2. In the original implementation, this was check was after the check for \"get_param\" not in v2 so you knew get_param was in there.",
+      "revId": "a80c8f51e96e44b73c7b18fc8a34d7f5d58562cf",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
