@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ca2d6e3_6567c297",
+        "filename": "ice_validator/tests/test_nova_servers_workload_context.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-09-30T19:31:23Z",
+      "side": 1,
+      "message": "I\u0027d use helpers.get_param here.  It does all these checks already (isinstance, get_param, etc.) You can just call it on each value and look for one that returns \"workload_context\"\n\nif any(get_param(val) \u003d\u003d \"workload_context\" for val in metadata.values():\n   if paramaters.get(\"workload_context\", {}).get(\"type\", \"\") !\u003d \"string\":\n      return \u0027must have parameter \"workload_context\" of type \"string\"\u0027\nelse:\n   return None",
+      "revId": "19197d162e1e883618f829d94ee2afab85fed126",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
