@@ -70,9 +70,7 @@ def test_network_resource_id_format(yaml_file):
 
     invalid_networks = []
     for k, v in yml["resources"].items():
-        if not isinstance(v, dict):
-            continue
-        if "properties" not in v:
+        if not has_properties(v):
             continue
         if property_uses_get_resource(v, "network"):
             continue
@@ -106,23 +104,15 @@ def test_network_has_subnet(yaml_file):
     networks = []
 
     for k, v in yml["resources"].items():
-        if not isinstance(v, dict):
-            continue
-        if "properties" not in v:
+        if not has_properties(v) or v.get("type") not in ["OS::Neutron::Net"]:
             continue
         # need to check if contrail networks also require subnet
         # and it is defined the same as neutron networks
         # if v.get("type") not in NETWORK_RESOURCE_TYPES:
-        if v.get("type") not in ["OS::Neutron::Net"]:
-            continue
         networks.append(k)
 
     for k, v in yml["resources"].items():
-        if not isinstance(v, dict):
-            continue
-        if "properties" not in v:
-            continue
-        if v.get("type") != "OS::Neutron::Subnet":
+        if not has_properties(v) and v.get("type") != "OS::Neutron::Subnet":
             continue
         network_prop = v.get("properties", {}).get("network", {}).get("get_resource")
 
@@ -136,3 +126,10 @@ def test_network_has_subnet(yaml_file):
             x += 1
 
     assert not networks, "Networks detected without subnet {}".format(networks)
+
+
+def has_properties(resource):
+    """
+    checks resource is a Neutron Subnet
+    """
+    return isinstance(resource, dict) and "properties" in resource
