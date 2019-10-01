@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9365bf55_2a03dbc2",
+        "filename": "ice_validator/tests/test_nova_servers_workload_context.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-10-01T13:38:59Z",
+      "side": 1,
+      "message": "break is unnecessary here as it follows return",
+      "revId": "064e72e504092e184ed026d60c419d2d4057adb2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
