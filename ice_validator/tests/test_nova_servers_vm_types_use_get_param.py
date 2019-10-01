@@ -40,7 +40,7 @@
 import pytest
 from tests import cached_yaml as yaml
 
-from .helpers import validates
+from .helpers import validates, is_nova_server
 
 
 @validates("R-901331", "R-481670", "R-663631")
@@ -59,13 +59,7 @@ def test_vm_type_assignments_on_nova_servers_only_use_get_param(yaml_file):
     invalid_nova_servers = set()
 
     for k, v in yml["resources"].items():
-        if not isinstance(v, dict):
-            continue
-        if "properties" not in v:
-            continue
-        if "type" not in v:
-            continue
-        if v["type"] != "OS::Nova::Server":
+        if not is_nova_server(v):
             continue
 
         for k2, v2 in v["properties"].items():
