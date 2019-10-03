@@ -252,14 +252,18 @@ class ContrailV2NetworkFlavorBaseProcessor(HeatProcessor):
                     network_flavor = cls.network_flavor_internal
                 else:
                     p = param.get("get_param")
-                    if isinstance(p, str):
-                        if "_int_" in p or p.startswith("int_"):
-                            network_flavor = cls.network_flavor_internal
-                        elif "_subint_" in p:
-                            network_flavor = cls.network_flavor_subint
-                        else:
-                            network_flavor = cls.network_flavor_external
+                    network_flavor = check_param(cls, p)
         return network_flavor
+
+
+def check_param(cls, p):
+    if isinstance(p, str):
+        if "_int_" in p or p.startswith("int_"):
+            return cls.network_flavor_internal
+        elif "_subint_" in p:
+            return cls.network_flavor_subint
+        else:
+            return cls.network_flavor_external
 
 
 class ContrailV2InstanceIpProcessor(ContrailV2NetworkFlavorBaseProcessor):
