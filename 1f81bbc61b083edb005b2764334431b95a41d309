@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8bb0e2d_bfbb89d9",
+        "filename": "ice_validator/tests/test_network_format.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-10-03T15:06:58Z",
+      "side": 1,
+      "message": "The condition is fine, but the line length exceeds the maximum (88).  I\u0027m not sure why flake8 isn\u0027t catching this.\n\nPlease ensure you are using the Black code formated.\n\nYou can run:\n  \u003e pre-commit install\n\nThis Black will automatically format the code on commit.",
+      "revId": "1f81bbc61b083edb005b2764334431b95a41d309",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
