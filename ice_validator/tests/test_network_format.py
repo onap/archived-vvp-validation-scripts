@@ -112,11 +112,11 @@ def test_network_has_subnet(yaml_file):
         networks.append(k)
 
     for k, v in yml["resources"].items():
-        if not has_properties(v) and v.get("type") != "OS::Neutron::Subnet":
-            continue
         network_prop = v.get("properties", {}).get("network", {}).get("get_resource")
-
-        if not network_prop:
+        if (
+            not has_properties(v) and v.get("type") != "OS::Neutron::Subnet"
+            and not network_prop
+        ):
             continue
         x = 0
         for network in networks:
