@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "93e37564_03bb4a0c",
+        "filename": "ice_validator/tests/structures.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-10-03T15:21:27Z",
+      "side": 1,
+      "message": "This isn\u0027t really a check so I don\u0027t think the method name is appropriate.  I would suggest something that better reflects the action being performed (ex: get_network_flavor)\n\nI would also not suggest accepting cls as a parameter as only one class can be passed.  You can just pass the parameter.  Since this method will only work with ContrailV2NetworkFlavorBaseProcessor, then I\u0027d suggest changing it to a classmethod\n\n@classmethod\ndef get_network_format(cls, param):\n   # rest stays the same\n\nThen when you call the method you will change it to \n\nself.get_network_format(param)",
+      "range": {
+        "startLine": 259,
+        "startChar": 4,
+        "endLine": 259,
+        "endChar": 15
+      },
+      "revId": "32e275261772fa9eee3a8a431df5ac638d8befb3",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
