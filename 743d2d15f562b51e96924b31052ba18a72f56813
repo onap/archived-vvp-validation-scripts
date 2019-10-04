@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ce54a508_5aadeefb",
+        "filename": "ice_validator/tests/conftest.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 616,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-10-04T13:35:50Z",
+      "side": 1,
+      "message": "These is not equivalent to the original logic. This changed was already proposed on a previous ticket, and not accepted.  We are not going to change the logic in conftest.py at this time.  \n\nWe created VVP-172 to track the specific changes we wanted to tackle from the Sonar report.  Please focus the changes on those.",
+      "revId": "743d2d15f562b51e96924b31052ba18a72f56813",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
