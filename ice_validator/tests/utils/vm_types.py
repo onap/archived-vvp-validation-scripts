@@ -63,7 +63,9 @@ def get_vm_types_for_resource(resource):
 
     vm_types = []
     for k2, v2 in resource["properties"].items():
-        if any([k2 not in key_values, "get_param" not in v2]):
+        if not isinstance(v2, dict) or any(
+            [k2 not in key_values, "get_param" not in v2]
+        ):
             continue
         formats = [v for v in key_value_formats if v[0] == k2]
         for v3 in formats:
@@ -79,7 +81,12 @@ def get_vm_types_for_resource(resource):
 
 def is_nova_server(resource):
 
-    return isinstance(resource, dict) and "type" in resource and "properties" in resource and resource.get("type") == "OS::Nova::Server"
+    return (
+        isinstance(resource, dict)
+        and "type" in resource
+        and "properties" in resource
+        and resource.get("type") == "OS::Nova::Server"
+    )
 
 
 def get_vm_type_for_nova_server(resource):
