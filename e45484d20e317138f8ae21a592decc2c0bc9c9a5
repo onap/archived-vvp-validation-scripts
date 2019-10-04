@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "39cf74cd_a7e90227",
+        "filename": "ice_validator/tests/test_port_resource_ids.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-10-04T13:56:12Z",
+      "side": 1,
+      "message": "This exceeds the maximum line length of 88. Please ensure you have the black code formatter installed.  Use the commit hook to ensure code is formatted before submission.\n\n\u003e pre-commit install\n\nDon\u0027t use any to evaluate individual boolean expression.  It\u0027s unnecessarily allocating a list.  Just use or.",
+      "revId": "e45484d20e317138f8ae21a592decc2c0bc9c9a5",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4e570d23_35fca62a",
+        "filename": "ice_validator/tests/test_port_resource_ids.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-10-04T13:56:12Z",
+      "side": 1,
+      "message": "just use or not any.   This is unnecessarily allocating a list.",
+      "revId": "e45484d20e317138f8ae21a592decc2c0bc9c9a5",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
