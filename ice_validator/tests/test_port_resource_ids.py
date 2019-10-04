@@ -70,17 +70,8 @@ def test_port_resource_ids(yaml_file):
 
     invalid_ports = []
     for k, v in resources.items():
-        if not isinstance(v, dict):
+        if any([not isinstance(v, dict), "type" not in v, v["type"] not in "OS::Nova::Server", "properties" not in v, "networks" not in v["properties"]]):
             continue
-        if "type" not in v:
-            continue
-        if v["type"] not in "OS::Nova::Server":
-            continue
-        if "properties" not in v:
-            continue
-        if "networks" not in v["properties"]:
-            continue
-
         vm_type = get_vm_type_for_nova_server(v)
         if not vm_type:
             continue
@@ -90,11 +81,8 @@ def test_port_resource_ids(yaml_file):
         properties = v["properties"]
         for v2 in properties["networks"]:
             for k3, v3 in v2.items():
-                if k3 != "port":
+                if any([k3 != "port", not isinstance(v3, dict)]):
                     continue
-                if not isinstance(v3, dict):
-                    continue
-
                 if "get_param" in v3:
                     continue
                 elif "get_resource" in v3:
