@@ -63,9 +63,7 @@ def get_vm_types_for_resource(resource):
 
     vm_types = []
     for k2, v2 in resource["properties"].items():
-        if k2 not in key_values:
-            continue
-        if "get_param" not in v2:
+        if any([k2 not in key_values, "get_param" not in v2]):
             continue
         formats = [v for v in key_value_formats if v[0] == k2]
         for v3 in formats:
