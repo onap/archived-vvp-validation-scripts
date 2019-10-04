@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "124e3b69_d24ff040",
+        "filename": "ice_validator/tests/test_nova_servers_environment_context.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-10-04T13:29:26Z",
+      "side": 1,
+      "message": "Line exceeds maximum length (88).  Please ensure you have installed the commit hook for the Black code formatter.  \n\n\u003e pre-commit install   \n\nthat will ensure the code is consistently formatted.\n\nThis condition can also be further simplified as\n\nif get_param(value) \u003d\u003d \"environment_context\":\n\n\nJust use the get_param function from I believe helpers.py",
+      "revId": "c4e96c4ee393a4ec6c94002e1a3d5e480622fee5",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "59fddbad_a91651cf",
+        "filename": "ice_validator/tests/test_nova_servers_environment_context.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-10-04T13:29:26Z",
+      "side": 1,
+      "message": "This section can be further simplified to not use break.\n\nif parameters.get(\"environment_context\", {}).get(\"type\") !\u003d \"string\":\n   return \u0027must have parameter \"environment_context of type \"string\"\u0027",
+      "revId": "c4e96c4ee393a4ec6c94002e1a3d5e480622fee5",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
