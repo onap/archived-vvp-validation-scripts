@@ -606,6 +606,10 @@ class Heat(object):
         self.heat_processors = self.get_heat_processors()
 
     @property
+    def is_heat(self):
+        return "heat_template_version" in self.yml
+
+    @property
     def contrail_resources(self):
         """This attribute is a dict of Contrail resources.
         """

@@ -38,37 +38,19 @@
 #
 ---
 resources:
-  vm_type_1_int_intranet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: int_intranet_net_name }
-
-  vm_type_1_int_vpnnet_0_port:
-        type: OS::Neutron::Port
-        properties:
-            network: { get_param: int_vpnnet_net_id }
-
-  vm_type_1_extnet_net_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: extnet_net_name }
-
-  vm_type_1_extnet_0_port:
-        type: OS::Neutron::Port
-        properties:
-          network: { get_param: extnet_net_id }
 
   int_oam_network:
-        type: OS::Neutron::Net
-        properties:
-          name: { get_param: int_oam_net_name }
+    type: OS::Neutron::Net
 
   int_oam_subnet:
-        type: OS::Neutron::Subnet
-        properties:
-          network: { get_resource: int_oam_network }
-  
-  vm_type_1_int_oam_1_port:
-    type: OS::Neutron::Port
+    type: OS::Neutron::Subnet
     properties:
-      network: { get_resource: int_oam_net }
+      network: { get_resource: int_oam_network }
+
+  int_other_network:
+    type: OS::ContrailV2::VirtualNetwork
+
+  int_other_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network: { get_resource: int_other_network }

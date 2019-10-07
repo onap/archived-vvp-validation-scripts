@@ -36,53 +36,34 @@
 # ============LICENSE_END============================================
 #
 #
+from itertools import chain
 
 import pytest
 import re
 
 from tests import cached_yaml as yaml
+from tests.structures import Heat
 
-from .helpers import validates
-from .utils.network_roles import property_uses_get_resource
+from tests.helpers import validates
 
-RE_INTERNAL_NETWORK_RID = re.compile(  # match pattern
-    r"int_(?P<network_role>.+)_network$"
-)
+RE_INTERNAL_NETWORK_RID = re.compile(r"int_(?P<network_role>.+)_network$")
 NETWORK_RESOURCE_TYPES = ["OS::Neutron::Net", "OS::ContrailV2::VirtualNetwork"]
 
 
-@validates("R-16968", "R-35666")
+@validates("R-16968")
 def test_network_resource_id_format(yaml_file):
-    """
-    Make sure all network resource ids use the allowed naming
-    convention
-    """
-    RE_INTERNAL_NETWORK_RID = re.compile(  # match pattern
-        r"int_(?P<network_role>.+)_network$"
+    heat = Heat(yaml_file)
+    network_ids = chain.from_iterable(
+        heat.get_resource_by_type(t) for t in NETWORK_RESOURCE_TYPES
     )
-
-    with open(yaml_file) as fh:
-        yml = yaml.load(fh)
-
-    # skip if resources are not defined
-    if "resources" not in yml:
-        pytest.skip("No resources specified in the heat template")
-
-    invalid_networks = []
-    for k, v in yml["resources"].items():
-        if not has_properties(v):
-            continue
-        if property_uses_get_resource(v, "network"):
-            continue
-        if v.get("type") not in NETWORK_RESOURCE_TYPES:
-            continue
-        match = RE_INTERNAL_NETWORK_RID.match(k)
-        if not match:
-            invalid_networks.append(k)
-
-    assert not set(invalid_networks), (
+    invalid_networks = {
+        r_id for r_id in network_ids if not RE_INTERNAL_NETWORK_RID.match(r_id)
+    }
+    assert not invalid_networks, (
         "Heat templates must only create internal networks "
-        "and follow format int_{{network-role}}_network"
+        "and their resource IDs must follow the format "
+        "int_{{network-role}}_network. The following network's resource IDs "
+        "have invalid resource ID formats: "
         "{}".format(", ".join(invalid_networks))
     )
 
@@ -114,7 +95,8 @@ def test_network_has_subnet(yaml_file):
     for k, v in yml["resources"].items():
         network_prop = v.get("properties", {}).get("network", {}).get("get_resource")
         if (
-            not has_properties(v) and v.get("type") != "OS::Neutron::Subnet"
+            not has_properties(v)
+            and v.get("type") != "OS::Neutron::Subnet"
             and not network_prop
         ):
             continue
