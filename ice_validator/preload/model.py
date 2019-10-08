@@ -236,7 +236,7 @@ class Vnf:
 
     @property
     def base_output_params(self):
-        return self.base_module.heat.outputs
+        return self.base_module.heat.outputs if self.base_module else {}
 
     def filter_base_outputs(self):
         non_base_modules = (m for m in self.modules if not m.is_base_module)

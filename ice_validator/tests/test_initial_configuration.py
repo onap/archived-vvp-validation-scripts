@@ -65,24 +65,26 @@ def test_00_valid_yaml(filename):
         ).format(str(e).replace("\n", " "))
 
 
+def check_duplicate_keys(yaml_path):
+    import yaml as normal_yaml
+
+    try:
+        with open(yaml_path) as fh:
+            normal_yaml.load(fh, yaml_custom_utils.UniqueKeyLoader)  # nosec
+    except ConstructorError as e:
+        pytest.fail("{} {}".format(e.problem, e.problem_mark))
+
+
 @pytest.mark.base
 @validates("R-92635")
 def test_02_no_duplicate_keys_in_file(yaml_file):
-    """
-    Checks that no duplicate keys exist in a given YAML file.
-    """
-    import yaml as normal_yaml  # we can't use the caching version in this test
+    check_duplicate_keys(yaml_file)
 
-    normal_yaml.add_constructor(
-        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-        yaml_custom_utils.raise_duplicates_keys,
-    )
 
-    try:
-        with open(yaml_file) as fh:
-            normal_yaml.safe_load(fh)
-    except ConstructorError as e:
-        pytest.fail("{} {}".format(e.problem, e.problem_mark))
+@pytest.mark.base
+@validates("R-92635")
+def test_02a_no_duplicate_keys_in_env(env_file):
+    check_duplicate_keys(env_file)
 
 
 @pytest.mark.base

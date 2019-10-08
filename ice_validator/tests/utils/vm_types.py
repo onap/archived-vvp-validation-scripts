@@ -99,7 +99,7 @@ def get_vm_type_for_nova_server(resource):
     vm_types = get_vm_types_for_resource(resource)
 
     # if more than one vm_type was identified, return None
-    if len(vm_types) > 1:
+    if not vm_types or len(vm_types) > 1:
         return None
 
     return vm_types.pop()

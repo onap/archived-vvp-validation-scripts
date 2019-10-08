@@ -169,7 +169,8 @@ class AbstractPreloadGenerator(ABC):
     def generate(self):
         # handle the base module first
         print("\nGenerating {} preloads".format(self.format_name()))
-        self.generate_environments(self.vnf.base_module)
+        if self.vnf.base_module:
+            self.generate_environments(self.vnf.base_module)
         if self.supports_output_passing():
             self.vnf.filter_base_outputs()
         for mod in self.vnf.incremental_modules:
