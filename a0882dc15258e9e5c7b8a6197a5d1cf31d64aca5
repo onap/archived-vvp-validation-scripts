@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "43b2c810_15124b2a",
+        "filename": "ice_validator/tests/conftest.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 3013
+      },
+      "writtenOn": "2019-10-16T16:56:23Z",
+      "side": 1,
+      "message": "If no categories are passed this is throwing an error. Needs a check if test_categories or \"\".",
+      "range": {
+        "startLine": 369,
+        "startChar": 36,
+        "endLine": 369,
+        "endChar": 65
+      },
+      "revId": "a0882dc15258e9e5c7b8a6197a5d1cf31d64aca5",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
