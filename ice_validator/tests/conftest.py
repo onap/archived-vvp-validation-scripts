@@ -360,13 +360,9 @@ def pytest_collection_modifyitems(session, config, items):
     config.traceability_items = list(items)  # save all items for traceability
     if not config.option.self_test:
         for item in items:
+            passed_categories = set(config.option.test_categories or [])
             all_of_categories = getattr(item.function, "all_categories", set())
             any_of_categories = getattr(item.function, "any_categories", set())
-            if any_of_categories and all_of_categories:
-                raise RuntimeError(
-                    "categories can not use 'any_of' with other categories"
-                )
-            passed_categories = set(config.option.test_categories or [])
             if all_of_categories and not all_of_categories.issubset(passed_categories):
                 item.add_marker(
                     pytest.mark.skip(
@@ -375,7 +371,7 @@ def pytest_collection_modifyitems(session, config, items):
                         )
                     )
                 )
-            elif any_of_categories and not passed_categories.intersection(
+            if any_of_categories and not passed_categories.intersection(
                 any_of_categories
             ):
                 item.add_marker(
