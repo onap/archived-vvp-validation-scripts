@@ -360,31 +360,31 @@ def pytest_collection_modifyitems(session, config, items):
     config.traceability_items = list(items)  # save all items for traceability
     if not config.option.self_test:
         for item in items:
-            # checking if test belongs to a category
-            if hasattr(item.function, "categories"):
-                if config.option.test_categories:
-                    test_categories = getattr(item.function, "categories")
-                    passed_categories = config.option.test_categories
-                    if not all(
-                        category in passed_categories for category in test_categories
-                    ):
-                        item.add_marker(
-                            pytest.mark.skip(
-                                reason=(
-                                    "Test categories do not match "
-                                    "all the passed categories"
-                                )
-                            )
-                        )
-                else:
-                    item.add_marker(
-                        pytest.mark.skip(
-                            reason=(
-                                "Test belongs to a category but "
-                                "no categories were passed"
-                            )
+            all_of_categories = getattr(item.function, "all_categories", set())
+            any_of_categories = getattr(item.function, "any_categories", set())
+            if any_of_categories and all_of_categories:
+                raise RuntimeError(
+                    "categories can not use 'any_of' with other categories"
+                )
+            passed_categories = set(config.option.test_categories)
+            if all_of_categories and not all_of_categories.issubset(passed_categories):
+                item.add_marker(
+                    pytest.mark.skip(
+                        reason=(
+                            "Test categories do not match " "all the passed categories"
                         )
                     )
+                )
+            elif any_of_categories and not passed_categories.intersection(
+                any_of_categories
+            ):
+                item.add_marker(
+                    pytest.mark.skip(
+                        reason=(
+                            "Test categories do not match " "any the passed categories"
+                        )
+                    )
+                )
 
     items.sort(
         key=lambda x: (0, x.name)

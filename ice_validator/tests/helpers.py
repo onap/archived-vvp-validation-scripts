@@ -124,16 +124,21 @@ def validates(*requirement_ids):
     return decorator
 
 
-def categories(*categories):
+def categories(*all_of, any_of=None):
+    any_of = set(any_of) if any_of else set()
+    all_of = set(all_of) if all_of else set()
+
     def decorator(func):
         @funcutils.wraps(func)
         def wrapper(*args, **kw):
             return func(*args, **kw)
 
-        wrapper.categories = categories
+        wrapper.all_categories = all_of
+        wrapper.any_categories = any_of
         return wrapper
 
-    decorator.categories = categories
+    decorator.all_categories = all_of
+    decorator.any_categories = any_of
     return decorator
 
 
