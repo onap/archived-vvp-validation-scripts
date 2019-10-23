@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "892aaa0f_9caac942",
+        "filename": "ice_validator/tests/test_nova_servers_environment_context.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-10-23T14:53:14Z",
+      "side": 1,
+      "message": "Error message text needs to be changed.  Parameter typpe for environment context must be string and it is some other value.  As it stands, the reference to workload_context is not relevant to the check being made,  and the message does not tell you what is wrong.",
+      "revId": "1e31c714084844544ac1092a88eef5b08ea0d9d5",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9170f744_d8537e93",
+        "filename": "ice_validator/tests/test_nova_servers_environment_context.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2019-10-23T14:53:14Z",
+      "side": 1,
+      "message": "This else clause should be removed.  if it\u0027s here, then the loop over metadata.values() will only check the first value.",
+      "revId": "1e31c714084844544ac1092a88eef5b08ea0d9d5",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
