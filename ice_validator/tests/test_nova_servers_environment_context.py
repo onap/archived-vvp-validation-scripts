@@ -43,7 +43,7 @@
 import pytest
 from tests import cached_yaml as yaml
 
-from .helpers import validates
+from .helpers import validates, get_param
 
 VERSION = "1.0.0"
 
@@ -89,17 +89,8 @@ def validate_metadata(metadata, parameters):
     Return error message string or None if no errors.
     """
     for value in metadata.values():
-        if isinstance(value, dict):
-            if "get_param" in value:
-                if value["get_param"] == "environment_context":
-                    wc = parameters.get("environment_context", {})
-                    if wc.get("type") == "string":
-                        break
-                    else:
-                        return (
-                            'must have parameter "environment_context"'
-                            ' of type "string"'
-                        )
-                    break
-    else:
-        return None
+        if get_param(value) == "environment_context" and parameters.get("environment_context", {}).get("type", "") != "string":
+            return 'environment_context "workload_context" of type "string"'
+        else:
+            return None
+
