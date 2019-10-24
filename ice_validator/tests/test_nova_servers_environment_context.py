@@ -90,7 +90,5 @@ def validate_metadata(metadata, parameters):
     """
     for value in metadata.values():
         if get_param(value) == "environment_context" and parameters.get("environment_context", {}).get("type", "") != "string":
-            return 'environment_context "workload_context" of type "string"'
-        else:
-            return None
+            return 'must have parameter "environment_context" of type "string"'
 
