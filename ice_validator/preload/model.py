@@ -251,7 +251,8 @@ def env_path(heat_path):
     :return: path to env file (assumes it is present and named correctly)
     """
     base_path = os.path.splitext(heat_path)[0]
-    return "{}.env".format(base_path)
+    env_path = "{}.env".format(base_path)
+    return env_path if os.path.exists(env_path) else None
 
 
 class VnfModule(FilterBaseOutputs):

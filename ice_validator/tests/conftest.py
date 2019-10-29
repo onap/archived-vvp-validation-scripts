@@ -348,7 +348,11 @@ def pytest_sessionfinish(session, exitstatus):
 def pytest_terminal_summary(terminalreporter, exitstatus):
     # Ensures all preload information and warnings appear after
     # test results
-    create_preloads(terminalreporter.config, exitstatus)
+    try:
+        create_preloads(terminalreporter.config, exitstatus)
+    except Exception:
+        print("Error creating preloads, skipping preload generation")
+        traceback.print_exc()
 
 
 # noinspection PyUnusedLocal
