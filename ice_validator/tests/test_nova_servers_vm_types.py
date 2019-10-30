@@ -42,7 +42,7 @@ import re
 
 from tests import cached_yaml as yaml
 
-from .helpers import validates
+from .helpers import validates, is_nova_server
 
 from .utils.vm_types import get_vm_types_for_resource, get_vm_types
 
@@ -64,13 +64,8 @@ def test_vm_type_consistent_on_nova_servers(yaml_file):
 
     invalid_nova_servers = []
     for k, v in yml["resources"].items():
-        if not isinstance(v, dict):
+        if not is_nova_server(v):
             continue
-        if v.get("type") != "OS::Nova::Server":
-            continue
-        if "properties" not in v:
-            continue
-
         vm_types = get_vm_types_for_resource(v)
         if len(vm_types) != 1:
             invalid_nova_servers.append(k)
