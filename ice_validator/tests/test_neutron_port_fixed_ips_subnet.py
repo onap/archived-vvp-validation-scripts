@@ -123,11 +123,9 @@ def test_neutron_port_internal_fixed_ips_subnet_in_base(yaml_files):
                 continue
             for ip in fip_list:
                 subnet = ip.get("subnet")
-                if not subnet:
+                if not subnet or "get_param" not in subnet:
                     continue
 
-                if "get_param" not in subnet:
-                    continue
                 param = subnet.get("get_param")
                 if param not in base_outputs:
                     errors.append(

@@ -65,7 +65,6 @@ resources:
 import collections
 import re
 
-import pytest
 
 from .structures import Heat
 from .helpers import validates
@@ -101,8 +100,6 @@ def test_vm_type_case(yaml_file):
     """
     heat = Heat(filepath=yaml_file)
     resources = heat.resources
-    if not resources:
-        pytest.skip("No resources found")
     bad = collections.defaultdict(list)
     for rid, resource in resources.items():
         vm_type = heat.get_vm_type(rid, resource=resource)

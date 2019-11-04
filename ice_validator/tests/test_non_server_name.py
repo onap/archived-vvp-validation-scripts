@@ -42,7 +42,6 @@ resource property name
 """
 import os
 import collections
-import pytest
 
 from .structures import Heat
 from .structures import HeatProcessor
@@ -74,13 +73,7 @@ def test_non_server_name(yaml_file):
 
     """
     h = Heat(filepath=yaml_file)
-    if not h.resources:
-        pytest.skip("No resources in this template")
-
     non_servers = get_non_servers(h)
-    if not non_servers:
-        pytest.skip("No non-server resources in this template")
-
     bad = []
     for rid, resource in non_servers.items():
         name = h.nested_get(resource, "properties", "name")
