@@ -44,11 +44,11 @@ from tests.test_network_format import NETWORK_RESOURCE_TYPES, RE_INTERNAL_NETWOR
 INTERNAL_NETWORK_PARAMETERS = [
     re.compile(r"int_(.+?)_net_id"),
     re.compile(r"int_(.+?)_net_name"),
+    re.compile(r".*_int_(.+?)_floating(?:_v6)?_ip"),
+    re.compile(r".*_int_(.+?)_floating(?:_v6)?_ips"),
     re.compile(r".*?_int_(.+?)(?:_v6)?_ips"),
     re.compile(r".*?_int_(.+?)(?:_v6)?_ip_\d+"),
     re.compile(r"int_(.+?)(?:_v6)?_subnet_id"),
-    re.compile(r".*_int_(.+?)_floating(?:_v6)?_ip"),
-    re.compile(r".*_int_(.+?)_floating(?:_v6)?_ips"),
     re.compile(r"(?:.*_)?int_(.+?)_security_group"),
 ]
 
