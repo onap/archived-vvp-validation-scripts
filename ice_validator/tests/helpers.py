@@ -53,6 +53,23 @@ __path__ = [os.path.dirname(os.path.abspath(__file__))]
 DEFAULT_OUTPUT_DIR = "{}/../output".format(__path__[0])
 RE_BASE = re.compile(r"(^base$)|(^base_)|(_base_)|(_base$)")
 
+INTRINSIC_FUNCTIONS = [
+    "get_resource",
+    "get_attr",
+    "str_replace",
+    "get_param",
+    "list_join",
+    "get_file",
+    "resource_facade",
+    "Fn::Select",
+    "repeat",
+    "digest",
+    "str_split",
+    "yaql",
+    "map_replace",
+    "map_merge",
+]
+
 
 def is_base_module(template_path):
     basename = os.path.basename(template_path).lower()
@@ -321,12 +338,13 @@ def parameter_type_to_heat_type(parameter):
 
 
 def prop_iterator(resource, *props):
-    terminators = ["get_resource", "get_attr", "str_replace", "get_param"]
     if "properties" in resource:
         resource = resource.get("properties")
     props = list(props)
 
-    if isinstance(resource, dict) and any(x for x in terminators if x in resource):
+    if isinstance(resource, dict) and any(
+        x for x in INTRINSIC_FUNCTIONS if x in resource
+    ):
         yield resource
     else:
         prop = resource.get(props.pop(0))
@@ -426,5 +444,9 @@ def is_nova_server(resource):
     """
     checks resource is a nova server
     """
-    return isinstance(resource, dict) and "type" in resource and "properties" in resource and resource.get("type") == "OS::Nova::Server"
-
+    return (
+        isinstance(resource, dict)
+        and "type" in resource
+        and "properties" in resource
+        and resource.get("type") == "OS::Nova::Server"
+    )
