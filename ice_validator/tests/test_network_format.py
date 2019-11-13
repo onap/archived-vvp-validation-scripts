@@ -38,7 +38,6 @@
 #
 from itertools import chain
 
-import pytest
 import re
 
 from tests import cached_yaml as yaml
@@ -77,10 +76,6 @@ def test_network_has_subnet(yaml_file):
 
     with open(yaml_file) as fh:
         yml = yaml.load(fh)
-
-    # skip if resources are not defined
-    if "resources" not in yml:
-        pytest.skip("No resources specified in the heat template")
 
     networks = []
 
