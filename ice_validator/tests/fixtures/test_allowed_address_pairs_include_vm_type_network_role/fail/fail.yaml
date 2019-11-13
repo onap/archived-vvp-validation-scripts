@@ -95,6 +95,22 @@ parameters:
     type: string
     description: lb_extanet_floating_ip
 
+  cidr:
+    type: string
+    description: naslfnsakl
+
+  badparameter:
+    type: string
+    description: naslfnsakl
+
+  TESTDB_int_priav_floating_ip:
+   type: string
+   description: asnfjl
+
+  TESTDB_priav_floating_ip:
+   type: string
+   description: asnfjl
+
 resources:
 
   lb_server_0:
@@ -137,3 +153,63 @@ resources:
           network: { get_param: extnet_net_name }
           allowed_address_pairs:
             - ip_address: { get_param: lb_extanet_floating_ip }
+
+  lb_0_extnet_port_0:
+        type: OS::Neutron::Port
+        properties:
+          network: { get_param: extnet_net_name }
+          allowed_address_pairs:
+            - ip_address:
+                str_replace:
+                  template: $IPADDR$CIDR
+                  params:
+                    $IPADDR: { get_param: lb_extanet_floating_ip }
+                    $CIDR: { get_param: cidr}
+
+  TESTDB_0_int_private_vmi_0:
+    type: OS::ContrailV2::VirtualMachineInterface
+    properties:
+      virtual_machine_interface_properties:
+        virtual_machine_interface_properties_service_interface_type: {
+          "priv_interface_type" 
+        }
+      virtual_network_refs:
+        - get_param: priv_net_fqdn
+      virtual_machine_interface_allowed_address_pairs:
+        {
+          virtual_machine_interface_allowed_address_pairs_allowed_address_pair:
+            [{
+              virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip:
+                {
+                  virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip_ip_prefix: { get_param: TESTDB_int_priav_floating_ip },
+                  virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip_ip_prefix_len: "dsafasdF",
+                },
+              virtual_machine_interface_allowed_address_pairs_allowed_address_pair_mac: "sdnfjkas",
+              virtual_machine_interface_allowed_address_pairs_allowed_address_pair_address_mode: "sadfnjasdfknj",
+            }],
+        }
+
+
+  TESTDB_0_private_vmi_0:
+    type: OS::ContrailV2::VirtualMachineInterface
+    properties:
+      virtual_machine_interface_properties:
+        virtual_machine_interface_properties_service_interface_type: {
+          "priv_interface_type" 
+        }
+      virtual_network_refs:
+        - get_param: priv_net_fqdn
+      virtual_machine_interface_allowed_address_pairs:
+        {
+          virtual_machine_interface_allowed_address_pairs_allowed_address_pair:
+            [{
+              virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip:
+                {
+                  virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip_ip_prefix: { get_param: TESTDB_priav_floating_ip },
+                  virtual_machine_interface_allowed_address_pairs_allowed_address_pair_ip_ip_prefix_len: "dsafasdF",
+                },
+              virtual_machine_interface_allowed_address_pairs_allowed_address_pair_mac: "sdnfjkas",
+              virtual_machine_interface_allowed_address_pairs_allowed_address_pair_address_mode: "sadfnjasdfknj",
+            }],
+        }
+

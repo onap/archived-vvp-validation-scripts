@@ -41,6 +41,10 @@ description: fdsafsfsa
 
 parameters:
 
+  TESTDB_praivate_ips:
+   type: comma_delimited_list
+   description: asnfjl
+
   TESTDB_int_priav_ips:
    type: comma_delimited_list
    description: asnfjl
@@ -73,6 +77,14 @@ resources:
       virtual_machine_interface_refs: { get_resource: TESTDB_1_priv_vmi_0 }
       virtual_network_refs: [{ get_param: priv_net_fqdn }]
       instance_ip_address: { get_param: [TESTDB_private_ips, 1] }
+      subnet_uuid: { get_param: privte_v6_subnet_id }
+
+  TESTDB_0_private_vmi_2_IP_0:
+    type: OS::ContrailV2::InstanceIp
+    properties:
+      virtual_machine_interface_refs: { get_resource: TESTDB_1_priv_vmi_0 }
+      virtual_network_refs: [{ get_param: priv_net_fqdn }]
+      instance_ip_address: { get_param: [TESTDB_praivate_ips, 1] }
       subnet_uuid: { get_param: privte_v6_subnet_id }
 
   #testnlksadf:
