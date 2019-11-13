@@ -49,6 +49,10 @@ parameters:
    type: string
    description: asnfjl
 
+  TESTDB_praivate_ips:
+   type: string
+   description: asnfjl
+
   priv_subnet_id:
    type: string
    description: asnfjl
@@ -73,6 +77,14 @@ resources:
       virtual_machine_interface_refs: { get_resource: TESTDB_1_priv_vmi_0 }
       virtual_network_refs: [{ get_param: priv_net_fqdn }]
       instance_ip_address: { get_param: [TESTDB_private_ips, 1] }
+      subnet_uuid: { get_param: privte_v6_subnet_id }
+
+  TESTDB_0_private_vmi_1_IP_1:
+    type: OS::ContrailV2::InstanceIp
+    properties:
+      virtual_machine_interface_refs: { get_resource: TESTDB_1_priv_vmi_0 }
+      virtual_network_refs: [{ get_param: priv_net_fqdn }]
+      instance_ip_address: { get_param: [TESTDB_praivate_ips, 1] }
       subnet_uuid: { get_param: privte_v6_subnet_id }
 
   other_0_int_priv_vmi_0_IP_0:
