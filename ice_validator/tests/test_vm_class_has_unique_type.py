@@ -73,8 +73,8 @@ class VmClassValidator(object):
         self.vm_rids = collections.defaultdict(set)
         self.vm_types = collections.defaultdict(set)
         va_config, self.va_count = CinderVolumeAttachmentProcessor.get_config(resources)
-        if not va_config:
-            pytest.skip("No Cinder Volume Attachment configurations found")
+        # if not va_config:
+        #     pytest.skip("No Cinder Volume Attachment configurations found")
         for rid, resource in resources.items():
             vm_class = NovaServerProcessor.get_vm_class(resource)
             if vm_class:
@@ -98,13 +98,15 @@ class VmClassValidator(object):
         for k, v in self.vm_types.items():
             if len(v) > 1:
                 errors.append(
-                    "vm-type %s has class conflict %s"
+                    "OS::Nova::Server resources with the same vm_type must have identical configurations. "
+                    "The following OS::Nova::Server resources for vm-type %s do not have identical configurations: %s"
                     % (k, ", ".join(str(list(self.vm_classes[c])) for c in v))
                 )
                 classes = list(v)
                 errors.append(
-                    "Differences %s"
-                    % ", ".join([str(key_diff(classes[0], c)) for c in classes[1:]])
+                    "The following attributes are detected differences between "
+                    "OS::Nova::Server's with vm_type %s: %s"
+                    % (k, ", ".join([str(key_diff(classes[0], c)) for c in classes[1:]]))
                 )
         for k, v in self.vm_counts.items():
             if len(v) > 1:

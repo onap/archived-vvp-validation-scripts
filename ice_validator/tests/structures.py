@@ -563,7 +563,7 @@ class NovaServerProcessor(HeatProcessor):
             d = dict(
                 flavor=cls.get_flavor(resource),
                 image=cls.get_image(resource),
-                networks=cls.get_network(resource),
+                network_role=cls.get_network(resource),
             )
             if all(d.values()):
                 vm_class.update(d)
