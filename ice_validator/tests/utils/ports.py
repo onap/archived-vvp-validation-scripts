@@ -160,8 +160,9 @@ def validate_port_parameter(
     If the parameter is present in the resource metadata
     and exemptions are allowed, then the validation will be skipped.
     """
-    parameter = param.get("get_param")
-    if not parameter:
+    if isinstance(param, dict) and "get_param" in param:
+        parameter = param.get("get_param")
+    else:
         return (
             "Unexpected parameter format for {} {} property {}: {}. "
             "Please consult the heat guidelines documentation for details."

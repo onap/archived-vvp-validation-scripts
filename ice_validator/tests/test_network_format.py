@@ -79,7 +79,7 @@ def test_network_has_subnet(yaml_file):
 
     networks = []
 
-    for k, v in yml["resources"].items():
+    for k, v in yml.get("resources", {}).items():
         if not has_properties(v) or v.get("type") not in ["OS::Neutron::Net"]:
             continue
         # need to check if contrail networks also require subnet
@@ -87,7 +87,7 @@ def test_network_has_subnet(yaml_file):
         # if v.get("type") not in NETWORK_RESOURCE_TYPES:
         networks.append(k)
 
-    for k, v in yml["resources"].items():
+    for k, v in yml.get("resources", {}).items():
         network_prop = v.get("properties", {}).get("network", {}).get("get_resource")
         if (
             not has_properties(v)
