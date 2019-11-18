@@ -111,14 +111,10 @@ def test_vm_type_case(yaml_file):
                         param = param[0]
                     if isinstance(param, str) and case_mismatch(vm_type, param):
                         bad[(rid, vm_type)].append((prop, param))
-    if bad:
-        raise AssertionError(
-            "vm-type/parameter case mis-match %s"
-            % (
-                "; ".join(
-                    "resource: %s vm-type: %s %s"
-                    % (k[0], k[1], ", ".join("%s: %s" % i for i in v))
-                    for k, v in bad.items()
-                )
-            )
-        )
+
+    msg = 'vm-type/parameter case mis-match %s' \
+        % '; '.join('resource: %s vm-type: %s %s' % (k[0], k[1],
+                    ', '.join('%s: %s' % i for i in v)) for (k, v) in
+                    bad.items())
+
+    assert not bad, msg
