@@ -38,7 +38,6 @@
 #
 import re
 
-import pytest
 
 from tests.utils.network_roles import get_network_type_from_port
 
@@ -100,8 +99,6 @@ def test_external_subnet_format(yaml_file):
 @validates("R-84123", "R-76160")
 def test_neutron_port_internal_fixed_ips_subnet_in_base(yaml_files):
     base_path = get_base_template_from_yaml_files(yaml_files)
-    if not base_path:
-        pytest.skip("No base module detected")
     base_heat = load_yaml(base_path)
     base_outputs = base_heat.get("outputs") or {}
     nested_template_paths = get_nested_files(yaml_files)
