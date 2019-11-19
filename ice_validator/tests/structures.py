@@ -247,12 +247,11 @@ class ContrailV2NetworkFlavorBaseProcessor(HeatProcessor):
         network_refs = nested_dict.get(resource, "properties", "virtual_network_refs")
         if network_refs and isinstance(network_refs, list):
             param = network_refs[0]
-            if isinstance(param, dict):
-                if "get_resource" in param:
-                    network_flavor = cls.network_flavor_internal
-                else:
-                    p = param.get("get_param")
-                    network_flavor = cls.get_network_format(p)
+            if isinstance(param, dict) and "get_resource" in param:
+                network_flavor = cls.network_flavor_internal
+            else:
+                p = param.get("get_param")
+                network_flavor = cls.get_network_format(p)
         return network_flavor
 
     @classmethod
