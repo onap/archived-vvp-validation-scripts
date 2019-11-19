@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d1d9f616_c1c303db",
+        "filename": "ice_validator/tests/structures.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 3013
+      },
+      "writtenOn": "2019-11-19T16:08:56Z",
+      "side": 1,
+      "message": "This else: block logic is now reachable if param is not a dict, which will cause a failure.",
+      "range": {
+        "startLine": 252,
+        "startChar": 0,
+        "endLine": 254,
+        "endChar": 0
+      },
+      "revId": "b356c123b93f09cf0ddf2b0e29254dba70293fc2",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
