@@ -104,6 +104,7 @@ from tkinter.scrolledtext import ScrolledText
 from typing import Optional, TextIO, Callable
 
 from config import Config
+from preload.engine import PLUGIN_MGR
 
 VERSION = version.VERSION
 PATH = os.path.dirname(os.path.realpath(__file__))
@@ -220,8 +221,9 @@ def run_pytest(
     report_format: str,
     halt_on_failure: bool,
     template_source: str,
-    env_dir: str,
+    preload_config: str,
     preload_format: list,
+    preload_source: str,
 ):
     """Runs pytest using the given ``profile`` in a background process.  All
     ``stdout`` and ``stderr`` are redirected to ``log``.  The result of the job
@@ -243,9 +245,10 @@ def run_pytest(
                                 prevent a large number of errors from flooding the
                                 report.
     :param template_source:     The path or name of the template to show on the report
-    :param env_dir:             Optional directory of env files that can be used
-                                to generate populated preload templates
-    :param preload_format:     Selected preload format
+    :param preload_config:      Optional directory or file that is input to preload
+                                data source
+    :param preload_format:      Selected preload format
+    :param preload_source:      Name of selected preload data source plugin
     """
     out_path = "{}/{}".format(PATH, OUT_DIR)
     if os.path.exists(out_path):
@@ -259,8 +262,13 @@ def run_pytest(
                 "--report-format={}".format(report_format),
                 "--template-source={}".format(template_source),
             ]
-            if env_dir:
-                args.append("--env-directory={}".format(env_dir))
+            if preload_config:
+                args.append("--preload-source={}".format(preload_config))
+                args.append(
+                    "--preload-source-type={}".format(
+                        PLUGIN_MGR.get_source_for_name(preload_source).get_identifier()
+                    )
+                )
             if categories:
                 for category in categories:
                     args.extend(("--category", category))
@@ -268,6 +276,7 @@ def run_pytest(
                 args.append("--continue-on-failure")
             if preload_format:
                 args.append("--preload-format={}".format(preload_format))
+            print("args: ", " ".join(args))
             pytest.main(args=args)
             result_queue.put((True, None))
         except Exception:
@@ -425,7 +434,7 @@ class ValidatorApp:
         settings_frame.grid(row=3, column=1, columnspan=3, pady=10, sticky="we")
 
         if self.config.preload_formats:
-            preload_format_label = Label(settings_frame, text="Preload Template:")
+            preload_format_label = Label(settings_frame, text="Preload Format:")
             preload_format_label.grid(row=settings_row, column=1, sticky=W)
             self.preload_format = StringVar(self._root, name="preload_format")
             self.preload_format.set(self.config.default_preload_format)
@@ -434,6 +443,19 @@ class ValidatorApp:
             )
             preload_format_menu.config(width=25)
             preload_format_menu.grid(
+                row=settings_row, column=2, columnspan=3, sticky=E, pady=5
+            )
+            settings_row += 1
+
+            preload_source_label = Label(settings_frame, text="Preload Source:")
+            preload_source_label.grid(row=settings_row, column=1, sticky=W)
+            self.preload_source = StringVar(self._root, name="preload_source")
+            self.preload_source.set(self.config.default_preload_source)
+            preload_source_menu = OptionMenu(
+                settings_frame, self.preload_source, *self.config.preload_source_types
+            )
+            preload_source_menu.config(width=25)
+            preload_source_menu.grid(
                 row=settings_row, column=2, columnspan=3, sticky=E, pady=5
             )
             settings_row += 1
@@ -480,7 +502,7 @@ class ValidatorApp:
         self.create_preloads.set(self.config.default_create_preloads)
         create_preloads_label = Label(
             settings_frame,
-            text="Create Preload from Env Files:",
+            text="Create Preload from Datasource:",
             anchor=W,
             justify=LEFT,
         )
@@ -504,16 +526,21 @@ class ValidatorApp:
         directory_browse = Button(actions, text="...", command=self.ask_template_source)
         directory_browse.grid(row=4, column=3, pady=5, sticky=W)
 
-        env_dir_label = Label(actions, text="Env Files:")
-        env_dir_label.grid(row=5, column=1, pady=5, sticky=W)
-        self.env_dir = StringVar(self._root, name="env_dir")
-        env_dir_state = NORMAL if self.create_preloads.get() else DISABLED
-        self.env_dir_entry = Entry(
-            actions, width=40, textvariable=self.env_dir, state=env_dir_state
+        preload_config_label = Label(actions, text="Preload Datasource:")
+        preload_config_label.grid(row=5, column=1, pady=5, sticky=W)
+        self.preload_config = StringVar(self._root, name="preload_config")
+        preload_config_state = NORMAL if self.create_preloads.get() else DISABLED
+        self.preload_config_entry = Entry(
+            actions,
+            width=40,
+            textvariable=self.preload_config,
+            state=preload_config_state,
         )
-        self.env_dir_entry.grid(row=5, column=2, pady=5, sticky=W)
-        env_dir_browse = Button(actions, text="...", command=self.ask_env_dir_source)
-        env_dir_browse.grid(row=5, column=3, pady=5, sticky=W)
+        self.preload_config_entry.grid(row=5, column=2, pady=5, sticky=W)
+        preload_config_browse = Button(
+            actions, text="...", command=self.ask_preload_source
+        )
+        preload_config_browse.grid(row=5, column=3, pady=5, sticky=W)
 
         validate_button = Button(
             actions, text="Process Templates", command=self.validate
@@ -566,6 +593,7 @@ class ValidatorApp:
             self.halt_on_failure,
             self.preload_format,
             self.create_preloads,
+            self.preload_source,
         )
         self.schedule(self.execute_pollers)
         if self.config.terms_link_text and not self.config.are_terms_accepted:
@@ -606,7 +634,9 @@ class ValidatorApp:
 
     def set_env_dir_state(self):
         state = NORMAL if self.create_preloads.get() else DISABLED
-        self.env_dir_entry.config(state=state)
+        if state == DISABLED:
+            self.preload_config.set("")
+        self.preload_config_entry.config(state=state)
 
     def ask_template_source(self):
         if self.input_format.get() == "ZIP File":
@@ -618,8 +648,21 @@ class ValidatorApp:
             template_source = filedialog.askdirectory()
         self.template_source.set(template_source)
 
-    def ask_env_dir_source(self):
-        self.env_dir.set(filedialog.askdirectory())
+    def ask_preload_source(self):
+        input_type = "DIR"
+        for source in PLUGIN_MGR.preload_sources:
+            if source.get_name() == self.preload_source.get():
+                input_type = source.get_source_type()
+
+        if input_type == "DIR":
+            self.preload_config.set(filedialog.askdirectory())
+        else:
+            self.preload_config.set(
+                filedialog.askopenfilename(
+                    title="Select Preload Datasource File",
+                    filetypes=(("All Files", "*"),),
+                )
+            )
 
     def validate(self):
         """Run the pytest validations in a background process"""
@@ -647,8 +690,9 @@ class ValidatorApp:
                     self.report_format.get().lower(),
                     self.halt_on_failure.get(),
                     self.template_source.get(),
-                    self.env_dir.get(),
+                    self.preload_config.get(),
                     self.preload_format.get(),
+                    self.preload_source.get(),
                 ),
             )
             self.task.daemon = True

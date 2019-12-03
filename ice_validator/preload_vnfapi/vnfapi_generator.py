@@ -34,17 +34,19 @@
 # limitations under the License.
 #
 # ============LICENSE_END============================================
-#
-#
 
 import json
 import os
+from pathlib import Path
+from typing import Mapping
 
+from preload.data import AbstractPreloadInstance
 from preload.generator import (
     get_json_template,
     get_or_create_template,
     AbstractPreloadGenerator,
 )
+from preload.model import VnfModule, Port
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(THIS_DIR, "vnfapi_data")
@@ -73,92 +75,151 @@ class VnfApiPreloadGenerator(AbstractPreloadGenerator):
     def output_sub_dir(cls):
         return "vnfapi"
 
-    def generate_module(self, vnf_module, output_dir):
-        preload = get_json_template(DATA_DIR, "preload_template")
-        self._populate(preload, vnf_module)
-        incomplete = "_incomplete" if self.module_incomplete else ""
-        outfile = "{}/{}{}.json".format(output_dir, vnf_module.vnf_name, incomplete)
-        with open(outfile, "w") as f:
-            json.dump(preload, f, indent=4)
+    def generate_module(
+        self,
+        vnf_module: VnfModule,
+        preload_data: AbstractPreloadInstance,
+        output_dir: Path,
+    ):
+        self.module_incomplete = False
+        template = get_json_template(DATA_DIR, "preload_template")
+        self._populate(template, preload_data, vnf_module)
+        incomplete = (
+            "_incomplete"
+            if preload_data.flag_incompletes and self.module_incomplete
+            else ""
+        )
+        filename = "{}{}.json".format(preload_data.preload_basename, incomplete)
+        outfile = output_dir.joinpath(filename)
+        with outfile.open("w") as f:
+            json.dump(template, f, indent=4)
 
-    def _populate(self, preload, vnf_module):
-        self._add_vnf_metadata(preload)
-        self._add_availability_zones(preload, vnf_module)
-        self._add_vnf_networks(preload, vnf_module)
-        self._add_vms(preload, vnf_module)
-        self._add_parameters(preload, vnf_module)
+    def _populate(
+        self,
+        template: Mapping,
+        preload_data: AbstractPreloadInstance,
+        vnf_module: VnfModule,
+    ):
+        self._add_vnf_metadata(template, preload_data)
+        self._add_availability_zones(template, preload_data, vnf_module)
+        self._add_vnf_networks(template, preload_data, vnf_module)
+        self._add_vms(template, preload_data, vnf_module)
+        self._add_parameters(template, preload_data, vnf_module)
 
-    def _add_vnf_metadata(self, preload):
-        vnf_meta = preload["input"]["vnf-topology-information"][
+    def _add_vnf_metadata(self, template: Mapping, preload: AbstractPreloadInstance):
+        vnf_meta = template["input"]["vnf-topology-information"][
             "vnf-topology-identifier"
         ]
-        vnf_meta["vnf-name"] = self.replace("vnf_name")
-        vnf_meta["generic-vnf-type"] = self.replace(
+
+        vnf_meta["vnf-name"] = self.normalize(preload.vnf_name, "vnf_name")
+        vnf_meta["generic-vnf-type"] = self.normalize(
+            preload.vnf_type,
             "vnf-type",
             "VALUE FOR: Concatenation of <Service Name>/"
             "<VF Instance Name> MUST MATCH SDC",
         )
-        vnf_meta["vnf-type"] = self.replace(
-            "vf-module-model-name", "VALUE FOR: <vfModuleModelName> from CSAR or SDC"
+        vnf_meta["vnf-type"] = self.normalize(
+            preload.vf_module_model_name,
+            "vf-module-model-name",
+            "VALUE FOR: <vfModuleModelName> from CSAR or SDC",
         )
 
-    def add_floating_ips(self, network_template, network):
+    def _add_availability_zones(
+        self, template: Mapping, preload: AbstractPreloadInstance, vnf_module: VnfModule
+    ):
+        zones = template["input"]["vnf-topology-information"]["vnf-assignments"][
+            "availability-zones"
+        ]
+        for i, zone_param in enumerate(vnf_module.availability_zones):
+            zone = preload.get_availability_zone(i, zone_param)
+            zones.append({"availability-zone": self.normalize(zone, zone_param, index=i)})
+
+    def add_floating_ips(
+        self, network_template: dict, port: Port, preload: AbstractPreloadInstance
+    ):
         # only one floating IP is really supported, in the preload model
         # so for now we'll just use the last one.  We might revisit this
         # and if multiple floating params exist, then come up with an
         # approach to pick just one
-        for ip in network.floating_ips:
+        for ip in port.floating_ips:
+            ip_value = preload.get_floating_ip(
+                port.vm.vm_type, port.network.network_role, ip.ip_version, ip.param
+            )
             key = "floating-ip" if ip.ip_version == 4 else "floating-ip-v6"
-            network_template[key] = self.replace(ip.param, single=True)
+            network_template[key] = self.normalize(ip_value, ip.param)
 
-    def add_fixed_ips(self, network_template, port):
-        for ip in port.fixed_ips:
+    def add_fixed_ips(
+        self, network_template: dict, port: Port, preload: AbstractPreloadInstance
+    ):
+        for index, ip in port.fixed_ips_with_index:
+            ip_value = preload.get_fixed_ip(
+                port.vm.vm_type,
+                port.network.network_role,
+                ip.ip_version,
+                index,
+                ip.param,
+            )
+            ip_value = self.normalize(ip_value, ip.param, index=index)
             if ip.ip_version == 4:
-                network_template["network-ips"].append(
-                    {"ip-address": self.replace(ip.param, single=True)}
-                )
+                network_template["network-ips"].append({"ip-address": ip_value})
                 network_template["ip-count"] += 1
             else:
-                network_template["network-ips-v6"].append(
-                    {"ip-address": self.replace(ip.param, single=True)}
-                )
+                network_template["network-ips-v6"].append({"ip-address": ip_value})
                 network_template["ip-count-ipv6"] += 1
 
-    def _add_availability_zones(self, preload, vnf_module):
-        zones = preload["input"]["vnf-topology-information"]["vnf-assignments"][
-            "availability-zones"
-        ]
-        for zone in vnf_module.availability_zones:
-            zones.append({"availability-zone": self.replace(zone, single=True)})
-
-    def _add_vnf_networks(self, preload, vnf_module):
-        networks = preload["input"]["vnf-topology-information"]["vnf-assignments"][
+    def _add_vnf_networks(
+        self, template: Mapping, preload: AbstractPreloadInstance, vnf_module: VnfModule
+    ):
+        networks = template["input"]["vnf-topology-information"]["vnf-assignments"][
             "vnf-networks"
         ]
         for network in vnf_module.networks:
             network_data = {
                 "network-role": network.network_role,
-                "network-name": self.replace(
+                "network-name": self.normalize(
+                    preload.get_network_name(network.network_role, network.name_param),
                     network.name_param,
                     "VALUE FOR: network name for {}".format(network.name_param),
                 ),
             }
             for subnet in network.subnet_params:
-                key = "ipv6-subnet-id" if "_v6_" in subnet else "subnet-id"
-                network_data[key] = subnet
+                subnet_id = preload.get_subnet_id(
+                    network.network_role, subnet.ip_version, subnet.param_name
+                )
+                if subnet_id:
+                    key = (
+                        "ipv6-subnet-id" if "_v6_" in subnet.param_name else "subnet-id"
+                    )
+                    network_data[key] = self.normalize(subnet_id, subnet.param_name)
+                else:
+                    subnet_name = preload.get_subnet_name(
+                        network.network_role, subnet.ip_version, ""
+                    )
+                    key = (
+                        "ipv6-subnet-name"
+                        if "_v6_" in subnet.param_name
+                        else "subnet-name"
+                    )
+                    msg = "VALUE FOR: name for {}".format(subnet.param_name)
+                    value = self.normalize(
+                        subnet_name, subnet.param_name, alt_message=msg
+                    )
+                    network_data[key] = value
             networks.append(network_data)
 
-    def _add_vms(self, preload, vnf_module):
-        vm_list = preload["input"]["vnf-topology-information"]["vnf-assignments"][
+    def _add_vms(
+        self, template: Mapping, preload: AbstractPreloadInstance, vnf_module: VnfModule
+    ):
+        vm_list = template["input"]["vnf-topology-information"]["vnf-assignments"][
             "vnf-vms"
         ]
         for vm in vnf_module.virtual_machine_types:
             vm_template = get_json_template(DATA_DIR, "vm")
             vm_template["vm-type"] = vm.vm_type
             vm_template["vm-count"] = vm.vm_count
-            for name in vm.names:
-                value = self.replace(name, single=True)
-                vm_template["vm-names"]["vm-name"].append(value)
+            for i, param in enumerate(sorted(vm.names)):
+                name = preload.get_vm_name(vm.vm_type, i, param)
+                vm_template["vm-names"]["vm-name"].append(self.normalize(name, param, index=i))
             vm_list.append(vm_template)
             vm_networks = vm_template["vm-networks"]
             for port in vm.ports:
@@ -167,15 +228,26 @@ class VnfApiPreloadGenerator(AbstractPreloadGenerator):
                 network_template["network-role"] = role
                 network_template["network-role-tag"] = role
                 network_template["use-dhcp"] = "Y" if port.uses_dhcp else "N"
-                self.add_fixed_ips(network_template, port)
-                self.add_floating_ips(network_template, port)
+                self.add_fixed_ips(network_template, port, preload)
+                self.add_floating_ips(network_template, port, preload)
 
-    def _add_parameters(self, preload, vnf_module):
-        params = preload["input"]["vnf-topology-information"]["vnf-parameters"]
+    def _add_parameters(
+        self, template: Mapping, preload: AbstractPreloadInstance, vnf_module: VnfModule
+    ):
+        params = template["input"]["vnf-topology-information"]["vnf-parameters"]
         for key, value in vnf_module.preload_parameters.items():
+            preload_value = preload.get_vnf_parameter(key, value)
+            value = preload_value or value
             params.append(
                 {
                     "vnf-parameter-name": key,
-                    "vnf-parameter-value": self.replace(key, value),
+                    "vnf-parameter-value": self.normalize(value, key),
+                }
+            )
+        for key, value in preload.get_additional_parameters().items():
+            params.append(
+                {
+                    "vnf-parameter-name": key,
+                    "vnf-parameter-value": self.normalize(value, key),
                 }
             )

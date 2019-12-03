@@ -1,13 +1,18 @@
 import re
 import tempfile
 from pathlib import Path
+from typing import Any, Optional, Mapping
 
 from cached_property import cached_property
 
+from preload.data import AbstractPreloadInstance, AbstractPreloadDataSource
+from preload.model import VnfModule
 from tests.helpers import check, first, unzip, load_yaml
 
 SERVICE_TEMPLATE_PATTERN = re.compile(r".*service-.*?-template.yml")
 RESOURCE_TEMPLATE_PATTERN = re.compile(r".*resource-(.*?)-template.yml")
+
+ZONE_PARAMS = ("availability_zone_0", "availability_zone_1", "availability_zone_2")
 
 
 def yaml_files(path):
@@ -278,3 +283,133 @@ class PreloadEnvironment:
 
     def __repr__(self):
         return "PreloadEnvironment(name={})".format(self.name)
+
+
+class EnvironmentFilePreloadInstance(AbstractPreloadInstance):
+
+    def __init__(self, env: PreloadEnvironment, module_label: str, module_params: dict):
+        self.module_params = module_params
+        self._module_label = module_label
+        self.env = env
+        self.env_cache = {}
+
+    @property
+    def flag_incompletes(self) -> bool:
+        return True
+
+    @property
+    def preload_basename(self) -> str:
+        return self.module_label
+
+    @property
+    def output_dir(self) -> Path:
+        return self.env.base_dir.joinpath("preloads")
+
+    @property
+    def module_label(self) -> str:
+        return self._module_label
+
+    @property
+    def vf_module_name(self) -> str:
+        return self.get_param("vf_module_name")
+
+    @property
+    def vnf_name(self) -> Optional[str]:
+        return self.get_param("vnf_name")
+
+    @property
+    def vnf_type(self) -> Optional[str]:
+        return self.get_param("vnf-type")
+
+    @property
+    def vf_module_model_name(self) -> Optional[str]:
+        return self.get_param("vf-module-model-name")
+
+    def get_availability_zone(self, index: int, param_name: str) -> Optional[str]:
+        return self.get_param(param_name)
+
+    def get_network_name(self, network_role: str, name_param: str) -> Optional[str]:
+        return self.get_param(name_param)
+
+    def get_subnet_id(
+        self, network_role: str, ip_version: int, param_name: str
+    ) -> Optional[str]:
+        return self.get_param(param_name)
+
+    def get_subnet_name(
+        self, network_role: str, ip_version: int, param_name: str
+    ) -> Optional[str]:
+        # Not supported with env files
+        return None
+
+    def get_vm_name(self, vm_type: str, index: int, param_name: str) -> Optional[str]:
+        return self.get_param(param_name, single=True)
+
+    def get_floating_ip(
+        self, vm_type: str, network_role: str, ip_version: int, param_name: str
+    ) -> Optional[str]:
+        return self.get_param(param_name)
+
+    def get_fixed_ip(
+        self, vm_type: str, network_role: str, ip_version: int, index: int, param: str
+    ) -> Optional[str]:
+        return self.get_param(param, single=True)
+
+    def get_vnf_parameter(self, key: str, value: Any) -> Optional[str]:
+        module_value = self.get_param(key)
+        return module_value or value
+
+    def get_additional_parameters(self) -> Mapping[str, Any]:
+        return {}
+
+    def get_param(self, param_name, single=False):
+        """
+        Retrieves the value for the given param if it exists. If requesting a
+        single item, and the parameter is tied to a list then only one item from
+        the list will be returned.  For each subsequent call with the same parameter
+        it will iterate/rotate through the values in that list.  If single is False
+        then the full list will be returned.
+
+        :param param_name:  name of the parameter
+        :param single:      If True returns single value from lists otherwises the full
+                            list.  This has no effect on non-list values
+        """
+        value = self.env_cache.get(param_name)
+        if not value:
+            value = self.module_params.get(param_name)
+            if isinstance(value, list):
+                value = value.copy()
+                value.reverse()
+            self.env_cache[param_name] = value
+
+        if value and single and isinstance(value, list):
+            result = value.pop()
+        else:
+            result = value
+        return result if result != "CHANGEME" else None
+
+
+class EnvironmentFileDataSource(AbstractPreloadDataSource):
+
+    def __init__(self, path: Path):
+        super().__init__(path)
+        check(path.is_dir(), f"{path} must be an existing directory")
+        self.path = path
+        self.env = PreloadEnvironment(path)
+
+    @classmethod
+    def get_source_type(cls) -> str:
+        return "DIR"
+
+    @classmethod
+    def get_identifier(self) -> str:
+        return "envfiles"
+
+    @classmethod
+    def get_name(self) -> str:
+        return "Environment Files"
+
+    def get_module_preloads(self, module: VnfModule):
+        for env in self.env.environments:
+            module_params = env.get_module(module.label)
+            yield EnvironmentFilePreloadInstance(env, module.label, module_params)

@@ -39,8 +39,16 @@ import json
 import os
 from abc import ABC, abstractmethod
 from collections import OrderedDict
+from pathlib import Path
 
 import yaml
+
+from preload.data import (
+    AbstractPreloadDataSource,
+    AbstractPreloadInstance,
+    BlankPreloadInstance,
+)
+from preload.model import VnfModule, Vnf
 
 
 def represent_ordered_dict(dumper, data):
@@ -76,26 +84,15 @@ def get_or_create_template(template_dir, key, value, sequence, template_name):
     return new_template
 
 
-def yield_by_count(sequence):
-    """
-    Iterates through sequence and yields each item according to its __count__
-    attribute.  If an item has a __count__ of it will be returned 3 times
-    before advancing to the next item in the sequence.
-
-    :param sequence: sequence of dicts (must contain __count__)
-    :returns:        generator of tuple key, value pairs
-    """
-    for key, value in sequence.items():
-        for i in range(value["__count__"]):
-            yield (key, value)
-
-
-def replace(param):
+def replace(param, index=None):
     """
     Optionally used by the preload generator to wrap items in the preload
     that need to be replaced by end users
-    :param param: p
+    :param param: parameter name
+    :param index: optional index (int or str) of the parameter
     """
+    if (param.endswith("_names") or param.endswith("_ips")) and index is not None:
+        param = "{}[{}]".format(param, index)
     return "VALUE FOR: {}".format(param) if param else ""
 
 
@@ -113,15 +110,15 @@ class AbstractPreloadGenerator(ABC):
         :param vnf:             Instance of Vnf that contains the preload data
         :param base_output_dir: Base directory to house the preloads.  All preloads
                                 must be written to a subdirectory under this directory
+        :param data_source:     Source data for preload population
     """
 
-    def __init__(self, vnf, base_output_dir, preload_env):
-        self.preload_env = preload_env
+    def __init__(
+        self, vnf: Vnf, base_output_dir: Path, data_source: AbstractPreloadDataSource
+    ):
+        self.data_source = data_source
         self.vnf = vnf
-        self.current_module = None
-        self.current_module_env = {}
         self.base_output_dir = base_output_dir
-        self.env_cache = {}
         self.module_incomplete = False
 
     @classmethod
@@ -158,11 +155,10 @@ class AbstractPreloadGenerator(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def generate_module(self, module, output_dir):
+    def generate_module(self, module: VnfModule, preload: AbstractPreloadInstance, output_dir: Path):
         """
-        Create the preloads and write them to ``output_dir``.  This
-        method is responsible for generating the content of the preload and
-        writing the file to disk.
+        Create the preloads.  This method is responsible for generating the
+        content of the preload and writing the file to disk.
         """
         raise NotImplementedError()
 
@@ -170,29 +166,17 @@ class AbstractPreloadGenerator(ABC):
         # handle the base module first
         print("\nGenerating {} preloads".format(self.format_name()))
         if self.vnf.base_module:
-            self.generate_environments(self.vnf.base_module)
+            self.generate_preloads(self.vnf.base_module)
         if self.supports_output_passing():
             self.vnf.filter_base_outputs()
         for mod in self.vnf.incremental_modules:
-            self.generate_environments(mod)
+            self.generate_preloads(mod)
 
-    def replace(self, param_name, alt_message=None, single=False):
-        value = self.get_param(param_name, single)
-        value = None if value == "CHANGEME" else value
-        if value:
-            return value
-        else:
-            self.module_incomplete = True
-            return alt_message or replace(param_name)
-
-    def start_module(self, module, env):
+    def start_module(self):
         """Initialize/reset the environment for the module"""
-        self.current_module = module
-        self.current_module_env = env
         self.module_incomplete = False
-        self.env_cache = {}
 
-    def generate_environments(self, module):
+    def generate_preloads(self, module):
         """
         Generate a preload for the given module in all available environments
         in the ``self.preload_env``.  This will invoke the abstract
@@ -204,65 +188,50 @@ class AbstractPreloadGenerator(ABC):
         print("\nGenerating Preloads for {}".format(module))
         print("-" * 50)
         print("... generating blank template")
-        self.start_module(module, {})
-        blank_preload_dir = self.make_preload_dir(self.base_output_dir)
-        self.generate_module(module, blank_preload_dir)
-        self.generate_preload_env(module, blank_preload_dir)
-        if self.preload_env:
-            for env in self.preload_env.environments:
-                output_dir = self.make_preload_dir(env.base_dir / "preloads")
+        self.start_module()
+        preload = BlankPreloadInstance(Path(self.base_output_dir), module.label)
+        blank_preload_dir = self.make_preload_dir(preload)
+        self.generate_module(module, preload, blank_preload_dir)
+        self.generate_preload_env(module, preload)
+
+        if self.data_source:
+            preloads = self.data_source.get_module_preloads(module)
+            for preload in preloads:
+                output_dir = self.make_preload_dir(preload)
                 print(
-                    "... generating preload for env ({}) to {}".format(
-                        env.name, output_dir
+                    "... generating preload for {} to {}".format(
+                        preload.module_label, output_dir
                     )
                 )
-                self.start_module(module, env.get_module(module.label))
-                self.generate_module(module, output_dir)
+                self.start_module()
+                self.generate_module(module, preload, output_dir)
 
-    def make_preload_dir(self, base_dir):
-        path = os.path.join(base_dir, self.output_sub_dir())
-        if not os.path.exists(path):
-            os.makedirs(path, exist_ok=True)
-        return path
+    def make_preload_dir(self, preload: AbstractPreloadInstance):
+        preload_dir = preload.output_dir.joinpath(self.output_sub_dir())
+        preload_dir.mkdir(parents=True, exist_ok=True)
+        return preload_dir
 
     @staticmethod
-    def generate_preload_env(module, blank_preload_dir):
+    def generate_preload_env(module: VnfModule, preload: AbstractPreloadInstance):
         """
         Create a .env template suitable for completing and using for
         preload generation from env files.
         """
         yaml.add_representer(OrderedDict, represent_ordered_dict)
-        output_dir = os.path.join(blank_preload_dir, "preload_env")
-        env_file = os.path.join(output_dir, "{}.env".format(module.vnf_name))
-        defaults_file = os.path.join(output_dir, "defaults.yaml")
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir, exist_ok=True)
-        with open(env_file, "w") as f:
+        output_dir = preload.output_dir.joinpath("preload_env")
+        env_file = output_dir.joinpath("{}.env".format(module.label))
+        defaults_file = output_dir.joinpath("defaults.yaml")
+        output_dir.mkdir(parents=True, exist_ok=True)
+        with env_file.open("w") as f:
             yaml.dump(module.env_template, f)
-        if not os.path.exists(defaults_file):
-            with open(defaults_file, "w") as f:
+        if not defaults_file.exists():
+            with defaults_file.open("w") as f:
                 yaml.dump({"vnf_name": "CHANGEME"}, f)
 
-    def get_param(self, param_name, single):
-        """
-        Retrieves the value for the given param if it exists. If requesting a
-        single item, and the parameter is tied to a list then only one item from
-        the list will be returned.  For each subsequent call with the same parameter
-        it will iterate/rotate through the values in that list.  If single is False
-        then the full list will be returned.
-
-        :param param_name:  name of the parameter
-        :param single:      If True returns single value from lists otherwises the full
-                            list.  This has no effect on non-list values
-        """
-        value = self.env_cache.get(param_name)
-        if not value:
-            value = self.current_module_env.get(param_name)
-            if isinstance(value, list):
-                value = value.copy()
-                value.reverse()
-            self.env_cache[param_name] = value
-        if value and single and isinstance(value, list):
-            return value.pop()
+    def normalize(self, preload_value, param_name, alt_message=None, index=None):
+        preload_value = None if preload_value == "CHANGEME" else preload_value
+        if preload_value:
+            return preload_value
         else:
-            return value
+            self.module_incomplete = True
+            return alt_message or replace(param_name, index)

@@ -41,7 +41,7 @@ from shutil import rmtree
 import pytest
 
 from app_tests.preload_tests.test_grapi import load_json
-from preload.environment import PreloadEnvironment
+from preload.environment import EnvironmentFileDataSource
 from preload.model import Vnf, get_heat_templates
 from preload_vnfapi import VnfApiPreloadGenerator
 from tests.helpers import load_yaml, first
@@ -74,20 +74,20 @@ def preload(pytestconfig, session_dir):
     pytestconfig.getoption = fake_getoption
     templates = get_heat_templates(pytestconfig)
     vnf = Vnf(templates)
-    preload_env = PreloadEnvironment(THIS_DIR / "sample_env")
-    generator = VnfApiPreloadGenerator(vnf, session_dir, preload_env)
+    datasource = EnvironmentFileDataSource(THIS_DIR / "sample_env")
+    generator = VnfApiPreloadGenerator(vnf, session_dir, datasource)
     generator.generate()
     return session_dir
 
 
 @pytest.fixture(scope="session")
 def base(preload):
-    return load_module(preload, "base_incomplete.json")
+    return load_module(preload, "base.json")
 
 
 @pytest.fixture(scope="session")
 def incremental(preload):
-    return load_module(preload, "incremental_incomplete.json")
+    return load_module(preload, "incremental.json")
 
 
 def test_base_azs(base):
@@ -106,13 +106,13 @@ def test_base_networks(base):
         {
             "network-role": "oam",
             "network-name": "VALUE FOR: network name for oam_net_id",
-            "subnet-id": "oam_subnet_id",
+            "subnet-name": "VALUE FOR: name for oam_subnet_id",
         },
         {"network-role": "ha", "network-name": "VALUE FOR: network name for ha_net_id"},
         {
             "network-role": "ctrl",
             "network-name": "VALUE FOR: network name for ctrl_net_id",
-            "subnet-id": "ctrl_subnet_id",
+            "subnet-name": "VALUE FOR: name for ctrl_subnet_id",
         },
     ]
 
@@ -154,7 +154,7 @@ def test_base_vm_types(base):
                 "network-ips-v6": [],
                 "network-macs": [],
                 "interface-route-prefixes": [],
-                "use-dhcp": "N",
+                "use-dhcp": "Y",
             },
         ],
     }
@@ -162,16 +162,7 @@ def test_base_vm_types(base):
 
 def test_base_parameters(base):
     params = base["input"]["vnf-topology-information"]["vnf-parameters"]
-    assert params == [
-        {
-            "vnf-parameter-name": "db_vol0_id",
-            "vnf-parameter-value": "VALUE FOR: db_vol0_id",
-        },
-        {
-            "vnf-parameter-name": "db_vol1_id",
-            "vnf-parameter-value": "VALUE FOR: db_vol1_id",
-        },
-    ]
+    assert params == []
 
 
 def test_incremental(incremental):

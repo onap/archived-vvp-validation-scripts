@@ -44,8 +44,7 @@ import os
 import re
 import time
 
-from preload.model import create_preloads
-from config import get_generator_plugin_names
+from preload.engine import PLUGIN_MGR, create_preloads
 from tests.helpers import get_output_dir
 
 try:
@@ -830,20 +829,30 @@ def pytest_addoption(parser):
     )
 
     parser.addoption(
-        "--env-directory",
-        dest="env_dir",
-        action="store",
-        help="optional directory of .env files for preload generation",
-    )
-
-    parser.addoption(
         "--preload-format",
         dest="preload_formats",
         action="append",
         help=(
             "Preload format to create (multiple allowed). If not provided "
             "then all available formats will be created: {}"
-        ).format(", ".join(get_generator_plugin_names())),
+        ).format(", ".join(g.format_name() for g in PLUGIN_MGR.preload_generators)),
+    )
+
+    parser.addoption(
+        "--preload-source-type",
+        dest="preload_source_type",
+        action="store",
+        default="envfiles",
+        help=(
+            "Preload source type to create (multiple allowed): {}"
+        ).format(", ".join(s.get_identifier() for s in PLUGIN_MGR.preload_sources)),
+    )
+
+    parser.addoption(
+        "--preload-source",
+        dest="preload_source",
+        action="store",
+        help="File or directory containing the source dat for the preloads",
     )
 
 
@@ -859,7 +868,8 @@ def pytest_configure(config):
         or config.getoption("self_test")
         or config.getoption("help")
     ):
-        raise Exception('One of "--template-dir" or' ' "--self-test" must be specified')
+        raise Exception('One of "--template-directory" or'
+                        ' "--self-test" must be specified')
 
 
 def pytest_generate_tests(metafunc):

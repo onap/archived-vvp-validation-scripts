@@ -134,18 +134,18 @@ def key_diff(d1, d2, prefix=""):
 @validates("R-01455")
 def test_vm_class_has_unique_type(yaml_files):
     """
-    When a VNF’s Heat Orchestration Template creates a Virtual
-    Machine (i.e., OS::Nova::Server), each “class” of VMs MUST be
-    assigned a VNF unique vm-type; where “class” defines VMs that
+    When a VNF's Heat Orchestration Template creates a Virtual
+    Machine (i.e., OS::Nova::Server), each "class" of VMs MUST be
+    assigned a VNF unique vm-type; where "class" defines VMs that
     MUST have the following identical characteristics:
 
     1.  OS::Nova::Server resource property flavor value
     2.  OS::Nova::Server resource property image value
     3.  Cinder Volume attachments
-        Each VM in the “class” MUST have the identical Cinder
+        Each VM in the "class" MUST have the identical Cinder
         Volume configuration
     4.  Network attachments and IP address requirements
-        Each VM in the “class” MUST have the the identical number of
+        Each VM in the "class" MUST have the the identical number of
         ports connecting to the identical networks and requiring the
         identical IP address configuration
     """

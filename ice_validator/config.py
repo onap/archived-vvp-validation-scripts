@@ -1,11 +1,8 @@
 import importlib
-import inspect
 import multiprocessing
 import os
-import pkgutil
 import queue
 from configparser import ConfigParser
-from itertools import chain
 from pathlib import Path
 from typing import MutableMapping, Iterator, List, Optional, Dict
 
@@ -13,8 +10,8 @@ import appdirs
 import yaml
 from cached_property import cached_property
 
+from preload.engine import PLUGIN_MGR
 from version import VERSION
-from preload.generator import AbstractPreloadGenerator
 from tests.test_environment_file_parameters import ENV_PARAMETER_SPEC
 
 PATH = os.path.dirname(os.path.realpath(__file__))
@@ -236,8 +233,12 @@ class Config:
     @property
     def preload_formats(self):
         excluded = self._config.get("excluded-preloads", [])
-        formats = (cls.format_name() for cls in get_generator_plugins())
+        formats = [cls.format_name() for cls in PLUGIN_MGR.preload_generators]
         return [f for f in formats if f not in excluded]
+
+    @property
+    def preload_source_types(self):
+        return [s.get_name() for s in PLUGIN_MGR.preload_sources]
 
     @property
     def default_preload_format(self):
@@ -247,9 +248,17 @@ class Config:
         else:
             return self.preload_formats[0]
 
+    @property
+    def default_preload_source(self):
+        default = self._user_settings.get("preload_source")
+        if default and default in self.preload_source_types:
+            return default
+        else:
+            return self.preload_source_types[0]
+
     @staticmethod
     def get_subdir_for_preload(preload_format):
-        for gen in get_generator_plugins():
+        for gen in PLUGIN_MGR.preload_generators:
             if gen.format_name() == preload_format:
                 return gen.output_sub_dir()
         return ""
@@ -325,35 +334,3 @@ class QueueWriter:
     def flush(self):
         """No operation method to satisfy file-like behavior"""
         pass
-
-
-def is_preload_generator(class_):
-    """
-    Returns True if the class is an implementation of AbstractPreloadGenerator
-    """
-    return (
-        inspect.isclass(class_)
-        and not inspect.isabstract(class_)
-        and issubclass(class_, AbstractPreloadGenerator)
-    )
-
-
-def get_generator_plugins():
-    """
-    Scan the system path for modules that are preload plugins and discover
-    and return the classes that implement AbstractPreloadGenerator in those
-    modules
-    """
-    preload_plugins = (
-        importlib.import_module(name)
-        for finder, name, ispkg in pkgutil.iter_modules()
-        if name.startswith("preload_")
-    )
-    members = chain.from_iterable(
-        inspect.getmembers(mod, is_preload_generator) for mod in preload_plugins
-    )
-    return [m[1] for m in members]
-
-
-def get_generator_plugin_names():
-    return [g.format_name() for g in get_generator_plugins()]
