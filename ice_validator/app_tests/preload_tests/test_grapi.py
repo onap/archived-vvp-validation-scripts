@@ -41,7 +41,7 @@ from shutil import rmtree
 
 import pytest
 
-from preload.environment import PreloadEnvironment
+from preload.environment import EnvironmentFileDataSource
 from preload.model import Vnf, get_heat_templates
 from preload_grapi import GrApiPreloadGenerator
 from tests.helpers import first
@@ -78,21 +78,28 @@ def preload(pytestconfig, session_dir):
 
     pytestconfig.getoption = fake_getoption
     templates = get_heat_templates(pytestconfig)
-    env = PreloadEnvironment(THIS_DIR / "sample_env")
     vnf = Vnf(templates)
-    generator = GrApiPreloadGenerator(vnf, session_dir, env)
+    datasource = EnvironmentFileDataSource(THIS_DIR / "sample_env")
+    generator = GrApiPreloadGenerator(vnf, session_dir, datasource)
     generator.generate()
     return session_dir
 
 
 @pytest.fixture(scope="session")
 def base(preload):
-    return load_module(preload, "base_incomplete.json")
+    return load_module(preload, "base.json")
 
 
 @pytest.fixture(scope="session")
 def incremental(preload):
-    return load_module(preload, "incremental_incomplete.json")
+    return load_module(preload, "incremental.json")
+
+
+def test_incomplete_filenames(preload):
+    base = THIS_DIR / "sample_env/preloads/grapi/base_incomplete.json"
+    inc = THIS_DIR / "sample_env/preloads/grapi/incremental_incomplete.json"
+    assert base.exists()
+    assert inc.exists()
 
 
 def test_base_fields(base):
@@ -122,7 +129,9 @@ def test_base_networks(base):
     assert oam == {
         "network-role": "oam",
         "network-name": "VALUE FOR: network name of oam_net_id",
-        "subnets-data": {"subnet-data": [{"subnet-id": "VALUE FOR: oam_subnet_id"}]},
+        "subnets-data": {
+            "subnet-data": [{"subnet-name": "VALUE FOR: name of oam_subnet_id"}]
+        },
     }
 
 
@@ -141,6 +150,7 @@ def test_base_vm_types(base):
             "vm-network": [
                 {
                     "network-role": "oam",
+                    "network-role-tag": "oam",
                     "network-information-items": {
                         "network-information-item": [
                             {
@@ -168,17 +178,18 @@ def test_base_vm_types(base):
                 },
                 {
                     "network-role": "ha",
+                    "network-role-tag": "ha",
                     "network-information-items": {
                         "network-information-item": [
                             {
                                 "ip-version": "4",
-                                "use-dhcp": "N",
+                                "use-dhcp": "Y",
                                 "ip-count": 0,
                                 "network-ips": {"network-ip": []},
                             },
                             {
                                 "ip-version": "6",
-                                "use-dhcp": "N",
+                                "use-dhcp": "Y",
                                 "ip-count": 0,
                                 "network-ips": {"network-ip": []},
                             },
@@ -210,10 +221,7 @@ def test_base_parameters(base):
     params = base["input"]["preload-vf-module-topology-information"][
         "vf-module-topology"
     ]["vf-module-parameters"]["param"]
-    assert params == [
-        {"name": "db_vol0_id", "value": "VALUE FOR: db_vol0_id"},
-        {"name": "db_vol1_id", "value": "VALUE FOR: db_vol1_id"},
-    ]
+    assert params == []
 
 
 def test_incremental(incremental):

@@ -41,9 +41,9 @@ from io import StringIO
 import pytest
 import yaml
 
-from config import Config, get_generator_plugin_names, to_uri
+from config import Config, to_uri
 import vvp
-
+from preload.engine import PLUGIN_MGR
 
 DEFAULT_CONFIG = """
 namespace: {namespace}
@@ -160,7 +160,7 @@ def test_env_specs(config):
 
 
 def test_get_generator_plugin_names(config):
-    names = get_generator_plugin_names()
+    names = [g.format_name() for g in PLUGIN_MGR.preload_generators]
     assert "VNF-API" in names
     assert "GR-API" in names
 

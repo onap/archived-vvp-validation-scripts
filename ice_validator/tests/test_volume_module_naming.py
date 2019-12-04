@@ -75,6 +75,6 @@ def test_detected_volume_module_follows_naming_convention(template_dir):
             errors.append(yaml_file)
         msg = (
             "Volume modules detected, but they do not follow the expected "
-            + " naming convention {{module_name}}_volume.[yaml|yml]: {}"
+            + " naming convention {{module_label}}_volume.[yaml|yml]: {}"
         ).format(", ".join(errors))
         assert not errors, msg

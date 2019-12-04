@@ -34,3 +34,7 @@
 # limitations under the License.
 #
 # ============LICENSE_END============================================
+
+from preload.environment import EnvironmentFileDataSource
+
+__all__ = ["EnvironmentFileDataSource"]
