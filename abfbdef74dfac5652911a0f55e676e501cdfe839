@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d1f8be68_8a9c5c9e",
+        "filename": "INFO.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 481
+      },
+      "writtenOn": "2019-12-19T21:55:02Z",
+      "side": 1,
+      "message": "Can we please either break or skip yamllint for this line please?\n\n13:52:07 ./gerrit.onap.org/vvp/validation-scripts/INFO.yaml\n13:52:07   46:81     error    line too long (81 \u003e 80 characters)  (line-length)",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 81
+      },
+      "revId": "abfbdef74dfac5652911a0f55e676e501cdfe839",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": false
+    }
+  ]
+}
