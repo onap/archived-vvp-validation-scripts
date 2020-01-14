@@ -440,6 +440,7 @@ class VnfModule(FilterBaseOutputs):
         :return: dict of parameters suitable for the preload
         """
         excluded = get_preload_excluded_parameters(self.template_file)
+        excluded.update(self.platform_provided_params)
         params = {k: v for k, v in self.parameters.items() if k not in excluded}
         return params
 
