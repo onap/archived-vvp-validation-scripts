@@ -234,8 +234,11 @@ def get_preload_excluded_parameters(yaml_file, persistent_only=False, env_spec=N
         for spec in specs:
             if persistent_only and not spec.get("persistent"):
                 continue
-            results.extend(get_template_parameters(yaml_file, resource_type,
-                                                   spec, all_resources, nested_resources=True))
+            results.extend(
+                get_template_parameters(
+                    yaml_file, resource_type, spec, all_resources, nested_resources=True
+                )
+            )
     results = {item["param"] for item in results}
     for param in Heat(yaml_file).parameters:
         # AZs often are manipulated and passed into nested templates making
@@ -246,14 +249,18 @@ def get_preload_excluded_parameters(yaml_file, persistent_only=False, env_spec=N
     return results
 
 
-def get_template_parameters(yaml_file, resource_type, spec, all_resources=False, nested_resources=False):
+def get_template_parameters(
+    yaml_file, resource_type, spec, all_resources=False, nested_resources=False
+):
     parameters = []
 
     heat = Heat(yaml_file)
     if all_resources:
         resources = heat.resources if not nested_resources else heat.get_all_resources()
     else:
-        resources = heat.get_resource_by_type(resource_type, all_resources=nested_resources)
+        resources = heat.get_resource_by_type(
+            resource_type, all_resources=nested_resources
+        )
     for rid, resource_props in resources.items():
         for param in prop_iterator(resource_props, *spec.get("property")):
             if param and get_param(param) and param_helper(spec, get_param(param), rid):

@@ -34,30 +34,33 @@
 # limitations under the License.
 #
 # ============LICENSE_END============================================
-#
-#
 
-"""
-test nesting level
-0 -> 1 -> 2 -> too many levels.
-"""
-
+from .structures import Heat
 from .utils import nested_files
 from .helpers import validates
 
-VERSION = "1.1.0"
 
-# pylint: disable=invalid-name
-
-
-@validates("R-60011")
+@validates("R-60011", "R-17528")
 def test_nesting_level(yaml_files):
-    """
-    A VNF's Heat Orchestration Template **MUST** have no more than two
-    levels of nesting.
-    """
-    bad, __, __, __ = nested_files.get_nesting(yaml_files)
-    assert not bad, "nesting depth of %d exceeded: %s" % (
-        nested_files.MAX_DEPTH,
-        ", ".join(bad),
-    )
+    errors = set()
+    non_nested_files = [
+        f for f in yaml_files if not nested_files.file_is_a_nested_template(f)
+    ]
+    heats = [Heat(f) for f in non_nested_files]
+    for heat in heats:
+        for depth, nested_heat in heat.iter_nested_heat():
+            if depth >= 3:
+                errors.add(
+                    (
+                        "{} is nested {} levels deep, but a maximum of {} levels are "
+                        "supported."
+                    ).format(nested_heat.basename, depth, nested_files.MAX_DEPTH)
+                )
+            if depth == 2 and nested_heat.resources:
+                errors.add(
+                    (
+                        "{} is a second level nested file, but it includes "
+                        "resources. Remove all Heat resources from this file."
+                    ).format(nested_heat.basename)
+                )
+    assert not errors, "\n\n".join(errors)

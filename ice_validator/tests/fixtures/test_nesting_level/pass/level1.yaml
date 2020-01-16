@@ -47,12 +47,8 @@ parameters:
         type: number
 
 resources:
-    server_0:
-        type: level3.yaml
-        properties:
-            name: {get_param: server_name_0}
     my_resource_group_1:
-        type: OS::Nova::Server
+        type: OS::Heat::ResourceGroup
         properties:
             count: 5
             resource_def: { type: level2.yaml }

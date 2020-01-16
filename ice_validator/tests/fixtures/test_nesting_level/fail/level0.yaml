@@ -38,22 +38,13 @@
 #
 # VERSION: '1.0.0'
 ---
-heat_template_version: '2013-05-23'
-
 resources:
-  volume:
-    type: OS::Cinder::Volume
-    properties:
-      size: 1
-
-  volume_attachment:
-    type: OS::Cinder::VolumeAttachment
-    properties:
-      volume_id: { get_resource: volume }
-      instance_uuid: { get_resource: instance }
-
-  instance:
-    type: OS::Nova::NotServer
-    properties:
-      image: myimage
-      flavor: m1.small
+    server_0:
+        type: level1.yaml
+        properties:
+            name: { get_param: server_name_0 }
+    my_resource_group_1:
+        type: OS::Heat::ResourceGroup
+        properties:
+            count: 5
+            resource_def: { type: level2.yaml }

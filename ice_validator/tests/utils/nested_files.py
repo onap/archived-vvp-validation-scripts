@@ -34,26 +34,15 @@
 # limitations under the License.
 #
 # ============LICENSE_END============================================
-#
-#
 
-"""nested files
-"""
 from functools import lru_cache
 from os import path, listdir
 import re
 from tests import cached_yaml as yaml
-from tests.structures import Heat
 
 from tests.helpers import load_yaml
 
-VERSION = "1.4.0"
-
-"""
-test nesting depth
-0 -> 1 -> 2 -> too deep.
-"""
-MAX_DEPTH = 3
+MAX_DEPTH = 2
 
 
 def check_for_invalid_nesting(  # pylint: disable=too-many-branches
@@ -70,7 +59,7 @@ def check_for_invalid_nesting(  # pylint: disable=too-many-branches
     for v in yml.values():
         if isinstance(v, dict) and "type" in v:
             t = v["type"]
-            if t.endswith(".yml") or t.endswith(".yaml"):
+            if t.lower().endswith(".yml") or t.lower().endswith(".yaml"):
                 filepath = path.join(dirpath, t)
             elif t == "OS::Heat::ResourceGroup":
                 rd = v["properties"]["resource_def"]
@@ -96,18 +85,6 @@ def check_for_invalid_nesting(  # pylint: disable=too-many-branches
             for d in v:
                 invalid_nesting.extend(check_for_invalid_nesting(d, yaml_file, dirpath))
     return invalid_nesting
-
-
-def get_dict_of_nested_files(yml, dirpath):
-    """Return dict.
-    key: resource id in yml which references a nested file.
-    value: the nested file name.
-    Nested files are either referenced through "type", or
-    for OS::Heat::ResourceGroup, through "resource_def type".
-    """
-    nested_files = get_type_nested_files(yml, dirpath)
-    nested_files.update(get_resourcegroup_nested_files(yml, dirpath))
-    return nested_files
 
 
 @lru_cache(maxsize=None)
@@ -136,62 +113,6 @@ def get_list_of_nested_files(yml_path, dirpath):
                         nested_files.append(filepath)
                         nested_files.extend(get_list_of_nested_files(filepath, dirpath))
     return nested_files
-
-
-def get_nesting(yaml_files):
-    """return bad, files, heat, depths
-    bad - list of error messages.
-    files - dict: key is filename, value is dict of nested files.
-            This is the tree.
-    heat - dict,: key is filename, value is Heat instance.
-    depths - dict: key is filename, value is a depth tuple
-
-    level: 0           1         2         3
-    file:  template -> nested -> nested -> nested
-    depth: 3           2         1         0
-    """
-    bad = []
-    files = {}
-    heat = {}
-    depths = {}
-    for yaml_file in yaml_files:
-        dirname, basename = path.split(yaml_file)
-        h = Heat(filepath=yaml_file)
-        heat[basename] = h
-        files[basename] = get_dict_of_nested_files(h.yml, dirname)
-    for filename in files:
-        depths[filename] = _get_nesting_depth_start(0, filename, files, [])
-        for depth in depths[filename]:
-            if depth[0] > MAX_DEPTH:
-                bad.append("{} {}".format(filename, str(depth[1])))
-    return bad, files, heat, depths
-
-
-def _get_nesting_depth_start(depth, filename, files, context):
-    depths = []
-    for rid, nf in files[filename].items():
-        depths.append(_get_nesting_depth(1, nf, files, context))
-    return depths
-
-
-def _get_nesting_depth(depth, filename, files, context):
-    """Return a depth tuple (max_depth, current_context).
-    `context` is the list of filenames.
-    `depth` is the length of `context`.
-    Finds the max_depth of all the resources of `filename`.
-    current_context is the updated list of filenames
-    and max_depth is its length.
-    """
-    max_depth = depth + 1
-    current_context = context + [filename]
-    if depth <= MAX_DEPTH:
-        nested_filenames = files.get(filename, {})
-        if nested_filenames:
-            max_depth, current_context = max(
-                _get_nesting_depth(depth + 1, nested_filename, files, current_context)
-                for nested_filename in nested_filenames.values()
-            )
-    return max_depth, current_context
 
 
 def get_resourcegroup_nested_files(yml, dirpath):

@@ -36,8 +36,6 @@
 # ============LICENSE_END============================================
 #
 #
-"""structures
-"""
 import collections
 import inspect
 import os
@@ -732,6 +730,31 @@ class Heat(object):
             re.search("(^(%(x)s)_)|(_(%(x)s)_)|(_(%(x)s)$)" % dict(x=part), name)
         )
 
+    def iter_nested_heat(self):
+        """
+        Returns an iterable of tuples (int, heat) where the first parameter is the
+        depth of the nested file and the second item is an instance of Heat
+        """
+
+        def walk_nested(heat, level=1):
+            resources = [Resource(r_id, data) for r_id, data in heat.resources.items()]
+            for resource in resources:
+                if resource.is_nested():
+                    nested_path = os.path.join(
+                        self.dirname, resource.get_nested_filename()
+                    )
+                    nested_heat = Heat(nested_path)
+                    yield level, nested_heat
+                    yield from walk_nested(nested_heat, level + 1)
+
+        yield from walk_nested(self)
+
+    def __str__(self):
+        return "Heat({})".format(self.filepath)
+
+    def __repr__(self):
+        return str(self)
+
 
 class Env(Heat):
     """An Environment file
@@ -831,6 +854,12 @@ class Resource(object):
             return load_yaml(file_path) if os.path.exists(file_path) else {}
         else:
             return {}
+
+    def __str__(self):
+        return "Resource(id={}, type={})".format(self.resource_id, self.resource_type)
+
+    def __repr__(self):
+        return str(self)
 
 
 def get_all_resources(yaml_files):

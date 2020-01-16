@@ -36,7 +36,7 @@
 # ============LICENSE_END============================================
 #
 #
-# VERSION: '1.0.0'
+# VERSION: '1.0.1'
 ---
 nested_template_description: base
 
@@ -48,15 +48,14 @@ parameters:
 
 resources:
     server_0:
-        type: not_a_template_file
+        type: level3.yaml
         properties:
             name: {get_param: server_name_0}
     my_resource_group_1:
-        type: OS::Nova::Server
+        type: OS::Heat::ResourceGroup
         properties:
             count: 5
-            #resource_def: { type: 17528_3.yaml }
-            resource_def: { type: 17528_2.yaml }
+            resource_def: { type: level2.yaml }
 
 outputs:
     vm_type_volume_id_0:
