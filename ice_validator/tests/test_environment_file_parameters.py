@@ -59,13 +59,13 @@ from tests.utils.nested_files import file_is_a_nested_template
 # at the end of a property to make it a tuple.
 ENV_PARAMETER_SPEC = {
     "PLATFORM PROVIDED": [
-        {"property": ("metadata", "vnf_id",), "persistent": False, "kwargs": {}},
-        {"property": ("metadata", "vnf_name",), "persistent": False, "kwargs": {}},
-        {"property": ("metadata", "vf_module_id",), "persistent": False, "kwargs": {}},
-        {"property": ("metadata", "vf_module_index",), "persistent": False, "kwargs": {}},
-        {"property": ("metadata", "vf_module_name",), "persistent": False, "kwargs": {}},
-        {"property": ("metadata", "workload_context",), "persistent": False, "kwargs": {}},
-        {"property": ("metadata", "environment_context",), "persistent": False, "kwargs": {}},
+        {"property": ("vnf_id",), "persistent": False, "kwargs": {}},
+        {"property": ("vnf_name",), "persistent": False, "kwargs": {}},
+        {"property": ("vf_module_id",), "persistent": False, "kwargs": {}},
+        {"property": ("vf_module_index",), "persistent": False, "kwargs": {}},
+        {"property": ("vf_module_name",), "persistent": False, "kwargs": {}},
+        {"property": ("workload_context",), "persistent": False, "kwargs": {}},
+        {"property": ("environment_context",), "persistent": False, "kwargs": {}},
         {"property": (r"^(.+?)_net_fqdn$",), "persistent": False, "kwargs": {}},
     ],
     "ALL": [{"property": ("name",), "persistent": False, "kwargs": {}}],
