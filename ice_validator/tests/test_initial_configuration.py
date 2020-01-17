@@ -176,20 +176,10 @@ def test_05_all_get_param_have_defined_parameter(yaml_file):
 
 @validates("R-90152")
 @pytest.mark.base
-def test_06_heat_template_resource_section_has_resources(heat_template):
-
-    found_resource = False
-
-    with open(heat_template) as fh:
-        yml = yaml.load(fh)
-
-    resources = yml.get("resources")
-    if resources:
-        for k1, v1 in yml["resources"].items():
-            if not isinstance(v1, dict):
-                continue
-
-            found_resource = True
-            break
-
-    assert found_resource, "Heat templates must contain at least one resource"
+def test_06_heat_template_resource_section_has_resources(yaml_file):
+    template = load_yaml(yaml_file)
+    if "resources" not in template:
+        pytest.skip("No resources section")
+    assert (
+        len(template["resources"]) > 0
+    ), "If resources section present, then there must be at least 1 resource defined."

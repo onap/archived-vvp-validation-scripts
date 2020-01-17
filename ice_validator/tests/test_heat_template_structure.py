@@ -39,9 +39,10 @@
 
 """Test heat template structure
 """
+import pytest
 
 from tests import cached_yaml as yaml
-from .helpers import validates
+from .helpers import validates, is_base_module, load_yaml
 
 VERSION = "1.2.0"
 
@@ -101,15 +102,10 @@ def test_heat_template_structure_contains_resources(heat_template):
     """
     Check that all heat templates have the required sections
     """
-    required_key_values = ["resources"]
-
-    with open(heat_template) as fh:
-        yml = yaml.load(fh)
-    assert all(
-        [k in yml for k in required_key_values]
-    ), "{} doesn't contain the {} section, but it is required".format(
-        heat_template, required_key_values[0]
-    )
+    if is_base_module(heat_template):
+        pytest.skip("Not applicable to base modules")
+    template = load_yaml(heat_template)
+    assert "resources" in template, "This template must contain a resources section"
 
 
 @validates("R-11441")
