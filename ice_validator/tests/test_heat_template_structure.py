@@ -54,15 +54,8 @@ def test_heat_template_structure_contains_heat_template_version(yaml_file):
     """
     Check that all heat templates have the required sections
     """
-    required_key_values = ["heat_template_version"]
-
-    with open(yaml_file) as fh:
-        yml = yaml.load(fh)
-    assert all(
-        [k in yml for k in required_key_values]
-    ), "{} doesn't contain the {} section, but it is required".format(
-        yaml_file, required_key_values[0]
-    )
+    template = load_yaml(yaml_file)
+    assert "heat_template_version" in template, "This template must contain a heat_template_version section"
 
 
 @validates("R-39402")
@@ -70,31 +63,19 @@ def test_heat_template_structure_contains_description(yaml_file):
     """
     Check that all heat templates have the required sections
     """
-    required_key_values = ["description"]
-
-    with open(yaml_file) as fh:
-        yml = yaml.load(fh)
-    assert all(
-        [k in yml for k in required_key_values]
-    ), "{} doesn't contain the {} section, but it is required".format(
-        yaml_file, required_key_values[0]
-    )
+    template = load_yaml(yaml_file)
+    assert "description" in template, "This template must contain a description section"
 
 
 @validates("R-35414")
-def test_heat_template_structure_contains_parameters(yaml_file):
+def test_heat_template_structure_contains_parameters(heat_template):
     """
     Check that all heat templates have the required sections
     """
-    required_key_values = ["parameters"]
-
-    with open(yaml_file) as fh:
-        yml = yaml.load(fh)
-    assert all(
-        [k in yml for k in required_key_values]
-    ), "{} doesn't contain the {} section, but it is required".format(
-        yaml_file, required_key_values[0]
-    )
+    if is_base_module(heat_template):
+        pytest.skip("Not applicable to base modules")
+    template = load_yaml(heat_template)
+    assert "parameters" in template, "This template must contain a parameters section"
 
 
 @validates("R-23664")
