@@ -255,6 +255,9 @@ def traverse(data, search_key, func, path=None):
                 traverse(value, search_key, func, curr_path)
             elif value == search_key:
                 func(curr_path, value)
+    elif search_key == data:
+        curr_path = path + [data]
+        func(curr_path, data)
 
 
 def check_indices(pattern, values, value_type):
