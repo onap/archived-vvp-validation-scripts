@@ -243,19 +243,3 @@ def mismatch_resource_and_parameter_attribute(check, resource_re_match, paramete
         return ("{0} {1} does not match parameter {2} {1}").format(
             rid, check, parameter
         )
-
-
-def get_list_of_ports_attached_to_nova_server(nova_server):
-    networks_list = nova_server.get("properties", {}).get("networks")
-
-    port_ids = []
-    if networks_list:
-        for network in networks_list:
-            network_prop = network.get("port")
-            if network_prop:
-                pid = network_prop.get("get_param")
-                if not pid:
-                    pid = network_prop.get("get_resource")
-                port_ids.append(pid)
-
-    return port_ids

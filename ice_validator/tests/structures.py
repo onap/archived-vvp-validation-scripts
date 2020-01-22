@@ -427,29 +427,6 @@ class ContrailV2VirtualNetworkProcessor(HeatProcessor):
     )
 
 
-class HeatResourceGroupProcessor(HeatProcessor):
-    """ Heat ResourceGroup
-    """
-
-    resource_type = "OS::Heat::ResourceGroup"
-    re_rids = collections.OrderedDict(
-        [
-            (
-                "subint",
-                _get_regex(
-                    r"(?P<vm_type>.+)"
-                    r"_(?P<vm_type_index>\d+)"
-                    r"_subint"
-                    r"_(?P<network_role>.+)"
-                    r"_port_(?P<port_index>\d+)"
-                    r"_subinterfaces"
-                    r"$"
-                ),
-            )
-        ]
-    )
-
-
 class NeutronNetProcessor(HeatProcessor):
     """ Neutron Net resource
     """
