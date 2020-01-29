@@ -1,0 +1,8 @@
+Verified+1: ONAP Jobbuilder <onap-jobbuilder@jenkins.onap.org>
+Code-Review+1: Hagop Bozawglanian <hagop.bozawglanian@att.com>
+Code-Review+2: steven stark <steven.stark@att.com>
+Submitted-by: steven stark <steven.stark@att.com>
+Submitted-at: Wed, 29 Jan 2020 14:54:03 +0000
+Reviewed-on: https://gerrit.onap.org/r/c/vvp/validation-scripts/+/100820
+Project: vvp/validation-scripts
+Branch: refs/heads/master
