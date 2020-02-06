@@ -28,7 +28,7 @@
         <!--sonar-->
         <sonar.sourceEncoding>UTF-8</sonar.sourceEncoding>
         <sonar.sources>.</sonar.sources>
-        <sonar.python.coverage.reportPath>coverage.xml</sonar.python.coverage.reportPath>
+        <sonar.python.coverage.reportPaths>coverage.xml</sonar.python.coverage.reportPaths>
         <sonar.language>py</sonar.language>
         <sonar.pluginName>python</sonar.pluginName>
         <sonar.inclusions>ice_validator/**.py</sonar.inclusions>
