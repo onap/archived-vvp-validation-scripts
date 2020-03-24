@@ -10,7 +10,7 @@
   <groupId>org.onap.vvp.validation-scripts</groupId>
   <artifactId>validation-scripts</artifactId>
   <packaging>pom</packaging>
-  <version>5.0.1</version>
+  <version>6.0.0</version>
   <name>vvp-validation-scripts</name>
 
   <properties>
