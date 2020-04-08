@@ -38,7 +38,7 @@
 #
 from tests.structures import Heat
 from tests.helpers import parameter_type_to_heat_type, prop_iterator
-from . import nested_dict
+from tests.utils import nested_dict
 
 
 AAP_EXEMPT_CAVEAT = (

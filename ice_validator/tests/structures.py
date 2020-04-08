@@ -44,7 +44,7 @@ import sys
 
 from tests import cached_yaml as yaml
 from tests.helpers import load_yaml, get_param
-from .utils import nested_dict
+from tests.utils import nested_dict
 
 VERSION = "4.2.0"
 
