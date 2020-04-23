@@ -34,14 +34,7 @@
 # limitations under the License.
 #
 # ============LICENSE_END============================================
-heat_template_version: 2015-04-30
-
-description: test
-
 parameters:
-  a:
-    type: string
-    description: Name of key-pair to be used for compute instance
 
 outputs:
   a:
