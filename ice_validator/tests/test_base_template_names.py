@@ -2,7 +2,7 @@
 # ============LICENSE_START====================================================
 # org.onap.vvp/validation-scripts
 # ===================================================================
-# Copyright © 2019 AT&T Intellectual Property. All rights reserved.
+# Copyright © 2020 AT&T Intellectual Property. All rights reserved.
 # ===================================================================
 #
 # Unless otherwise specified, all software contained herein is licensed
@@ -18,8 +18,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-#
-#
 # Unless otherwise specified, all documentation contained herein is licensed
 # under the Creative Commons License, Attribution 4.0 Intl. (the "License");
 # you may not use this documentation except in compliance with the License.
@@ -34,12 +32,11 @@
 # limitations under the License.
 #
 # ============LICENSE_END============================================
-#
-#
 
 from os import listdir
 from os import path
 import re
+from pathlib import Path
 
 import pytest
 
@@ -50,17 +47,35 @@ from .helpers import validates
 RE_BASE = re.compile(r"(^base$)|(^base_)|(_base_)|(_base$)")
 
 
-@validates("R-37028", "R-87485", "R-81339", "R-87247", "R-76057")
-def test_base_template_names(template_dir):
-    """
-    Check all base templates have a filename that includes "_base_".
-    """
-    filenames = [
+def list_filenames(template_dir):
+    return [
         f
         for f in listdir(template_dir)
         if path.isfile(path.join(template_dir, f))
         and path.splitext(f)[-1] in [".yaml", ".yml"]
     ]
+
+
+@validates("R-81339", "R-87247", "R-76057")
+def test_template_names_valid_characters(template_dir):
+    filenames = list_filenames(template_dir)
+    errors = []
+    for f in filenames:
+        stem = Path(f).stem
+        if not stem.replace("_", "").isalnum():
+            errors.append(f)
+    assert not errors, (
+        "The following Heat template names include characters other than "
+        "alphanumerics and underscores: {}"
+    ).format(", ".join(errors))
+
+
+@validates("R-37028", "R-87485", "R-81339", "R-87247", "R-76057")
+def test_base_template_names(template_dir):
+    """
+    Check all base templates have a filename that includes "_base_".
+    """
+    filenames = list_filenames(template_dir)
 
     if not filenames and listdir(template_dir):
         pytest.skip("Nested directory detected.  Let that test fail instead.")

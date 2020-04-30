@@ -55,7 +55,9 @@ def test_heat_template_structure_contains_heat_template_version(yaml_file):
     Check that all heat templates have the required sections
     """
     template = load_yaml(yaml_file)
-    assert "heat_template_version" in template, "This template must contain a heat_template_version section"
+    assert (
+        "heat_template_version" in template
+    ), "This template must contain a heat_template_version section"
 
 
 @validates("R-39402")
@@ -75,7 +77,9 @@ def test_heat_template_structure_contains_parameters(yaml_file):
     if is_base_module(yaml_file):
         pytest.skip("Not applicable to base modules")
     template = load_yaml(yaml_file)
-    assert "parameters" in template and len(template["parameters"].keys()), "This template must contain a parameters section"
+    assert "parameters" in template and len(
+        template["parameters"].keys()
+    ), "This template must contain a parameters section"
 
 
 @validates("R-23664")
