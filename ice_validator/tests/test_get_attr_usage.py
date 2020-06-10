@@ -60,12 +60,12 @@ class GetAttrValidator:
                 )
 
     def add_error(self, path, arg, message):
-        path_str = ".".join(path)
+        path_str = ".".join(map(str, path))
         self.errors.append("{} {}: {}".format(path_str, arg, message))
 
     @property
     def error_message(self):
-        errs = ", ".join(self.errors)
+        errs = "\n".join(self.errors)
         return "Invalid get_attr usage detected: {}".format(errs)
 
 
