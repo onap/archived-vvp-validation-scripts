@@ -65,7 +65,7 @@ class GetAttrValidator:
 
     @property
     def error_message(self):
-        errs = ", ".join(self.errors)
+        errs = "\n".join(map(str, self.errors))
         return "Invalid get_attr usage detected: {}".format(errs)
 
 
