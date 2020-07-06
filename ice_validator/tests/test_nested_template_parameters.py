@@ -67,6 +67,14 @@ def validate_parms(dirname, basename, nested, nested_props, prop_type):
                 " of %s resource %s"
                 % (nested_filename, list(missing), prop_type, basename, rid)
             )
+        else:
+            additional = props - parms
+            if additional:
+                bad.append(
+                    "%s properties %s not defined as "
+                    "parameters in %s"
+                    % (rid, list(additional), nested_filepath)
+                )
     return bad
 
 
