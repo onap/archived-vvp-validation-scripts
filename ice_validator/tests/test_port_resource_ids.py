@@ -108,14 +108,22 @@ def test_port_resource_ids(yaml_file):
 
                 if property_uses_get_resource(v, "network"):
                     continue
+
                 network_role = get_network_role_from_port(port_resource)
                 if not network_role:
+                    invalid_ports.append(
+                        (port_id, "Unable to determine network role for port.")
+                    )
                     continue
                 network_role = network_role.lower()
 
                 network_type = get_network_type_from_port(port_resource)
                 if not network_type:
+                    invalid_ports.append(
+                        (port_id, "Unable to determine network type for port (internal or external).")
+                    )
                     continue
+
                 if network_type == "external":
                     expected_r_id = r"{}_\d+_{}_port_\d+".format(vm_type, network_role)
                 else:
