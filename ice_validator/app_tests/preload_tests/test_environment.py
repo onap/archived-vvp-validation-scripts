@@ -76,7 +76,7 @@ def test_csar_get_vf_module_resource_name(csar):
 
 
 def test_csar_get_vnf_type(csar):
-    assert csar.get_vnf_type("vdns") == "stark_0917_vlb_svc/stark_0917_vlb_vf"
+    assert csar.get_vnf_type("vdns") == "stark_0917_vlb_svc/stark_0917_vlb_vf 0"
 
 
 def test_csar_get_vf_module_resource_name_not_found(csar):
@@ -176,6 +176,8 @@ def test_preload_environment_defaults_in_module_env(env):
         "common": "ABC",
         "custom_env_3": "default",
         "my_ip": "default",
+        "vf-module-model-name": "Starkmultimodule2A9463fd82915..base..module-0",
+        "vnf-type": "StarkMultiModule2_43550/StarkMultiModule2 a9463fd8-2915 0"
     }
     mod = env.get_environment("env_one").get_module("base")
     assert mod == {
