@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "318de082_d6eb8f9c",
+        "filename": "ice_validator/preload/environment.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 3999
+      },
+      "writtenOn": "2020-07-16T15:30:22Z",
+      "side": 1,
+      "message": "Not sure if it\u0027s possible for a module to have a period in it (remembering our discussions on valid values in file names).   It\u0027s probably safer here to either you splitext or rsplit.",
+      "revId": "98ad42e831459a0e8b65889a3b5811a479040cf7",
+      "serverId": "14b4e41f-c4e3-4fb9-9955-6a9b5656895a",
+      "unresolved": true
+    }
+  ]
+}
