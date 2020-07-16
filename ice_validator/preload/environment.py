@@ -1,3 +1,4 @@
+import os
 import re
 import tempfile
 from pathlib import Path
@@ -50,6 +51,12 @@ class CloudServiceArchive:
         :param vf_module: name of Heat module (no path or file extension)
         :return: The definition of the module as a dict or None if not found
         """
+        if(
+            vf_module.endswith(".env")
+            or vf_module.endswith(".yaml")
+            or vf_module.endswith(".yml")
+        ):
+            vf_module = os.path.splitext(vf_module)[0]
         groups = self._service.get("topology_template", {}).get("groups", {})
         for props in groups.values():
             module_label = props.get("properties", {}).get("vf_module_label", "")
@@ -102,7 +109,7 @@ class CloudServiceArchive:
         service_name = self.service_name
         instance_name = self.get_vf_module_resource_name(module)
         if service_name and instance_name:
-            return "{}/{}".format(service_name, instance_name)
+            return "{}/{} 0".format(service_name, instance_name)
 
     @property
     def vf_module_resource_names(self):
