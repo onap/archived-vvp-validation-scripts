@@ -109,6 +109,9 @@ def test_port_resource_ids(yaml_file):
                 if property_uses_get_resource(v, "network"):
                     continue
 
+                if port_resource.get("type", "") != "OS::Neutron::Port":
+                    continue
+
                 network_role = get_network_role_from_port(port_resource)
                 if not network_role:
                     invalid_ports.append(
