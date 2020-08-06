@@ -123,7 +123,10 @@ def test_port_resource_ids(yaml_file):
                 network_type = get_network_type_from_port(port_resource)
                 if not network_type:
                     invalid_ports.append(
-                        (port_id, "Unable to determine network type for port (internal or external).")
+                        (
+                            port_id,
+                            "Unable to determine network type for port (internal or external).",
+                        )
                     )
                     continue
 

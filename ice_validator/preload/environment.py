@@ -51,7 +51,7 @@ class CloudServiceArchive:
         :param vf_module: name of Heat module (no path or file extension)
         :return: The definition of the module as a dict or None if not found
         """
-        if(
+        if (
             vf_module.endswith(".env")
             or vf_module.endswith(".yaml")
             or vf_module.endswith(".yml")
@@ -293,7 +293,6 @@ class PreloadEnvironment:
 
 
 class EnvironmentFilePreloadInstance(AbstractPreloadInstance):
-
     def __init__(self, env: PreloadEnvironment, module_label: str, module_params: dict):
         self.module_params = module_params
         self._module_label = module_label
@@ -397,7 +396,6 @@ class EnvironmentFilePreloadInstance(AbstractPreloadInstance):
 
 
 class EnvironmentFileDataSource(AbstractPreloadDataSource):
-
     def __init__(self, path: Path):
         super().__init__(path)
         check(path.is_dir(), f"{path} must be an existing directory")

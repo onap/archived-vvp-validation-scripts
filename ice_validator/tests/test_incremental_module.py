@@ -50,10 +50,14 @@ def test_incremental_module_has_server(yaml_files):
         servers = Heat(filepath=module).get_resource_by_type(
             "OS::Nova::Server", all_resources=True
         )
-        if not servers:
+        volumes = Heat(filepath=module).get_resource_by_type(
+            "OS::Cinder::Volume", all_resources=True
+        )
+        if not (servers or volumes):
             errors.append(os.path.basename(module))
 
     assert not errors, (
-        "The following incremental modules do not contain an OS::Nova::Server "
+        "The following incremental modules do not contain at least one "
+        "OS::Nova::Server or OS::Cinder::Volume "
         "as required: {}".format(", ".join(errors))
     )
